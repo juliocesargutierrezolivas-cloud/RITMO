@@ -238,6 +238,8 @@ async function cargarTiendas(){
   const {F,db}=C;
   if(ME.alcance==='Todas'){const s=await F.getDocs(F.collection(db,'tiendas')).catch(()=>null);TIENDAS=s?s.docs.map(d=>({codigo:d.id,...d.data()})):[]}
   else{TIENDAS=(await Promise.all((ME.tiendas||[]).map(t=>F.getDoc(F.doc(db,'tiendas',t)).catch(()=>null)))).filter(s=>s&&s.exists()).map(s=>({codigo:s.id,...s.data()}))}
+  // La tienda de pruebas solo la ven el superusuario y su propio gerente de prueba
+  if(ME.rol!=='Superusuario') TIENDAS=TIENDAS.filter(t=>!t.prueba||(ME.tiendas||[]).includes(t.codigo));
   TIENDAS.sort((a,b)=>(a.numero||0)-(b.numero||0));
 }
 async function cargarEntregas(){
@@ -331,13 +333,14 @@ $('fileX').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
     const tiendas=T.filter(r=>r['Código']).map(r=>({codigo:String(r['Código']).trim(),numero:+r['N°']||0,nombre:String(r['Nombre comercial']).trim(),
       zona:String(r['Zona']).trim(),region:String(r['Región']).trim(),correoTienda:correo(r['Correo tienda (usuario)']),correoGZ:correo(r['Correo GZ']),
       auxiliar:String(r['Auxiliar de planilla']).trim(),activa:String(r['Activa']).trim()!=='No'}));
+    tiendas.forEach(t=>t.prueba=t.zona.toLowerCase()==='pruebas');
     const nom={};U.forEach(r=>{if(r['Correo (usuario)'])nom[correo(r['Correo (usuario)'])]=String(r['Nombre']).trim()});
     tiendas.forEach(t=>t.gzNombre=nom[t.correoGZ]||'');
     const act=tiendas.filter(t=>t.activa);
     const usuarios=U.filter(r=>r['Correo (usuario)']).map(r=>{
       const u={correo:correo(r['Correo (usuario)']),nombre:String(r['Nombre']).trim(),cargo:String(r['Cargo']).trim(),rol:String(r['Rol']).trim(),
         alcance:String(r['Alcance']).trim(),valor:String(r['Valor de alcance']).trim(),reportaA:correo(r['Reporta a (correo)']),activo:String(r['Activo']).trim()!=='No'};
-      u.tiendas=u.alcance==='Todas'?[]:act.filter(t=>u.alcance==='Tienda'?t.codigo===u.valor:u.alcance==='GZ'?t.correoGZ===u.correo:
+      u.tiendas=u.alcance==='Todas'?[]:act.filter(t=>u.alcance==='Tienda'?t.codigo===u.valor:t.prueba?false:u.alcance==='GZ'?t.correoGZ===u.correo:
         u.alcance==='Región'?t.region===u.valor:u.alcance==='Asignadas'?t.auxiliar===u.cargo:false).map(t=>t.codigo);
       return u});
     const sinCorreo=U.filter(r=>!r['Correo (usuario)']).length;
