@@ -182,7 +182,7 @@ label{font-weight:600;font-size:13px;color:var(--navy-2);display:block;margin-bo
       </div>
     </div>
 
-    <div class="foot"><span>Creado por <b>Julio César Gutiérrez Olivas</b></span><span class="ver">RITMO v1 · vista previa</span></div>
+    <div class="foot"><span>Creado por <b>Julio César Gutiérrez Olivas</b></span><span class="ver">RITMO v1</span></div>
   </section>
 </main>
 
@@ -234,14 +234,46 @@ label{font-weight:600;font-size:13px;color:var(--navy-2);display:block;margin-bo
 
   const p=document.getElementById('p'), eye=document.getElementById('eye');
   eye.onclick=()=>{const s=p.type==='password';p.type=s?'text':'password';eye.setAttribute('aria-label',s?'Ocultar contraseña':'Mostrar contraseña')};
-  const note=document.getElementById('note');
-  // Vista previa: aún no hay nube conectada. No se guarda ni se envía nada.
-  document.getElementById('login').addEventListener('submit',e=>{e.preventDefault();
-    note.textContent='Vista previa: el acceso se activa cuando conectemos la nube (paso 2). Nada de lo que escribas se guarda ni se envía.';
-    note.classList.add('on'); p.value=''});
-  document.getElementById('forgot').addEventListener('click',e=>{e.preventDefault();
-    note.textContent='Pide el restablecimiento al superusuario. Él te asigna una contraseña temporal.';note.classList.add('on')});
 })();
+</script>
+<script type="module">
+import { nube, configurado, correo } from "./js/nube.js";
+const f=document.getElementById('login'), u=document.getElementById('u'), p=document.getElementById('p'),
+      note=document.getElementById('note'), btn=f.querySelector('.go'), rem=document.getElementById('rem');
+const say=(t,ok)=>{note.textContent=t;note.classList.add('on');note.style.background=ok?'#e3f4ea':'';note.style.color=ok?'#1d7f48':''};
+try{const r=localStorage.getItem('ritmo-user');if(r){u.value=r;rem.checked=true}}catch(e){}
+
+if(configurado){
+  nube().then(({auth,A})=>A.onAuthStateChanged(auth,usr=>{ if(usr) location.replace('panel.html') }));
+}
+f.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!configurado){say('Vista previa: el acceso se activa al conectar Firebase. Nada de lo que escribas se guarda ni se envía.');p.value='';return}
+  const em=correo(u.value);
+  if(!em||!p.value){say('Escribe tu correo y tu contraseña.');return}
+  btn.disabled=true;btn.style.opacity=.7;say('Verificando…',true);
+  try{
+    const {auth,A}=await nube();
+    await A.setPersistence(auth, rem.checked?A.browserLocalPersistence:A.browserSessionPersistence);
+    await A.signInWithEmailAndPassword(auth,em,p.value);
+    try{rem.checked?localStorage.setItem('ritmo-user',em):localStorage.removeItem('ritmo-user')}catch(e){}
+    location.replace('panel.html');
+  }catch(err){
+    const c=err.code||'';
+    say(c.includes('too-many')?'Demasiados intentos. Espera unos minutos.':
+        c.includes('network')?'Sin conexión. Revisa tu internet.':
+        'Correo o contraseña incorrectos.');
+    p.value='';
+  }finally{btn.disabled=false;btn.style.opacity=1}
+});
+document.getElementById('forgot').addEventListener('click',async e=>{
+  e.preventDefault();
+  const em=correo(u.value);
+  if(!configurado){say('Vista previa: la recuperación se activa al conectar Firebase.');return}
+  if(!em){say('Escribe tu correo arriba y vuelve a tocar "¿Olvidaste tu contraseña?".');return}
+  try{const {auth,A}=await nube();await A.sendPasswordResetEmail(auth,em)}catch(e){}
+  say('Si el correo está registrado, te llegará un enlace para crear una nueva contraseña.',true);
+});
 </script>
 </body>
 </html>

@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RITMO · Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#04003f;--navy-2:#11284a;--blue:#0055ba;--orange:#ff8300;--orange-2:#e87200;--amber:#ffa400;
+  --ink:#0f1e36;--muted:#56678a;--line:#d6ddea;--line-2:#e6ebf3;--bg:#eef2f8;--card:#fff;
+  --ok:#1d7f48;--ok-bg:#e3f4ea;--warn:#8a5200;--warn-bg:#fff2d6;--bad:#b42318;--bad-bg:#fde2e2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.5 "IBM Plex Sans","Segoe UI",Arial,sans-serif}
+.mono{font-family:"IBM Plex Mono",Consolas,monospace}
+header{background:#fff;border-bottom:3px solid var(--orange);position:sticky;top:0;z-index:5}
+.hin{max-width:1280px;margin:auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ritmo{font-weight:700;letter-spacing:.14em;font-size:20px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.pulse{display:inline-flex;gap:3px;align-items:flex-end;height:18px}
+.pulse i{width:3.5px;border-radius:2px;background:var(--orange)}
+.pulse i:nth-child(1){height:40%}.pulse i:nth-child(2){height:100%;background:var(--amber)}.pulse i:nth-child(3){height:65%}.pulse i:nth-child(4){height:85%;background:var(--navy)}
+.logo{height:30px}
+.sp{flex:1}
+.who{display:flex;align-items:center;gap:10px;font-size:13px}
+.who b{display:block;color:var(--navy);line-height:1.2}
+.who span{color:var(--muted);font-size:12px}
+.badge{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;letter-spacing:.04em}
+.r-Superusuario{background:var(--navy);color:#fff}.r-Editor{background:var(--orange);color:var(--navy)}
+.r-Visualizar{background:var(--blue);color:#fff}.r-Descargar{background:var(--amber);color:var(--navy)}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:8px 12px;font:600 13px "IBM Plex Sans",sans-serif;cursor:pointer}
+.btn:hover{border-color:var(--navy-2)}
+.btn.pri{background:var(--orange);border-color:var(--orange);color:var(--navy)}
+.btn.pri:hover{background:var(--amber)}
+.btn.nav{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:1280px;margin:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.demo{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:13px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:0;background:transparent;padding:8px 14px;border-radius:8px;font:600 13.5px "IBM Plex Sans",sans-serif;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--navy);color:#fff}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.in{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:#fff;color:var(--ink)}
+h2{margin:0;font-size:22px;color:var(--navy)}
+.sub{color:var(--muted);margin:2px 0 0;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font:600 26px "IBM Plex Mono",monospace;color:var(--navy)}
+.kpi span{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi.hot b{color:var(--orange-2)}
+.meter{height:6px;background:var(--line-2);border-radius:6px;margin-top:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--amber))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+.ch h3{margin:0;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--navy-2)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:#fafbfd}
+td{padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.st{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.st.ok{background:var(--ok-bg);color:var(--ok)}.st.no{background:var(--warn-bg);color:var(--warn)}
+.st i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.mine{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--muted);cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.on{border-color:var(--orange);background:#fff8f0}
+.drop b{color:var(--navy);display:block;font-size:15px;margin-bottom:4px}
+.pad{padding:16px}
+.steps{margin:0;padding-left:20px;color:var(--ink)}
+.steps li{margin:4px 0}
+.log{background:#0f1e36;color:#d6ddea;font:12px/1.55 "IBM Plex Mono",monospace;border-radius:10px;padding:12px 14px;max-height:260px;overflow:auto;white-space:pre-wrap}
+.grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mini{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.mini b{font:600 20px "IBM Plex Mono",monospace;color:var(--navy);display:block}
+.mini span{font-size:11.5px;color:var(--muted)}
+.msg{border-radius:10px;padding:10px 14px;font-size:13px;display:none}
+.msg.on{display:block}.msg.ok{background:var(--ok-bg);color:var(--ok)}.msg.bad{background:var(--bad-bg);color:var(--bad)}.msg.warn{background:var(--warn-bg);color:var(--warn)}
+[hidden]{display:none!important}
+#gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:20;color:var(--muted)}
+@media (max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
+</style>
+</head>
+<body>
+<div id="gate">Cargando RITMO…</div>
+<header><div class="hin">
+  <div class="ritmo"><span class="pulse" aria-hidden="true"><i></i><i></i><i></i><i></i></span>RITMO</div>
+  <img class="logo" src="assets/logo-ampm.png" alt="ampm">
+  <div class="sp"></div>
+  <div class="who"><div><b id="uName">—</b><span id="uMail"></span></div><span class="badge" id="uRol"></span></div>
+  <button class="btn" id="out">Salir</button>
+</div></header>
+
+<main>
+  <div class="demo" id="demo" hidden>Vista previa con datos de ejemplo: Firebase aún no está conectado. Nada se guarda.</div>
+
+  <div class="bar">
+    <div style="flex:1;min-width:240px"><h2 id="title">Cumplimiento de la quincena</h2><p class="sub" id="qTxt"></p></div>
+    <label>Quincena <select class="in" id="qSel"></select></label>
+  </div>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <!-- Seguimiento (Visualizar, Descargar, Superusuario) -->
+  <section id="v-seg" hidden>
+    <div class="kpis">
+      <div class="kpi"><b id="kT">0</b><span>Tiendas a cargo</span></div>
+      <div class="kpi"><b id="kE">0</b><span>Entregadas</span></div>
+      <div class="kpi hot"><b id="kP">0</b><span>Pendientes</span></div>
+      <div class="kpi"><b id="kC">0%</b><span>Cumplimiento</span><div class="meter"><i id="kM" style="width:0"></i></div></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="ch"><h3>Detalle por tienda</h3>
+        <div class="bar"><input class="in" id="fTxt" placeholder="Buscar tienda o GZ"><select class="in" id="fZona"><option value="">Todas las zonas</option></select>
+        <select class="in" id="fEst"><option value="">Todos los estados</option><option value="ok">Entregadas</option><option value="no">Pendientes</option></select></div></div>
+      <div class="scroll"><table><thead><tr><th>Código</th><th>Tienda</th><th>Zona</th><th>GZ</th><th>Estado</th><th>Entregó</th><th>Fecha</th><th id="thAcc">Acción</th></tr></thead><tbody id="tb"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- Mi tienda (Editor) -->
+  <section id="v-mia" hidden>
+    <div class="mine">
+      <div class="card"><div class="ch"><h3>Entregar la quincena</h3><span id="miaSt"></span></div>
+        <div class="pad">
+          <label class="drop" id="drop"><b>Sube el respaldo del Generador</b>Arrástralo aquí o toca para elegirlo (archivo <span class="mono">Respaldo_Horarios_AMPM_….json</span>)<input type="file" id="file" accept=".json,.txt" hidden></label>
+          <div class="msg" id="miaMsg" style="margin-top:12px"></div>
+        </div></div>
+      <div class="card"><div class="ch"><h3>Cómo se entrega</h3></div>
+        <div class="pad"><ol class="steps">
+          <li>En el Generador, guarda los horarios de las semanas de la quincena.</li>
+          <li>Ve a <b>Configuración › Descargar respaldo</b>.</li>
+          <li>Sube aquí ese archivo. Con eso queda <b>entregada</b> la quincena: horario y planilla.</li>
+          <li>¿Cambiaste algo? Vuelve a subirlo; se reemplaza el anterior.</li>
+        </ol></div></div>
+    </div>
+  </section>
+
+  <!-- Administración (Superusuario) -->
+  <section id="v-adm" hidden>
+    <div class="card"><div class="ch"><h3>1 · Importar roles</h3><span class="sub">Archivo <span class="mono">Roles_de_Ritmo_v2.xlsx</span>, hojas Tiendas y Usuarios</span></div>
+      <div class="pad">
+        <label class="drop" id="dropX"><b>Elegir archivo de roles</b>Se lee en tu navegador; no se sube el Excel.<input type="file" id="fileX" accept=".xlsx" hidden></label>
+        <div class="grid2" id="xSum" style="margin-top:12px" hidden></div>
+        <div class="msg" id="xMsg" style="margin-top:12px"></div>
+        <div class="bar" style="margin-top:12px"><button class="btn nav" id="pub" disabled>Publicar tiendas y usuarios</button></div>
+      </div></div>
+    <div class="card"><div class="ch"><h3>2 · Crear accesos</h3><span class="sub">Crea la cuenta y envía a cada correo un enlace para definir su contraseña</span></div>
+      <div class="pad">
+        <div class="bar"><select class="in" id="accSel"><option value="nuevos">Solo usuarios sin acceso</option><option value="todos">Reenviar enlace a todos</option></select>
+        <button class="btn pri" id="acc">Crear accesos</button></div>
+        <div class="log" id="log" style="margin-top:12px" hidden></div>
+      </div></div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+import { nube, authSecundaria, configurado, correo, quincena, quincenaTexto, SUPERUSUARIO } from "./js/nube.js";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null;
+
+// ---------- Quincenas (actual y 5 anteriores)
+(function(){const d=new Date();const qs=[];for(let i=0;i<6;i++){qs.push(quincena(d));d.setDate(d.getDate()<=15?0:15)}
+  $('qSel').innerHTML=qs.map(q=>`<option value="${q}">${quincenaTexto(q)}</option>`).join('');})();
+$('qSel').onchange=()=>{Q=$('qSel').value;cargarEntregas()};
+
+// ---------- Inicio
+async function inicio(){
+  if(!configurado) return demo();
+  C=await nube();
+  C.A.onAuthStateChanged(C.auth,async u=>{
+    if(!u){location.replace('index.html');return}
+    const em=correo(u.email);
+    const snap=await C.F.getDoc(C.F.doc(C.db,'usuarios',em)).catch(()=>null);
+    if(snap&&snap.exists()) ME={correo:em,...snap.data()};
+    else if(em===SUPERUSUARIO) ME={correo:em,nombre:'Superusuario',rol:'Superusuario',alcance:'Todas',tiendas:[],activo:true,bootstrap:true};
+    else {$('gate').textContent='Tu usuario no tiene acceso asignado. Contacta al superusuario.';return}
+    if(ME.activo===false){$('gate').textContent='Tu acceso está desactivado. Contacta al superusuario.';return}
+    await cargarTiendas(); armar(); await cargarEntregas(); $('gate').hidden=true;
+  });
+  $('out').onclick=()=>C.A.signOut(C.auth);
+}
+async function cargarTiendas(){
+  const {F,db}=C;
+  if(ME.alcance==='Todas'){const s=await F.getDocs(F.collection(db,'tiendas')).catch(()=>null);TIENDAS=s?s.docs.map(d=>({codigo:d.id,...d.data()})):[]}
+  else{TIENDAS=(await Promise.all((ME.tiendas||[]).map(t=>F.getDoc(F.doc(db,'tiendas',t)).catch(()=>null)))).filter(s=>s&&s.exists()).map(s=>({codigo:s.id,...s.data()}))}
+  TIENDAS.sort((a,b)=>(a.numero||0)-(b.numero||0));
+}
+async function cargarEntregas(){
+  ENT={};
+  if(C){const {F,db}=C;
+    await Promise.all(TIENDAS.map(async t=>{const s=await F.getDoc(F.doc(db,'entregas',`${t.codigo}_${Q}`)).catch(()=>null);if(s&&s.exists())ENT[t.codigo]=s.data()}));
+  } else demoEntregas();
+  pintar();
+}
+
+// ---------- Interfaz según rol
+function armar(){
+  $('uName').textContent=ME.nombre||ME.correo;$('uMail').textContent=ME.correo;
+  $('uRol').textContent=ME.rol;$('uRol').className='badge r-'+ME.rol;
+  const T=[];
+  if(ME.rol==='Editor') T.push(['mia','Mi tienda']);
+  else T.push(['seg','Seguimiento']);
+  if(ME.rol==='Superusuario') T.push(['adm','Administración']);
+  $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}</button>`).join('');
+  $('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;[...$('tabs').children].forEach(x=>x.setAttribute('aria-selected',x===b));ver(b.dataset.k)};
+  if(T.length<2)$('tabs').hidden=true;
+  $('thAcc').hidden=!(ME.rol==='Descargar'||ME.rol==='Superusuario');
+  const zs=[...new Set(TIENDAS.map(t=>t.zona).filter(Boolean))].sort();
+  $('fZona').innerHTML='<option value="">Todas las zonas</option>'+zs.map(z=>`<option>${esc(z)}</option>`).join('');
+  ['fTxt','fZona','fEst'].forEach(id=>$(id).oninput=pintar);
+  ver(T[0][0]);
+}
+function ver(k){['seg','mia','adm'].forEach(x=>$('v-'+x).hidden=x!==k);
+  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración'}[k];}
+
+function pintar(){
+  $('qTxt').textContent=quincenaTexto(Q);
+  const ok=TIENDAS.filter(t=>ENT[t.codigo]).length, n=TIENDAS.length, pct=n?Math.round(ok/n*100):0;
+  $('kT').textContent=n;$('kE').textContent=ok;$('kP').textContent=n-ok;$('kC').textContent=pct+'%';$('kM').style.width=pct+'%';
+  const tx=$('fTxt').value.toLowerCase(), z=$('fZona').value, es=$('fEst').value;
+  const rows=TIENDAS.filter(t=>(!z||t.zona===z)&&(!es||(es==='ok')===!!ENT[t.codigo])&&(!tx||[t.codigo,t.nombre,t.gzNombre].join(' ').toLowerCase().includes(tx)));
+  const canDl=ME.rol==='Descargar'||ME.rol==='Superusuario';
+  $('tb').innerHTML=rows.length?rows.map(t=>{const e=ENT[t.codigo];return `<tr>
+    <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
+    <td>${e?'<span class="st ok"><i></i>Entregada</span>':'<span class="st no"><i></i>Pendiente</span>'}</td>
+    <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
+    ${canDl?`<td>${e?`<button class="btn" data-dl="${esc(t.codigo)}">Descargar</button>`:''}</td>`:''}</tr>`}).join('')
+    :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
+  if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
+    $('miaSt').innerHTML=e?`<span class="st ok"><i></i>Entregada · ${fmt(e.fecha)}</span>`:'<span class="st no"><i></i>Pendiente</span>';}
+}
+const fmt=f=>{const d=f?.toDate?f.toDate():new Date(f);return isNaN(d)?'':d.toLocaleDateString('es-NI',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})};
+
+// ---------- Descargar respaldo (Descargar / Superusuario)
+$('tb').onclick=async e=>{const b=e.target.closest('[data-dl]');if(!b)return;const cod=b.dataset.dl;
+  let txt;
+  if(C){const s=await C.F.getDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`,'datos','respaldo')).catch(()=>null);if(!s||!s.exists())return alert('No se encontró el archivo.');txt=s.data().contenido}
+  else txt=JSON.stringify({demo:true,tienda:cod,quincena:Q});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=`RITMO_${cod}_${Q}.json`;a.click();URL.revokeObjectURL(a.href)};
+
+// ---------- Entregar (Editor)
+const drop=$('drop');
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('on')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('on')}));
+drop.addEventListener('drop',e=>{if(e.dataTransfer.files[0])entregar(e.dataTransfer.files[0])});
+$('file').onchange=e=>{if(e.target.files[0])entregar(e.target.files[0]);e.target.value=''};
+function msg(id,t,k){const m=$(id);m.textContent=t;m.className='msg on '+k}
+async function entregar(f){
+  const t=TIENDAS[0];if(!t)return msg('miaMsg','Tu usuario no tiene tienda asignada.','bad');
+  if(f.size>900000)return msg('miaMsg','El archivo es demasiado grande. Usa el respaldo del Generador.','bad');
+  let txt=await f.text(),j;try{j=JSON.parse(txt)}catch(e){return msg('miaMsg','El archivo no es un respaldo válido del Generador.','bad')}
+  if(!j||typeof j!=="object"||!(j.app==="Generador de Horarios AMPM"||j.semanas||j.agentes))return msg('miaMsg','No parece un respaldo del Generador de Horarios.','bad');
+  if(!C){ENT[t.codigo]={por:ME.correo,porNombre:ME.nombre,fecha:new Date()};pintar();return msg('miaMsg','Vista previa: entregado (no se guardó).','ok')}
+  msg('miaMsg','Subiendo…','warn');
+  try{const {F,db}=C,id=`${t.codigo}_${Q}`;
+    await F.setDoc(F.doc(db,'entregas',id,'datos','respaldo'),{contenido:txt,archivo:f.name,tienda:t.codigo});
+    await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:f.name,bytes:f.size,estado:'Entregada',por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()});
+    await cargarEntregas();msg('miaMsg','Listo: la quincena quedó entregada. Tu GZ ya lo ve.','ok');
+  }catch(e){msg('miaMsg','No se pudo guardar: '+(e.code||e.message),'bad')}
+}
+
+// ---------- Administración: importar roles
+$('fileX').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const wb=XLSX.read(await f.arrayBuffer());
+    const rows=n=>{const ws=wb.Sheets[n];if(!ws)throw new Error(`Falta la hoja "${n}"`);return XLSX.utils.sheet_to_json(ws,{defval:''})};
+    const T=rows('Tiendas'),U=rows('Usuarios');
+    const tiendas=T.filter(r=>r['Código']).map(r=>({codigo:String(r['Código']).trim(),numero:+r['N°']||0,nombre:String(r['Nombre comercial']).trim(),
+      zona:String(r['Zona']).trim(),region:String(r['Región']).trim(),correoTienda:correo(r['Correo tienda (usuario)']),correoGZ:correo(r['Correo GZ']),
+      auxiliar:String(r['Auxiliar de planilla']).trim(),activa:String(r['Activa']).trim()!=='No'}));
+    const nom={};U.forEach(r=>{if(r['Correo (usuario)'])nom[correo(r['Correo (usuario)'])]=String(r['Nombre']).trim()});
+    tiendas.forEach(t=>t.gzNombre=nom[t.correoGZ]||'');
+    const act=tiendas.filter(t=>t.activa);
+    const usuarios=U.filter(r=>r['Correo (usuario)']).map(r=>{
+      const u={correo:correo(r['Correo (usuario)']),nombre:String(r['Nombre']).trim(),cargo:String(r['Cargo']).trim(),rol:String(r['Rol']).trim(),
+        alcance:String(r['Alcance']).trim(),valor:String(r['Valor de alcance']).trim(),reportaA:correo(r['Reporta a (correo)']),activo:String(r['Activo']).trim()!=='No'};
+      u.tiendas=u.alcance==='Todas'?[]:act.filter(t=>u.alcance==='Tienda'?t.codigo===u.valor:u.alcance==='GZ'?t.correoGZ===u.correo:
+        u.alcance==='Región'?t.region===u.valor:u.alcance==='Asignadas'?t.auxiliar===u.cargo:false).map(t=>t.codigo);
+      return u});
+    const sinCorreo=U.filter(r=>!r['Correo (usuario)']).length;
+    const dup=usuarios.map(u=>u.correo).filter((c,i,a)=>a.indexOf(c)!==i);
+    const roles=['Superusuario','Editor','Visualizar','Descargar'],malRol=usuarios.filter(u=>!roles.includes(u.rol));
+    IMP={tiendas,usuarios};
+    $('xSum').hidden=false;
+    $('xSum').innerHTML=[[tiendas.length,'Tiendas'],[usuarios.length,'Usuarios con correo'],[sinCorreo,'Sin correo (se omiten)'],[dup.length,'Correos repetidos']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
+    if(dup.length||malRol.length){msg('xMsg',`Corrige antes de publicar: ${dup.length?'correos repetidos ('+[...new Set(dup)].join(', ')+')':''}${malRol.length?' roles no válidos en '+malRol.length+' usuarios':''}.`,'bad');$('pub').disabled=true}
+    else{msg('xMsg','Archivo correcto. Revisa los totales y publica.','ok');$('pub').disabled=false}
+  }catch(err){msg('xMsg','No se pudo leer el archivo: '+err.message,'bad');$('pub').disabled=true}
+};
+$('pub').onclick=async()=>{if(!IMP)return;
+  if(!C)return msg('xMsg','Vista previa: en producción aquí se publican tiendas y usuarios.','warn');
+  $('pub').disabled=true;msg('xMsg','Publicando…','warn');
+  try{const {F,db}=C;let b=F.writeBatch(db),n=0;
+    const flush=async()=>{await b.commit();b=F.writeBatch(db);n=0};
+    for(const t of IMP.tiendas){const {codigo,...d}=t;b.set(F.doc(db,'tiendas',codigo),d);if(++n>=400)await flush()}
+    for(const u of IMP.usuarios){const {correo:c,...d}=u;b.set(F.doc(db,'usuarios',c),{...d,actualizado:F.serverTimestamp()},{merge:true});if(++n>=400)await flush()}
+    await flush();await cargarTiendas();await cargarEntregas();
+    msg('xMsg',`Publicado: ${IMP.tiendas.length} tiendas y ${IMP.usuarios.length} usuarios. Sigue con "Crear accesos".`,'ok');
+  }catch(e){msg('xMsg','Error al publicar: '+(e.code||e.message),'bad')}finally{$('pub').disabled=false}
+};
+
+// ---------- Administración: crear accesos
+$('acc').onclick=async()=>{
+  const L=$('log');L.hidden=false;const w=t=>{L.textContent+=t+'\n';L.scrollTop=L.scrollHeight};L.textContent='';
+  if(!C){w('Vista previa: en producción se crean las cuentas y se envía un enlace a cada correo.');return}
+  $('acc').disabled=true;
+  try{const {F,db,A}=C;const s=await F.getDocs(F.collection(db,'usuarios'));const us=s.docs.map(d=>({correo:d.id,...d.data()})).filter(u=>u.activo!==false);
+    const modo=$('accSel').value, a2=await authSecundaria();let nuevos=0,env=0,err=0;
+    w(`Usuarios activos: ${us.length}`);
+    for(const u of us){
+      if(modo==='nuevos'&&u.accesoCreado){continue}
+      try{
+        if(!u.accesoCreado){const pw=crypto.getRandomValues(new Uint32Array(4)).join('-')+'Aa!';
+          try{await A.createUserWithEmailAndPassword(a2,u.correo,pw);await A.signOut(a2);nuevos++}catch(e){if(e.code!=='auth/email-already-in-use')throw e}}
+        await A.sendPasswordResetEmail(C.auth,u.correo);env++;
+        await F.setDoc(F.doc(db,'usuarios',u.correo),{accesoCreado:true,enlaceEnviado:F.serverTimestamp()},{merge:true});
+        w(`✔ ${u.correo}`);
+      }catch(e){err++;w(`✖ ${u.correo} · ${e.code||e.message}`)}
+      await new Promise(r=>setTimeout(r,350));
+    }
+    w(`\nCuentas nuevas: ${nuevos} · Enlaces enviados: ${env} · Errores: ${err}`);
+  }catch(e){w('Error: '+(e.code||e.message))}finally{$('acc').disabled=false}
+};
+
+// ---------- Vista previa sin Firebase
+function demo(){
+  $('demo').hidden=false;
+  const zonas=['Zona Norte','Zona Sur','Zona Centro'];
+  TIENDAS=Array.from({length:12},(_,i)=>({codigo:'DEMO'+String(i+1).padStart(2,'0'),numero:i+1,nombre:'Sucursal de ejemplo '+(i+1),zona:zonas[i%3],gzNombre:['GZ Ejemplo A','GZ Ejemplo B','GZ Ejemplo C'][i%3]}));
+  const r=new URLSearchParams(location.search).get('rol')||'Superusuario';
+  ME={correo:'usuario@ejemplo.com',nombre:'Usuario de ejemplo',rol:r,alcance:'Todas'};
+  if(r==='Editor')TIENDAS=TIENDAS.slice(0,1);
+  armar();demoEntregas();pintar();$('gate').hidden=true;
+  $('out').onclick=()=>location.href='index.html';
+}
+function demoEntregas(){if(C)return;TIENDAS.forEach((t,i)=>{if(i%3!==2)ENT[t.codigo]={por:'jefe.tienda@ejemplo.com',porNombre:'Gerente de ejemplo',fecha:new Date(Date.now()-i*36e5)}})}
+inicio();
+</script>
+</body>
+</html>

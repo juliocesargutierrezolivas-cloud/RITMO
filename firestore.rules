@@ -1,0 +1,50 @@
+rules_version = '2';
+// RITMO · Reglas de seguridad de Firestore
+// Pegar en: Consola Firebase › Firestore Database › Reglas › Publicar.
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function email() { return request.auth.token.email.lower(); }
+    function signed() { return request.auth != null && request.auth.token.email != null; }
+    // Superusuario inicial (arranque). Debe coincidir con js/firebase-config.js
+    function bootstrap() { return signed() && email() == 'julio.gutierrez@ampm.com.ni'; }
+    function registered() { return signed() && exists(/databases/$(db)/documents/usuarios/$(email())); }
+    function me() { return get(/databases/$(db)/documents/usuarios/$(email())).data; }
+    function active() { return registered() && me().activo == true; }
+    function rol(r) { return active() && me().rol == r; }
+    function isSuper() { return bootstrap() || rol('Superusuario'); }
+    function sees(t) { return isSuper() || (active() && (me().alcance == 'Todas' || t in me().tiendas)); }
+    function owns(t) { return rol('Editor') && t in me().tiendas; }
+
+    // Usuarios: cada quien lee su ficha; solo el superusuario escribe.
+    match /usuarios/{u} {
+      allow read: if isSuper() || (signed() && email() == u);
+      allow write: if isSuper();
+    }
+
+    // Tiendas: visibles según alcance; solo el superusuario escribe.
+    match /tiendas/{t} {
+      allow read: if sees(t);
+      allow write: if isSuper();
+    }
+
+    // Entregas por quincena: estado visible para todo el alcance (GZ, distrito, operaciones, planilla).
+    match /entregas/{id} {
+      allow read: if sees(resource.data.tienda);
+      allow create, update: if isSuper()
+        || (owns(request.resource.data.tienda) && request.resource.data.por == email());
+      allow delete: if isSuper();
+
+      // Contenido del respaldo (cédulas y salarios): solo la tienda, planilla y superusuario.
+      match /datos/{doc} {
+        allow read: if isSuper()
+          || owns(resource.data.tienda)
+          || (rol('Descargar') && sees(resource.data.tienda));
+        allow write: if isSuper() || owns(request.resource.data.tienda);
+      }
+    }
+
+    // Todo lo demás, cerrado.
+    match /{path=**} { allow read, write: if false; }
+  }
+}
