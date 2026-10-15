@@ -117,6 +117,15 @@ tr:last-child td{border-bottom:0}
 .vc span{font-size:12.5px;opacity:.85}
 .vc.on{background:linear-gradient(90deg,#5b21b6,var(--navy))}
 @media (prefers-reduced-motion:reduce){.net i{animation:none}}
+.chk{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer}
+.chk input{accent-color:var(--orange);width:17px;height:17px;margin-top:1px}
+.chk:has(input:checked){border-color:var(--orange);background:#fff8f0}
+.req{display:flex;flex-direction:column;gap:10px}
+.step{display:flex;gap:10px;align-items:center;font-weight:600;color:var(--navy-2);font-size:13px}
+.step i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--navy);display:grid;place-items:center;font-size:12px}
+.step.ok i{background:var(--ok);color:#fff}
+.ok-file{font-size:12.5px;color:var(--ok);margin-top:6px}
+.regla{margin-top:8px;font-weight:600}
 [hidden]{display:none!important}
 #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:20;color:var(--muted)}
 @media (max-width:860px){.form{grid-template-columns:1fr}.nv{grid-template-columns:1fr;gap:4px}.cd{margin-left:0;text-align:left}.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
@@ -168,15 +177,24 @@ tr:last-child td{border-bottom:0}
     <div class="mine">
       <div class="card"><div class="ch"><h3>Entregar la quincena</h3><span id="miaSt"></span></div>
         <div class="pad">
-          <label class="drop" id="drop"><b>Sube el respaldo del Generador</b>Arrástralo aquí o toca para elegirlo (archivo <span class="mono">Respaldo_Horarios_AMPM_….json</span>)<input type="file" id="file" accept=".json,.txt" hidden></label>
+          <div class="req">
+            <div class="step" id="s1"><i>1</i>Respaldo del Generador (horario y planilla)</div>
+            <label class="drop" id="drop"><b>Sube el respaldo del Generador</b>Arrástralo aquí o toca para elegirlo (archivo <span class="mono">Respaldo_Horarios_AMPM_….json</span>)<input type="file" id="file" accept=".json,.txt" hidden></label>
+            <div class="ok-file" id="f1"></div>
+            <div id="wA"><div class="step" id="s2"><i>2</i>Hoja de asistencia</div>
+              <label class="drop" id="dropA" style="margin-top:8px"><b>Sube la hoja de asistencia</b>Foto clara o PDF (máx. 700 KB)<input type="file" id="fileA" accept="image/*,.pdf" hidden></label>
+              <div class="ok-file" id="f2"></div></div>
+            <label class="chk" id="wV"><input type="checkbox" id="val">Validé que todo esté reportado: turnos, novedades, horas extra y feriados.</label>
+            <button class="btn pri" id="env" disabled>Entregar quincena</button>
+          </div>
           <div class="msg" id="miaMsg" style="margin-top:12px"></div>
         </div></div>
       <div class="card"><div class="ch"><h3>Cómo se entrega</h3></div>
         <div class="pad"><ol class="steps">
           <li>En el Generador, guarda los horarios de las semanas de la quincena.</li>
           <li>Ve a <b>Configuración › Descargar respaldo</b>.</li>
-          <li>Sube aquí ese archivo. Con eso queda <b>entregada</b> la quincena: horario y planilla.</li>
-          <li>¿Cambiaste algo? Vuelve a subirlo; se reemplaza el anterior.</li>
+          <li>Sube aquí ese archivo y, si planilla lo pide, la foto de la hoja de asistencia.</li><li>Confirma que validaste todo y toca <b>Entregar quincena</b>.</li>
+          <li>¿Cambiaste algo? Vuelve a entregar; se reemplaza lo anterior (la fecha cuenta desde la última entrega).</li>
         </ol></div></div>
     </div>
   </section>
@@ -189,9 +207,17 @@ tr:last-child td{border-bottom:0}
           <span class="sub" style="font-weight:400">Se pagan semanas ya ejecutadas (con rezago). Marca las que entran en esta planilla.</span>
           <div class="weeks" id="calW"></div></div>
         <div class="form">
-          <label class="fl">Fecha y hora límite de entrega<input class="in" type="datetime-local" id="calL"></label>
-          <label class="fl">Nota para las tiendas (opcional)<input class="in" id="calN" maxlength="200" placeholder="Ej.: incluir subsidios del período"></label>
+          <label class="fl">Fecha y hora límite para que la tienda envíe<input class="in" type="datetime-local" id="calL"></label>
+          <label class="fl">Fecha de entrega de planilla (procesamiento)<input class="in" type="date" id="calP"></label>
         </div>
+        <div class="fl">Requisitos de la entrega
+          <div class="form">
+            <label class="chk"><input type="checkbox" checked disabled>Respaldo del Generador (horario y planilla) · siempre</label>
+            <label class="chk"><input type="checkbox" id="rqA" checked>Hoja de asistencia (foto o PDF)</label>
+            <label class="chk"><input type="checkbox" id="rqV" checked>El gerente confirma que validó que todo esté reportado</label>
+            <label class="chk"><input type="checkbox" id="rqH" checked>Si se entrega después del límite, no se toma en cuenta el pago de horas extra</label>
+          </div></div>
+        <label class="fl">Nota para las tiendas (opcional)<input class="in" id="calN" maxlength="240" placeholder="Ej.: incluir subsidios del período"></label>
         <div class="bar"><button class="btn pri" id="calS">Guardar y publicar alerta</button><span class="sub" id="calBy"></span></div>
         <div class="msg" id="calMsg"></div>
       </div></div>
@@ -267,7 +293,7 @@ async function cargarEntregas(){
   CAL=null;
   if(C){const s=await C.F.getDoc(C.F.doc(C.db,'calendario',Q)).catch(()=>null);if(s&&s.exists())CAL=s.data()}
   else CAL=DEMO_CAL[Q]||null;
-  pintar();pintarCal();
+  pintar();pintarCal();listo();
 }
 
 // ---------- Interfaz según rol
@@ -308,19 +334,23 @@ function pintar(){
     <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
     <td>${estado(e)}</td>
     <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
-    ${canDl?`<td>${e?`<button class="btn" data-dl="${esc(t.codigo)}">Descargar</button>`:''}</td>`:''}</tr>`}).join('')
+    ${canDl?`<td style="white-space:nowrap">${e?`<button class="btn" data-dl="${esc(t.codigo)}">Respaldo</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}">Asistencia</button>`:''}`:''}</td>`:''}</tr>`}).join('')
     :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
     $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span>`:'');}
 }
 const toD=f=>f?.toDate?f.toDate():(f?new Date(f):null);
 function estado(e){const L=toD(CAL?.limite);
-  if(e){const d=toD(e.fecha);return L&&d&&d>L?'<span class="st late"><i></i>Entregada tarde</span>':'<span class="st ok"><i></i>Entregada</span>'}
+  if(e){const d=toD(e.fecha);return L&&d&&d>L?`<span class="st late"><i></i>${CAL?.sinHETarde!==false?'Tarde · sin pago de HE':'Entregada tarde'}</span>`:'<span class="st ok"><i></i>Entregada</span>'}
   return L&&Date.now()>L?'<span class="st bad"><i></i>Vencida</span>':'<span class="st no"><i></i>Pendiente</span>'}
 const fmt=f=>{const d=f?.toDate?f.toDate():new Date(f);return isNaN(d)?'':d.toLocaleDateString('es-NI',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})};
 
 // ---------- Descargar respaldo (Descargar / Superusuario)
-$('tb').onclick=async e=>{const b=e.target.closest('[data-dl]');if(!b)return;const cod=b.dataset.dl;
+$('tb').onclick=async e=>{const ba=e.target.closest('[data-as]');if(ba){const cod=ba.dataset.as;
+    if(!C)return alert('Vista previa: aquí se descarga la hoja de asistencia.');
+    const s=await C.F.getDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`,'datos','asistencia')).catch(()=>null);if(!s||!s.exists())return alert('No se encontró la hoja de asistencia.');
+    const d=s.data(),a=document.createElement('a');a.href=d.contenido;a.download=`Asistencia_${cod}_${Q}${d.contenido.startsWith('data:application/pdf')?'.pdf':'.jpg'}`;a.click();return}
+  const b=e.target.closest('[data-dl]');if(!b)return;const cod=b.dataset.dl;
   let txt;
   if(C){const s=await C.F.getDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`,'datos','respaldo')).catch(()=>null);if(!s||!s.exists())return alert('No se encontró el archivo.');txt=s.data().contenido}
   else txt=JSON.stringify({demo:true,tienda:cod,quincena:Q});
@@ -330,22 +360,55 @@ $('tb').onclick=async e=>{const b=e.target.closest('[data-dl]');if(!b)return;con
 const drop=$('drop');
 ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('on')}));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('on')}));
-drop.addEventListener('drop',e=>{if(e.dataTransfer.files[0])entregar(e.dataTransfer.files[0])});
-$('file').onchange=e=>{if(e.target.files[0])entregar(e.target.files[0]);e.target.value=''};
+drop.addEventListener('drop',e=>{if(e.dataTransfer.files[0])tomarResp(e.dataTransfer.files[0])});
+$('file').onchange=e=>{if(e.target.files[0])tomarResp(e.target.files[0]);e.target.value=''};
+const dropA=$('dropA');
+['dragover','dragenter'].forEach(ev=>dropA.addEventListener(ev,e=>{e.preventDefault();dropA.classList.add('on')}));
+['dragleave','drop'].forEach(ev=>dropA.addEventListener(ev,e=>{e.preventDefault();dropA.classList.remove('on')}));
+dropA.addEventListener('drop',e=>{if(e.dataTransfer.files[0])tomarAsis(e.dataTransfer.files[0])});
+$('fileA').onchange=e=>{if(e.target.files[0])tomarAsis(e.target.files[0]);e.target.value=''};
+$('val').onchange=listo;
 function msg(id,t,k){const m=$(id);m.textContent=t;m.className='msg on '+k}
-async function entregar(f){
-  const t=TIENDAS[0];if(!t)return msg('miaMsg','Tu usuario no tiene tienda asignada.','bad');
-  if(f.size>900000)return msg('miaMsg','El archivo es demasiado grande. Usa el respaldo del Generador.','bad');
-  let txt=await f.text(),j;try{j=JSON.parse(txt)}catch(e){return msg('miaMsg','El archivo no es un respaldo válido del Generador.','bad')}
-  if(!j||typeof j!=="object"||!(j.app==="Generador de Horarios AMPM"||j.semanas||j.agentes))return msg('miaMsg','No parece un respaldo del Generador de Horarios.','bad');
-  if(!C){ENT[t.codigo]={por:ME.correo,porNombre:ME.nombre,fecha:new Date()};pintar();return msg('miaMsg','Vista previa: entregado (no se guardó).','ok')}
-  msg('miaMsg','Subiendo…','warn');
-  try{const {F,db}=C,id=`${t.codigo}_${Q}`;
-    await F.setDoc(F.doc(db,'entregas',id,'datos','respaldo'),{contenido:txt,archivo:f.name,tienda:t.codigo});
-    await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:f.name,bytes:f.size,estado:'Entregada',por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()});
-    await cargarEntregas();msg('miaMsg','Listo: la quincena quedó entregada. Tu GZ ya lo ve.','ok');
-  }catch(e){msg('miaMsg','No se pudo guardar: '+(e.code||e.message),'bad')}
+let PEND={};
+const reqA=()=>CAL?CAL.reqAsistencia!==false:false, reqV=()=>CAL?CAL.reqValidar!==false:true;
+function listo(){
+  $('wA').hidden=!reqA();$('wV').hidden=!reqV();
+  $('s1').classList.toggle('ok',!!PEND.resp);$('s2').classList.toggle('ok',!!PEND.asis);
+  $('env').disabled=!(PEND.resp&&(!reqA()||PEND.asis)&&(!reqV()||$('val').checked));
 }
+async function tomarResp(f){
+  if(f.size>900000)return msg('miaMsg','El archivo es demasiado grande. Usa el respaldo del Generador.','bad');
+  const txt=await f.text();let j;try{j=JSON.parse(txt)}catch(e){return msg('miaMsg','El archivo no es un respaldo válido del Generador.','bad')}
+  if(!j||typeof j!=="object"||!(j.app==="Generador de Horarios AMPM"||j.semanas||j.agentes))return msg('miaMsg','No parece un respaldo del Generador de Horarios.','bad');
+  PEND.resp={txt,name:f.name,size:f.size};$('f1').textContent='✔ '+f.name+(j.cfg?.tienda?' · '+j.cfg.tienda:'');$('miaMsg').className='msg';listo();
+}
+async function tomarAsis(f){
+  try{
+    let url,name=f.name;
+    if(f.type==='application/pdf'){if(f.size>700000)return msg('miaMsg','El PDF pesa más de 700 KB. Envía una foto de la hoja.','bad');url=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)})}
+    else if(f.type.startsWith('image/')){
+      const img=await createImageBitmap(f);const sc=Math.min(1,1800/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      let q=.72;url=c.toDataURL('image/jpeg',q);while(url.length>900000&&q>.35){q-=.08;url=c.toDataURL('image/jpeg',q)}
+      name=name.replace(/\.[^.]+$/,'')+'.jpg';
+    } else return msg('miaMsg','La hoja de asistencia debe ser foto o PDF.','bad');
+    if(url.length>950000)return msg('miaMsg','La foto es muy pesada aun comprimida. Tómala más de cerca.','bad');
+    PEND.asis={url,name};$('f2').textContent='✔ '+name+' · '+Math.round(url.length*.75/1024)+' KB';$('miaMsg').className='msg';listo();
+  }catch(e){msg('miaMsg','No se pudo leer la imagen.','bad')}
+}
+$('env').onclick=async()=>{
+  const t=TIENDAS[0];if(!t)return msg('miaMsg','Tu usuario no tiene tienda asignada.','bad');
+  if(!C){ENT[t.codigo]={por:ME.correo,porNombre:ME.nombre,fecha:new Date(),asistencia:!!PEND.asis};pintar();PEND={};$('f1').textContent=$('f2').textContent='';$('val').checked=false;listo();return msg('miaMsg','Vista previa: entregado (no se guardó).','ok')}
+  $('env').disabled=true;msg('miaMsg','Enviando…','warn');
+  try{const {F,db}=C,id=`${t.codigo}_${Q}`;
+    await F.setDoc(F.doc(db,'entregas',id,'datos','respaldo'),{contenido:PEND.resp.txt,archivo:PEND.resp.name,tienda:t.codigo});
+    if(PEND.asis)await F.setDoc(F.doc(db,'entregas',id,'datos','asistencia'),{contenido:PEND.asis.url,archivo:PEND.asis.name,tienda:t.codigo});
+    await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:PEND.resp.name,bytes:PEND.resp.size,asistencia:!!PEND.asis,
+      validado:reqV()?$('val').checked:null,estado:'Entregada',por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()});
+    PEND={};$('f1').textContent=$('f2').textContent='';$('val').checked=false;
+    await cargarEntregas();msg('miaMsg','Listo: la quincena quedó entregada. Tu GZ y planilla ya lo ven.','ok');
+  }catch(e){msg('miaMsg','No se pudo enviar: '+(e.code||e.message),'bad')}finally{listo()}
+};
 
 // ---------- Administración: importar roles
 $('fileX').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
@@ -431,9 +494,15 @@ function pintarCal(){
   if(!CAL){A.className='alerta none';A.innerHTML=`<span class="ic">🗓</span><div><b>Planilla aún no publica el calendario de esta quincena.</b>Cuando lo haga verás aquí las semanas de horas extra a pagar y la fecha límite.</div>`}
   else{const ms=L?L-Date.now():1e12;const k=ms<0?'venc':ms<864e5?'prox':'info';
     A.className='alerta '+k;
-    A.innerHTML=`<span class="ic">${k==='venc'?'⛔':k==='prox'?'⏰':'🗓'}</span><div><b>${quincenaTexto(Q)} · entrega límite ${L?fLarga(L):'sin definir'}</b>
-      ${(CAL.semanas||[]).length?'Horas extra que se pagan: <div class="w">'+CAL.semanas.map(w=>`<span class="wk">Semana ${semTxt(w)}</span>`).join('')+'</div>':'Esta quincena no se pagan horas extra.'}
-      ${CAL.nota?`<div style="margin-top:6px">${esc(CAL.nota)}</div>`:''}</div>${L?`<div class="cd">${falta(L)}</div>`:''}`}
+    const fp=CAL.fechaPlanilla?new Date(CAL.fechaPlanilla+'T00:00'):null;
+    const rq=['Respaldo del Generador (horario y planilla)'].concat(CAL.reqAsistencia!==false?['Hoja de asistencia']:[]);
+    A.innerHTML=`<span class="ic">${k==='venc'?'⛔':k==='prox'?'⏰':'🗓'}</span><div><b>Entrega de planilla ${quincenaTexto(Q)}</b>
+      Envía a más tardar el <b style="display:inline">${L?fLarga(L):'—'}</b>${fp?` · la planilla se entrega el ${fp.toLocaleDateString('es-NI',{weekday:'long',day:'numeric',month:'long'})}`:''}.
+      <div style="margin-top:6px">${(CAL.semanas||[]).length?'Horas extra que se pagan: <span class="w" style="display:inline-flex">'+CAL.semanas.map(w=>`<span class="wk">Semana ${semTxt(w)}</span>`).join('')+'</span>':'Esta quincena no se pagan horas extra.'}</div>
+      <div style="margin-top:6px">Debes enviar: ${rq.join(' + ')}.${CAL.reqValidar!==false?' Valida que todo esté reportado antes de enviar.':''}</div>
+      ${CAL.sinHETarde!==false?'<div class="regla">⚠ Si envías después de la fecha límite, no se tomará en cuenta el pago de horas extra.</div>':''}
+      ${CAL.nota?`<div style="margin-top:6px">${esc(CAL.nota)}</div>`:''}
+      ${CAL.porNombre?`<div class="sub" style="margin-top:6px">Publicado por ${esc(CAL.porNombre)}${CAL.cargo?' · '+esc(CAL.cargo):''}</div>`:''}</div>${L?`<div class="cd">${falta(L)}</div>`:''}`}
   // formulario
   if(!$('calW'))return;
   $('calQ').textContent=quincenaTexto(Q);
@@ -443,13 +512,17 @@ function pintarCal(){
   const def=new Date(finQ(Q));def.setDate(def.getDate()+2);def.setHours(17,0,0,0);
   const v=L||def;$('calL').value=`${iso(v)}T${String(v.getHours()).padStart(2,'0')}:${String(v.getMinutes()).padStart(2,'0')}`;
   $('calN').value=CAL?.nota||'';
+  {const dp=new Date(finQ(Q));dp.setDate(dp.getDate()+5);$('calP').value=CAL?.fechaPlanilla||iso(dp);}
+  $('rqA').checked=CAL?CAL.reqAsistencia!==false:true;$('rqV').checked=CAL?CAL.reqValidar!==false:true;$('rqH').checked=CAL?CAL.sinHETarde!==false:true;
   $('calBy').textContent=CAL?.porNombre?`Publicado por ${CAL.porNombre}${CAL.fecha?' · '+fmt(CAL.fecha):''}`:'';
 }
 setInterval(()=>{if(CAL)pintarCal()},60000);
 $('calS').onclick=async()=>{
   const semanas=[...$('calW').querySelectorAll('input:checked')].map(i=>i.value).sort();
   const L=new Date($('calL').value);if(isNaN(L))return msg('calMsg','Indica la fecha y hora límite.','bad');
-  const d={quincena:Q,semanas,limite:L,nota:$('calN').value.trim(),por:ME.correo,porNombre:ME.nombre||ME.correo};
+  const P=$('calP').value;
+  const d={quincena:Q,semanas,limite:L,fechaPlanilla:P||'',reqAsistencia:$('rqA').checked,reqValidar:$('rqV').checked,sinHETarde:$('rqH').checked,
+    nota:$('calN').value.trim(),por:ME.correo,porNombre:ME.nombre||ME.correo,cargo:ME.cargo||''};
   if(!C){DEMO_CAL[Q]={...d,fecha:new Date()};CAL=DEMO_CAL[Q];pintarCal();pintar();return msg('calMsg','Vista previa: alerta publicada (no se guardó).','ok')}
   try{await C.F.setDoc(C.F.doc(C.db,'calendario',Q),{...d,limite:C.F.Timestamp.fromDate(L),fecha:C.F.serverTimestamp()});
     await cargarEntregas();msg('calMsg','Publicado. Todos los usuarios ya ven la alerta.','ok')}
@@ -512,7 +585,7 @@ function demo(){
   ME={correo:'usuario@ejemplo.com',nombre:'Usuario de ejemplo',rol:r,alcance:'Todas'};
   if(r==='Editor')TIENDAS=TIENDAS.slice(0,1);
   {const f=new Date();f.setDate(f.getDate()+2);f.setHours(17,0,0,0);const m=lunes(new Date());const a=new Date(m);a.setDate(a.getDate()-14);const b=new Date(m);b.setDate(b.getDate()-7);
-   DEMO_CAL[Q]={quincena:Q,semanas:[iso(a),iso(b)],limite:f,nota:'Ejemplo: incluir subsidios del período.',porNombre:'Encargado de planilla (ejemplo)',fecha:new Date()};CAL=DEMO_CAL[Q]}
+   DEMO_CAL[Q]={quincena:Q,semanas:[iso(a),iso(b)],limite:f,fechaPlanilla:iso(new Date(f.getTime()+2*864e5)),reqAsistencia:true,reqValidar:true,sinHETarde:true,cargo:'Auxiliar de planilla',nota:'Ejemplo: incluir subsidios del período.',porNombre:'Encargado de planilla (ejemplo)',fecha:new Date()};CAL=DEMO_CAL[Q]}
   REAL={...ME};ALLT=TIENDAS.slice();armar();demoEntregas();pintar();pintarCal();$('gate').hidden=true;
   $('out').onclick=()=>location.href='index.html';
 }

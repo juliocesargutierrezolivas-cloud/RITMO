@@ -3,6 +3,11 @@
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 8, fecha: "2026-10-15", version: "1.6", tipo: "Nuevo", para: "Todos",
+    titulo: "Entrega completa: hoja de asistencia y validación del gerente",
+    detalle: "El aviso de planilla ahora trae la fecha límite de envío, la fecha de entrega de planilla, las semanas de horas extra (de lunes a domingo) y los requisitos. El gerente sube el respaldo y la foto de la hoja de asistencia y confirma que validó todo. Si entrega después del límite, se marca 'Tarde · sin pago de HE'."
+  },
+  {
     id: 7, fecha: "2026-10-15", version: "1.5", tipo: "Mejora", para: "Todos",
     titulo: "Saludo personalizado e indicador de conexión",
     detalle: "Al entrar, RITMO te saluda por tu nombre y te recuerda qué puedes hacer. Arriba a la derecha, la luz verde confirma que estás en línea con conexión segura; si se pierde internet se pone en rojo."
