@@ -9,6 +9,8 @@ Sistema en línea para sucursales AMPM: los gerentes cargan horarios y planilla 
 - `js/nube.js` — Conexión a Firebase.
 - `firestore.rules` — Reglas de seguridad por rol.
 - `GUIA_FIREBASE.md` — Paso a paso para conectar Firebase.
+- `js/novedades.js` — Novedades del desarrollador (bitácora visible para usuarios).
+- `TRASPASO.md` — Documento para entregar RITMO al equipo de desarrollo de AMPM.
 - `assets/escena0-7.gif` — Vistazo animado de la herramienta (8 escenas).
 - `assets/logo-ampm.png`, `assets/logo-mbk.png` — Logos oficiales.
 - `../Roles_de_Ritmo_v2.xlsx` — Tiendas, usuarios, roles, alcances y permisos.
@@ -19,6 +21,7 @@ Sistema en línea para sucursales AMPM: los gerentes cargan horarios y planilla 
 - 2026-10-15 · Roles v2: archivo de roles reestructurado en Tiendas / Usuarios / Permisos / Revisión.
 
 - 2026-10-15 · v1.1: login con Firebase, panel por rol, entrega por respaldo del Generador, importación de roles y creación de accesos.
+- 2026-10-15 · v1.2: calendario de planilla (semanas de HE con rezago + fecha límite) con alertas para todos, estados a tiempo/tarde/vencida, panel de novedades y documento de traspaso.
 
 ## Próximo
 1. Cerrar pendientes de la hoja Revisión.

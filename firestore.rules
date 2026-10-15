@@ -44,6 +44,12 @@ service cloud.firestore {
       }
     }
 
+    // Calendario de planilla por quincena: lo ven todos; lo publican planilla y superusuario.
+    match /calendario/{q} {
+      allow read: if isSuper() || active();
+      allow write: if isSuper() || rol('Descargar');
+    }
+
     // Todo lo demás, cerrado.
     match /{path=**} { allow read, write: if false; }
   }

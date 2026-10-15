@@ -76,9 +76,36 @@ tr:last-child td{border-bottom:0}
 .mini span{font-size:11.5px;color:var(--muted)}
 .msg{border-radius:10px;padding:10px 14px;font-size:13px;display:none}
 .msg.on{display:block}.msg.ok{background:var(--ok-bg);color:var(--ok)}.msg.bad{background:var(--bad-bg);color:var(--bad)}.msg.warn{background:var(--warn-bg);color:var(--warn)}
+.alerta{border-radius:12px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;border:1px solid;flex-wrap:wrap}
+.alerta.info{background:#eaf2fc;border-color:#bcd3f3;color:#0b3a7a}
+.alerta.prox{background:var(--warn-bg);border-color:#f3d79a;color:var(--warn)}
+.alerta.venc{background:var(--bad-bg);border-color:#f4b8b4;color:var(--bad)}
+.alerta.none{background:#fff;border-color:var(--line);color:var(--muted)}
+.alerta .ic{font-size:20px;line-height:1}
+.alerta b{display:block;font-size:14.5px;color:inherit}
+.alerta .w{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.wk{background:rgba(255,255,255,.75);border:1px solid currentColor;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
+.cd{margin-left:auto;text-align:right;font:600 13px "IBM Plex Mono",monospace;white-space:nowrap}
+.st.late{background:#fff2d6;color:var(--warn)}.st.bad{background:var(--bad-bg);color:var(--bad)}
+.weeks{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.weeks label{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;font-size:13px}
+.weeks label:has(input:checked){border-color:var(--orange);background:#fff8f0}
+.weeks input{accent-color:var(--orange);width:16px;height:16px}
+.fl{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px;color:var(--navy-2)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.nov{display:flex;flex-direction:column}
+.nv{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:16px;border-bottom:1px solid var(--line-2)}
+.nv:last-child{border-bottom:0}
+.nv .d{font:500 12px "IBM Plex Mono",monospace;color:var(--muted)}
+.nv h4{margin:0 0 4px;font-size:15px;color:var(--navy)}
+.nv p{margin:0;color:var(--ink)}
+.tg{display:inline-block;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:6px}
+.tg.Nuevo{background:var(--orange);color:var(--navy)}.tg.Mejora{background:var(--blue);color:#fff}.tg.Corrección{background:var(--line);color:var(--navy)}
+.nv.unread{background:#fffaf3}
+.dot{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:var(--orange);color:var(--navy);font:700 11px/18px "IBM Plex Sans";text-align:center;padding:0 5px;margin-left:6px}
 [hidden]{display:none!important}
 #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:20;color:var(--muted)}
-@media (max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
+@media (max-width:860px){.form{grid-template-columns:1fr}.nv{grid-template-columns:1fr;gap:4px}.cd{margin-left:0;text-align:left}.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
 </style>
 </head>
 <body>
@@ -93,6 +120,8 @@ tr:last-child td{border-bottom:0}
 
 <main>
   <div class="demo" id="demo" hidden>Vista previa con datos de ejemplo: Firebase aún no está conectado. Nada se guarda.</div>
+
+  <div class="alerta none" id="alerta"></div>
 
   <div class="bar">
     <div style="flex:1;min-width:240px"><h2 id="title">Cumplimiento de la quincena</h2><p class="sub" id="qTxt"></p></div>
@@ -135,6 +164,28 @@ tr:last-child td{border-bottom:0}
     </div>
   </section>
 
+  <!-- Calendario de planilla (Descargar, Superusuario) -->
+  <section id="v-cal" hidden>
+    <div class="card"><div class="ch"><h3>Calendario de planilla</h3><span class="sub" id="calQ"></span></div>
+      <div class="pad" style="display:flex;flex-direction:column;gap:16px">
+        <div class="fl">Semanas de horas extra que se pagan en esta quincena
+          <span class="sub" style="font-weight:400">Se pagan semanas ya ejecutadas (con rezago). Marca las que entran en esta planilla.</span>
+          <div class="weeks" id="calW"></div></div>
+        <div class="form">
+          <label class="fl">Fecha y hora límite de entrega<input class="in" type="datetime-local" id="calL"></label>
+          <label class="fl">Nota para las tiendas (opcional)<input class="in" id="calN" maxlength="200" placeholder="Ej.: incluir subsidios del período"></label>
+        </div>
+        <div class="bar"><button class="btn pri" id="calS">Guardar y publicar alerta</button><span class="sub" id="calBy"></span></div>
+        <div class="msg" id="calMsg"></div>
+      </div></div>
+  </section>
+
+  <!-- Novedades del desarrollador -->
+  <section id="v-nov" hidden>
+    <div class="card"><div class="ch"><h3>Novedades de RITMO</h3><span class="sub">Mejoras publicadas por el equipo de desarrollo</span></div>
+      <div class="nov" id="novL"></div></div>
+  </section>
+
   <!-- Administración (Superusuario) -->
   <section id="v-adm" hidden>
     <div class="card"><div class="ch"><h3>1 · Importar roles</h3><span class="sub">Archivo <span class="mono">Roles_de_Ritmo_v2.xlsx</span>, hojas Tiendas y Usuarios</span></div>
@@ -156,9 +207,10 @@ tr:last-child td{border-bottom:0}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
 import { nube, authSecundaria, configurado, correo, quincena, quincenaTexto, SUPERUSUARIO } from "./js/nube.js";
+import { NOVEDADES } from "./js/novedades.js";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null;
+let C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null, CAL=null, DEMO_CAL={};
 
 // ---------- Quincenas (actual y 5 anteriores)
 (function(){const d=new Date();const qs=[];for(let i=0;i<6;i++){qs.push(quincena(d));d.setDate(d.getDate()<=15?0:15)}
@@ -192,7 +244,10 @@ async function cargarEntregas(){
   if(C){const {F,db}=C;
     await Promise.all(TIENDAS.map(async t=>{const s=await F.getDoc(F.doc(db,'entregas',`${t.codigo}_${Q}`)).catch(()=>null);if(s&&s.exists())ENT[t.codigo]=s.data()}));
   } else demoEntregas();
-  pintar();
+  CAL=null;
+  if(C){const s=await C.F.getDoc(C.F.doc(C.db,'calendario',Q)).catch(()=>null);if(s&&s.exists())CAL=s.data()}
+  else CAL=DEMO_CAL[Q]||null;
+  pintar();pintarCal();
 }
 
 // ---------- Interfaz según rol
@@ -202,18 +257,19 @@ function armar(){
   const T=[];
   if(ME.rol==='Editor') T.push(['mia','Mi tienda']);
   else T.push(['seg','Seguimiento']);
+  if(ME.rol==='Descargar'||ME.rol==='Superusuario') T.push(['cal','Calendario de planilla']);
+  T.push(['nov','Novedades']);
   if(ME.rol==='Superusuario') T.push(['adm','Administración']);
-  $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}</button>`).join('');
+  $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}${k==='nov'?'<span class="dot" id="novDot" hidden></span>':''}</button>`).join('');
   $('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;[...$('tabs').children].forEach(x=>x.setAttribute('aria-selected',x===b));ver(b.dataset.k)};
-  if(T.length<2)$('tabs').hidden=true;
   $('thAcc').hidden=!(ME.rol==='Descargar'||ME.rol==='Superusuario');
   const zs=[...new Set(TIENDAS.map(t=>t.zona).filter(Boolean))].sort();
   $('fZona').innerHTML='<option value="">Todas las zonas</option>'+zs.map(z=>`<option>${esc(z)}</option>`).join('');
   ['fTxt','fZona','fEst'].forEach(id=>$(id).oninput=pintar);
-  ver(T[0][0]);
+  ver(T[0][0]);pintarNov();
 }
-function ver(k){['seg','mia','adm'].forEach(x=>$('v-'+x).hidden=x!==k);
-  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración'}[k];}
+function ver(k){['seg','mia','adm','cal','nov'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
+  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',cal:'Calendario de planilla',nov:'Novedades'}[k];}
 
 function pintar(){
   $('qTxt').textContent=quincenaTexto(Q);
@@ -224,13 +280,17 @@ function pintar(){
   const canDl=ME.rol==='Descargar'||ME.rol==='Superusuario';
   $('tb').innerHTML=rows.length?rows.map(t=>{const e=ENT[t.codigo];return `<tr>
     <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
-    <td>${e?'<span class="st ok"><i></i>Entregada</span>':'<span class="st no"><i></i>Pendiente</span>'}</td>
+    <td>${estado(e)}</td>
     <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
     ${canDl?`<td>${e?`<button class="btn" data-dl="${esc(t.codigo)}">Descargar</button>`:''}</td>`:''}</tr>`}).join('')
     :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
-    $('miaSt').innerHTML=e?`<span class="st ok"><i></i>Entregada · ${fmt(e.fecha)}</span>`:'<span class="st no"><i></i>Pendiente</span>';}
+    $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span>`:'');}
 }
+const toD=f=>f?.toDate?f.toDate():(f?new Date(f):null);
+function estado(e){const L=toD(CAL?.limite);
+  if(e){const d=toD(e.fecha);return L&&d&&d>L?'<span class="st late"><i></i>Entregada tarde</span>':'<span class="st ok"><i></i>Entregada</span>'}
+  return L&&Date.now()>L?'<span class="st bad"><i></i>Vencida</span>':'<span class="st no"><i></i>Pendiente</span>'}
 const fmt=f=>{const d=f?.toDate?f.toDate():new Date(f);return isNaN(d)?'':d.toLocaleDateString('es-NI',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})};
 
 // ---------- Descargar respaldo (Descargar / Superusuario)
@@ -324,6 +384,56 @@ $('acc').onclick=async()=>{
   }catch(e){w('Error: '+(e.code||e.message))}finally{$('acc').disabled=false}
 };
 
+// ---------- Calendario de planilla
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const lunes=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const semTxt=k=>{const a=new Date(k+'T00:00'),b=new Date(a);b.setDate(b.getDate()+6);
+  return a.getMonth()===b.getMonth()?`${a.getDate()}–${b.getDate()} ${MES[b.getMonth()]}`:`${a.getDate()} ${MES[a.getMonth()]}–${b.getDate()} ${MES[b.getMonth()]}`};
+function finQ(q){const [y,m,k]=q.split('-');return k==='Q1'?new Date(+y,+m-1,15):new Date(+y,+m,0)}
+function falta(L){const ms=L-Date.now(),a=Math.abs(ms),d=Math.floor(a/864e5),h=Math.floor(a%864e5/36e5),mi=Math.floor(a%36e5/6e4);
+  const t=d?`${d} d ${h} h`:h?`${h} h ${mi} min`:`${mi} min`;return ms>=0?`faltan ${t}`:`venció hace ${t}`}
+const fLarga=d=>d.toLocaleDateString('es-NI',{weekday:'short',day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('es-NI',{hour:'numeric',minute:'2-digit'});
+function pintarCal(){
+  const A=$('alerta');const L=toD(CAL?.limite);
+  if(!CAL){A.className='alerta none';A.innerHTML=`<span class="ic">🗓</span><div><b>Planilla aún no publica el calendario de esta quincena.</b>Cuando lo haga verás aquí las semanas de horas extra a pagar y la fecha límite.</div>`}
+  else{const ms=L?L-Date.now():1e12;const k=ms<0?'venc':ms<864e5?'prox':'info';
+    A.className='alerta '+k;
+    A.innerHTML=`<span class="ic">${k==='venc'?'⛔':k==='prox'?'⏰':'🗓'}</span><div><b>${quincenaTexto(Q)} · entrega límite ${L?fLarga(L):'sin definir'}</b>
+      ${(CAL.semanas||[]).length?'Horas extra que se pagan: <div class="w">'+CAL.semanas.map(w=>`<span class="wk">Semana ${semTxt(w)}</span>`).join('')+'</div>':'Esta quincena no se pagan horas extra.'}
+      ${CAL.nota?`<div style="margin-top:6px">${esc(CAL.nota)}</div>`:''}</div>${L?`<div class="cd">${falta(L)}</div>`:''}`}
+  // formulario
+  if(!$('calW'))return;
+  $('calQ').textContent=quincenaTexto(Q);
+  const fin=lunes(finQ(Q)),ws=[];for(let i=0;i<8;i++){const d=new Date(fin);d.setDate(d.getDate()-7*i);ws.push(iso(d))}
+  const sel=new Set(CAL?.semanas||[]);
+  $('calW').innerHTML=ws.map(w=>`<label><input type="checkbox" value="${w}" ${sel.has(w)?'checked':''}>Semana ${semTxt(w)}</label>`).join('');
+  const def=new Date(finQ(Q));def.setDate(def.getDate()+2);def.setHours(17,0,0,0);
+  const v=L||def;$('calL').value=`${iso(v)}T${String(v.getHours()).padStart(2,'0')}:${String(v.getMinutes()).padStart(2,'0')}`;
+  $('calN').value=CAL?.nota||'';
+  $('calBy').textContent=CAL?.porNombre?`Publicado por ${CAL.porNombre}${CAL.fecha?' · '+fmt(CAL.fecha):''}`:'';
+}
+setInterval(()=>{if(CAL)pintarCal()},60000);
+$('calS').onclick=async()=>{
+  const semanas=[...$('calW').querySelectorAll('input:checked')].map(i=>i.value).sort();
+  const L=new Date($('calL').value);if(isNaN(L))return msg('calMsg','Indica la fecha y hora límite.','bad');
+  const d={quincena:Q,semanas,limite:L,nota:$('calN').value.trim(),por:ME.correo,porNombre:ME.nombre||ME.correo};
+  if(!C){DEMO_CAL[Q]={...d,fecha:new Date()};CAL=DEMO_CAL[Q];pintarCal();pintar();return msg('calMsg','Vista previa: alerta publicada (no se guardó).','ok')}
+  try{await C.F.setDoc(C.F.doc(C.db,'calendario',Q),{...d,limite:C.F.Timestamp.fromDate(L),fecha:C.F.serverTimestamp()});
+    await cargarEntregas();msg('calMsg','Publicado. Todos los usuarios ya ven la alerta.','ok')}
+  catch(e){msg('calMsg','No se pudo guardar: '+(e.code||e.message),'bad')}
+};
+
+// ---------- Novedades del desarrollador
+const visto=()=>{try{return +localStorage.getItem('ritmo-nov')||0}catch(e){return 0}};
+function pintarNov(){const v=visto();
+  const L=NOVEDADES.filter(n=>n.para==='Todos'||[].concat(n.para).includes(ME.rol));
+  $('novL').innerHTML=L.map(n=>`<div class="nv ${n.id>v?'unread':''}"><div class="d">${n.fecha}<br>v${esc(n.version)}</div>
+    <div><h4><span class="tg ${esc(n.tipo)}">${esc(n.tipo)}</span>${esc(n.titulo)}</h4><p>${esc(n.detalle)}</p></div></div>`).join('');
+  const k=L.filter(n=>n.id>v).length,dot=$('novDot');if(dot){dot.hidden=!k;dot.textContent=k}}
+function leerNov(){pintarNov();const m=Math.max(0,...NOVEDADES.map(n=>n.id));try{localStorage.setItem('ritmo-nov',m)}catch(e){}
+  const dot=$('novDot');if(dot)dot.hidden=true}
+
 // ---------- Vista previa sin Firebase
 function demo(){
   $('demo').hidden=false;
@@ -332,7 +442,9 @@ function demo(){
   const r=new URLSearchParams(location.search).get('rol')||'Superusuario';
   ME={correo:'usuario@ejemplo.com',nombre:'Usuario de ejemplo',rol:r,alcance:'Todas'};
   if(r==='Editor')TIENDAS=TIENDAS.slice(0,1);
-  armar();demoEntregas();pintar();$('gate').hidden=true;
+  {const f=new Date();f.setDate(f.getDate()+2);f.setHours(17,0,0,0);const m=lunes(new Date());const a=new Date(m);a.setDate(a.getDate()-14);const b=new Date(m);b.setDate(b.getDate()-7);
+   DEMO_CAL[Q]={quincena:Q,semanas:[iso(a),iso(b)],limite:f,nota:'Ejemplo: incluir subsidios del período.',porNombre:'Encargado de planilla (ejemplo)',fecha:new Date()};CAL=DEMO_CAL[Q]}
+  armar();demoEntregas();pintar();pintarCal();$('gate').hidden=true;
   $('out').onclick=()=>location.href='index.html';
 }
 function demoEntregas(){if(C)return;TIENDAS.forEach((t,i)=>{if(i%3!==2)ENT[t.codigo]={por:'jefe.tienda@ejemplo.com',porNombre:'Gerente de ejemplo',fecha:new Date(Date.now()-i*36e5)}})}
