@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RITMO · Horarios y Planilla</title>
+<meta name="description" content="RITMO: horarios, planilla y viático MBK para sucursales AMPM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#04003f; --navy-2:#11284a; --blue:#0055ba; --blue-2:#003da6;
+  --orange:#ff8300; --orange-2:#e87200; --amber:#ffa400;
+  --ink:#0f1e36; --muted:#56678a; --line:#d6ddea; --bg:#ffffff; --field:#f5f7fb;
+  --ok:#1d7f48; --warn-bg:#fff2d6; --warn:#8a5200;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 "IBM Plex Sans","Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.shell{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(400px,1fr);min-height:100vh}
+
+/* ---------- Lado izquierdo: video ---------- */
+.show{position:relative;overflow:hidden;color:#fff;isolation:isolate;
+  background:radial-gradient(120% 80% at 85% 0%,#0b1a6b 0%,rgba(11,26,107,0) 55%),radial-gradient(90% 70% at 0% 100%,#0a2f7a 0%,rgba(10,47,122,0) 60%),var(--navy)}
+.show::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:44px 44px}
+.show-in{position:relative;height:100%;display:flex;flex-direction:column;gap:28px;justify-content:space-between;padding:34px 48px 30px}
+.screen{position:relative;border-radius:14px;background:#0d0a52;box-shadow:0 30px 70px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.12);overflow:hidden}
+.screen .chrome{display:flex;align-items:center;gap:6px;padding:9px 12px;background:rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.08)}
+.screen .chrome i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.25)}
+.screen .chrome i:first-child{background:var(--orange)}
+.screen .chrome span{margin-left:10px;font:500 11.5px "IBM Plex Mono",monospace;color:rgba(255,255,255,.55)}
+.screen img.gif{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#fff}
+.glow{position:absolute;width:340px;height:340px;right:-90px;top:30%;border-radius:50%;background:radial-gradient(circle,rgba(255,131,0,.35),rgba(255,131,0,0) 70%);z-index:-1;filter:blur(10px)}
+.brandline{display:flex;align-items:center;gap:14px}
+.ritmo{font-weight:700;font-size:26px;letter-spacing:.14em;display:flex;align-items:center;gap:10px}
+.pulse{display:inline-flex;gap:3px;align-items:flex-end;height:22px}
+.pulse i{width:4px;border-radius:2px;background:var(--orange);animation:beat 1.2s ease-in-out infinite}
+.pulse i:nth-child(1){height:40%;animation-delay:0s}
+.pulse i:nth-child(2){height:100%;animation-delay:.15s;background:var(--amber)}
+.pulse i:nth-child(3){height:65%;animation-delay:.3s}
+.pulse i:nth-child(4){height:85%;animation-delay:.45s;background:#fff}
+@keyframes beat{0%,100%{transform:scaleY(.55)}50%{transform:scaleY(1)}}
+.tag{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);border-left:1px solid rgba(255,255,255,.35);padding-left:14px}
+
+.peek h2{margin:0 0 6px;font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--amber)}
+.peek .now{font-size:clamp(24px,2.4vw,34px);line-height:1.15;font-weight:700;margin:0 0 6px;max-width:26ch;min-height:1.2em;transition:opacity .35s}
+.peek .sub{margin:0 0 18px;color:rgba(255,255,255,.8);max-width:60ch;min-height:3em;transition:opacity .35s}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#fff;border-radius:999px;padding:6px 12px;font:500 12.5px/1 "IBM Plex Sans",sans-serif;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.chip:hover{background:rgba(255,255,255,.14)}
+.chip[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:var(--navy)}
+.bar{height:3px;background:rgba(255,255,255,.18);border-radius:3px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--amber))}
+.vctl{margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(255,255,255,.7)}
+.vctl button{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:6px;padding:4px 10px;font:500 12px "IBM Plex Sans",sans-serif;cursor:pointer}
+
+/* ---------- Lado derecho: acceso ---------- */
+.access{display:flex;flex-direction:column;justify-content:center;padding:40px clamp(28px,5vw,72px);position:relative;border-top:4px solid var(--orange)}
+.logos{display:flex;align-items:center;justify-content:space-between;margin-bottom:38px}
+.logos img.ampm{height:44px;width:auto}
+.logos img.mbk{height:26px;width:auto;opacity:.95}
+.hello{font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--orange-2);margin:0 0 6px}
+h1{font-size:34px;line-height:1.1;margin:0 0 10px;color:var(--navy);letter-spacing:-.01em}
+h1 b{color:var(--orange)}
+.lead{margin:0 0 28px;color:var(--muted);max-width:42ch}
+form{display:flex;flex-direction:column;gap:16px;max-width:420px}
+label{font-weight:600;font-size:13px;color:var(--navy-2);display:block;margin-bottom:6px}
+.field{position:relative}
+.field input{width:100%;border:1.5px solid var(--line);background:var(--field);border-radius:10px;padding:13px 14px 13px 42px;font:500 15px "IBM Plex Sans",sans-serif;color:var(--ink);outline:none;transition:border-color .15s,background .15s,box-shadow .15s}
+.field input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(0,85,186,.12)}
+.field svg.ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted)}
+.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:6px}
+.eye:hover{color:var(--navy)}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.row label{display:inline-flex;align-items:center;gap:8px;margin:0;font-weight:500;color:var(--muted)}
+.row input{accent-color:var(--orange);width:16px;height:16px}
+.row a{color:var(--blue);text-decoration:none;font-weight:500}
+.row a:hover{text-decoration:underline}
+.go{margin-top:4px;border:0;border-radius:10px;padding:14px 18px;background:var(--orange);color:var(--navy);font:700 15.5px "IBM Plex Sans",sans-serif;letter-spacing:.02em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s,transform .05s}
+.go:hover{background:var(--amber)}
+.go:active{transform:translateY(1px)}
+.note{display:none;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:11px 14px;font-size:13px;max-width:420px}
+.note.on{display:block}
+.roles{margin-top:34px;max-width:420px}
+.roles p{margin:0 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.rl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.rl div{border:1px solid var(--line);border-radius:10px;padding:10px 10px 9px}
+.rl b{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--navy)}
+.rl b i{width:8px;height:8px;border-radius:50%}
+.rl span{display:block;font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:3px}
+.foot{position:absolute;left:clamp(28px,5vw,72px);right:clamp(28px,5vw,72px);bottom:18px;display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}
+.foot b{color:var(--navy-2);font-weight:600}
+.ver{font-family:"IBM Plex Mono",monospace}
+
+@media (max-width:920px){
+  .shell{grid-template-columns:1fr}
+  .show-in{padding:22px 16px 20px;gap:18px}
+  .glow{display:none}
+  .peek .now{font-size:24px;min-height:auto}
+  .peek .sub{min-height:auto;margin-bottom:14px}
+  .chips{display:none}
+  .access{padding:30px 16px 70px;border-top:0;order:-1}
+  .foot{left:16px;right:16px;flex-direction:column;gap:2px}
+  h1{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){.pulse i{animation:none}}
+</style>
+</head>
+<body>
+<main class="shell">
+
+  <!-- Vistazo animado (GIF por escena) -->
+  <section class="show" aria-label="Un vistazo a RITMO">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="show-in">
+      <div class="brandline">
+        <div class="ritmo"><span class="pulse" aria-hidden="true"><i></i><i></i><i></i><i></i></span>RITMO</div>
+        <div class="tag">Horarios · Planilla · Viático MBK</div>
+      </div>
+      <div class="screen">
+        <div class="chrome"><i></i><i></i><i></i><span>ritmo · vista de la herramienta</span></div>
+        <img id="vid" class="gif" src="assets/escena0.gif" alt="Vista de la herramienta en uso">
+      </div>
+      <div class="peek">
+        <h2>Un vistazo a lo que encontrarás</h2>
+        <p class="now" id="now">Autollenado del horario</p>
+        <p class="sub" id="sub">Arma la semana respetando la ley y las reglas de la tienda en un clic.</p>
+        <div class="chips" id="chips" role="group" aria-label="Funciones"></div>
+        <div class="bar"><span id="prog"></span></div>
+        <div class="vctl"><span id="cnt">1 / 8</span><button type="button" id="pp">Pausar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Acceso -->
+  <section class="access" aria-label="Acceso">
+    <div class="logos">
+      <img class="ampm" src="assets/logo-ampm.png" alt="ampm">
+      <img class="mbk" src="assets/logo-mbk.png" alt="Mi Ban-Kito">
+    </div>
+    <p class="hello">Bienvenido</p>
+    <h1>Tu tienda, a su <b>ritmo</b>.</h1>
+    <p class="lead">Ingresa para cargar el horario de la semana y la planilla quincenal de tu sucursal, o para revisar y descargar lo que te corresponde.</p>
+
+    <form id="login" autocomplete="on" novalidate>
+      <div>
+        <label for="u">Usuario</label>
+        <div class="field">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          <input id="u" name="usuario" type="text" placeholder="correo o usuario" autocomplete="username" required>
+        </div>
+      </div>
+      <div>
+        <label for="p">Contraseña</label>
+        <div class="field">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input id="p" name="clave" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          <button class="eye" type="button" id="eye" aria-label="Mostrar contraseña">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="rem"> Recordarme</label>
+        <a href="#" id="forgot">¿Olvidaste tu contraseña?</a>
+      </div>
+      <button class="go" type="submit">Ingresar
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <div class="note" id="note" role="status"></div>
+    </form>
+
+    <div class="roles">
+      <p>Niveles de acceso</p>
+      <div class="rl">
+        <div><b><i style="background:var(--orange)"></i>Editor</b><span>Gerente de tienda: carga horarios y planilla quincenal.</span></div>
+        <div><b><i style="background:var(--blue)"></i>Visualizar</b><span>Zona, distrito y operaciones: validan que esté hecho.</span></div>
+        <div><b><i style="background:var(--amber)"></i>Descargar</b><span>Planilla: baja las planillas de sus tiendas asignadas.</span></div>
+        <div><b><i style="background:var(--navy)"></i>Superusuario</b><span>Ve todo, crea usuarios y asigna tiendas.</span></div>
+      </div>
+    </div>
+
+    <div class="foot"><span>Creado por <b>Julio César Gutiérrez Olivas</b></span><span class="ver">RITMO v1 · vista previa</span></div>
+  </section>
+</main>
+
+<script>
+(()=>{
+  const S=[
+    ["Autollenado del horario","Arma la semana respetando la ley y las reglas de la tienda en un clic."],
+    ["Ajuste del gerente","Toca una celda y ve quién está disponible, por prioridad y con el motivo de cada alerta."],
+    ["Arrastra y ordena","Mueve o intercambia turnos; verde cumple, amarillo alerta, rojo rompe una regla."],
+    ["Novedades del personal","Vacaciones, subsidio, extraordinario y ausencias que van directo a la planilla."],
+    ["Mensaje por persona","Día, turno, caja y horario de cada quien, listo para WhatsApp."],
+    ["Planilla quincenal","Días, horas extra y feriados salen solos de los horarios guardados."],
+    ["Viático MBK","Presupuesto semanal repartido por salida de 8 y 10 pm, con imagen de solicitud."],
+    ["Historial y respaldo","Todo en orden cronológico y listo para llevar a otra versión."]
+  ];
+  const D=[6,6,6,6,6,6,7,6], N=S.length;
+  const v=document.getElementById('vid'), now=document.getElementById('now'), sub=document.getElementById('sub'),
+        chips=document.getElementById('chips'), prog=document.getElementById('prog'), cnt=document.getElementById('cnt'), pp=document.getElementById('pp');
+  // Precarga de las 8 escenas (GIF) para que el cambio sea instantáneo
+  const G=['assets/escena0.gif','assets/escena1.gif','assets/escena2.gif','assets/escena3.gif','assets/escena4.gif','assets/escena5.gif','assets/escena6.gif','assets/escena7.gif'];
+  const src=i=>G[i];
+  for(let i=1;i<N;i++){const im=new Image();im.src=src(i)}
+  let cur=0, t0=performance.now(), paused=false, pausedAt=0;
+  function show(i){
+    cur=i; t0=performance.now();
+    v.src=src(i);
+    now.style.opacity=sub.style.opacity=0;
+    setTimeout(()=>{now.textContent=S[i][0];sub.textContent=S[i][1];now.style.opacity=sub.style.opacity=1},180);
+    [...chips.children].forEach((c,k)=>c.setAttribute('aria-pressed',k===i));
+    cnt.textContent=(i+1)+' / '+N;
+  }
+  S.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=s[0];
+    b.onclick=()=>{paused=false;pp.textContent='Pausar';show(i)};chips.appendChild(b)});
+  const before=D.map((_,i)=>D.slice(0,i).reduce((a,b)=>a+b,0)), T=D.reduce((a,b)=>a+b,0);
+  function tick(ts){
+    if(!paused){
+      const el=(ts-t0)/1000;
+      if(el>=D[cur]) show((cur+1)%N);
+      prog.style.width=(Math.min(T,before[cur]+Math.min(el,D[cur]))/T*100).toFixed(2)+'%';
+    }
+    requestAnimationFrame(tick);
+  }
+  show(0); requestAnimationFrame(tick);
+  pp.onclick=()=>{
+    if(paused){paused=false;t0=performance.now()-pausedAt*1000;pp.textContent='Pausar'}
+    else{paused=true;pausedAt=(performance.now()-t0)/1000;pp.textContent='Reproducir'}
+  };
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){paused=true;pp.textContent='Reproducir'}
+
+  const p=document.getElementById('p'), eye=document.getElementById('eye');
+  eye.onclick=()=>{const s=p.type==='password';p.type=s?'text':'password';eye.setAttribute('aria-label',s?'Ocultar contraseña':'Mostrar contraseña')};
+  const note=document.getElementById('note');
+  // Vista previa: aún no hay nube conectada. No se guarda ni se envía nada.
+  document.getElementById('login').addEventListener('submit',e=>{e.preventDefault();
+    note.textContent='Vista previa: el acceso se activa cuando conectemos la nube (paso 2). Nada de lo que escribas se guarda ni se envía.';
+    note.classList.add('on'); p.value=''});
+  document.getElementById('forgot').addEventListener('click',e=>{e.preventDefault();
+    note.textContent='Pide el restablecimiento al superusuario. Él te asigna una contraseña temporal.';note.classList.add('on')});
+})();
+</script>
+</body>
+</html>

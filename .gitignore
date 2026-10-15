@@ -1,0 +1,12 @@
+# RITMO: nunca subir datos de personal ni respaldos
+*.xlsx
+*.xls
+*.csv
+*.json
+!firebase.json
+*.pdf
+*.mp4
+Respaldo*
+~$*
+desktop.ini
+Thumbs.db
