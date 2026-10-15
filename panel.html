@@ -347,7 +347,7 @@ function armar(){
   if(ME.rol==='Superusuario') T.push(['adm','Administración']);
   $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}${k==='nov'?'<span class="dot" id="novDot" hidden></span>':''}</button>`).join('');
   $('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;[...$('tabs').children].forEach(x=>x.setAttribute('aria-selected',x===b));ver(b.dataset.k)};
-  $('thAcc').hidden=!(ME.rol==='Descargar'||ME.rol==='Superusuario');
+  $('thAcc').hidden=false;
   const zs=[...new Set(TIENDAS.map(t=>t.zona).filter(Boolean))].sort();
   $('fZona').innerHTML='<option value="">Todas las zonas</option>'+zs.map(z=>`<option>${esc(z)}</option>`).join('');
   ['fTxt','fZona','fEst'].forEach(id=>$(id).oninput=pintar);
@@ -363,14 +363,15 @@ function pintar(){
   const tx=$('fTxt').value.toLowerCase(), z=$('fZona').value, es=$('fEst').value;
   const rows=TIENDAS.filter(t=>(!z||t.zona===z)&&(!es||(es==='ok')===!!ENT[t.codigo])&&(!tx||[t.codigo,t.nombre,t.gzNombre].join(' ').toLowerCase().includes(tx)));
   const canDl=ME.rol==='Descargar'||ME.rol==='Superusuario';
+  const ver=c=>`<a class="btn" href="visor.html?t=${encodeURIComponent(c)}&q=${encodeURIComponent(Q)}" title="Ver horario, planilla y MBK (solo lectura)">👁 Ver</a>`;
   $('tb').innerHTML=rows.length?rows.map(t=>{const e=ENT[t.codigo];return `<tr>
     <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
     <td>${estado(e)}</td>
     <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
-    ${canDl?`<td style="white-space:nowrap">${e?`<button class="btn" data-dl="${esc(t.codigo)}" title="Descargar archivo">⬇ Respaldo</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar en este navegador">💾</button>`:''}</td>`:''}</tr>`}).join('')
+    ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-dl="${esc(t.codigo)}" title="Descargar archivo">⬇ Respaldo</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar en este navegador">💾</button>`:''}</td>`:`<td>${e?ver(t.codigo):''}</td>`}</tr>`}).join('')
     :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
-    $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span>`:'');}
+    $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}">👁 Ver mi entrega</a>`:'');}
 }
 const toD=f=>f?.toDate?f.toDate():(f?new Date(f):null);
 function estado(e){const L=toD(CAL?.limite);
@@ -487,7 +488,7 @@ $('pub').onclick=async()=>{if(!IMP)return;
     const flush=async()=>{await b.commit();b=F.writeBatch(db);n=0};
     for(const t of IMP.tiendas){const {codigo,...d}=t;b.set(F.doc(db,'tiendas',codigo),d);if(++n>=400)await flush()}
     for(const u of IMP.usuarios){const {correo:c,...d}=u;b.set(F.doc(db,'usuarios',c),{...d,actualizado:F.serverTimestamp()},{merge:true});if(++n>=400)await flush()}
-    await flush();await cargarTiendas();await cargarEntregas();
+    await flush();await cargarTiendas();ALLT=TIENDAS.slice();armar();await cargarEntregas();
     msg('xMsg',`Publicado: ${IMP.tiendas.length} tiendas y ${IMP.usuarios.length} usuarios. Sigue con "Crear accesos".`,'ok');
   }catch(e){msg('xMsg','Error al publicar: '+(e.code||e.message),'bad')}finally{$('pub').disabled=false}
 };
@@ -585,7 +586,7 @@ $('accSel').onchange=()=>{$('accUno').hidden=$('accSel').value!=='uno'};
 // ---------- Ver como (solo superusuario): revisar la interfaz de cada rol
 function armarVC(){
   if(REAL?.rol!=='Superusuario'){$('vc').hidden=true;return}
-  if($('vcSel').options.length){$('vc').hidden=false;return}
+  if($('vcSel').options.length&&$('vcSel').value!=='real'){$('vc').hidden=false;return}
   const gz=[...new Map(ALLT.filter(t=>!t.prueba&&t.correoGZ).map(t=>[t.correoGZ,t.gzNombre||t.correoGZ])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
   const beta=ALLT.find(t=>t.prueba)||ALLT[0];
   const O=[['real','Superusuario (yo)']];

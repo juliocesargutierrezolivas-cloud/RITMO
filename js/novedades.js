@@ -3,6 +3,16 @@
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 12, fecha: "2026-10-15", version: "1.8", tipo: "Nuevo", para: "Todos",
+    titulo: "Ver la operación de cada tienda (solo lectura)",
+    detalle: "Con el botón 👁 Ver abres el horario, la planilla, la planilla MBK y el historial de la entrega tal como los ve la tienda, sin poder editar. Planilla, además, descarga la planilla en Excel desde ahí."
+  },
+  {
+    id: 11, fecha: "2026-10-15", version: "1.8", tipo: "Nuevo", para: ["Editor","Superusuario"],
+    titulo: "Hoja de asistencia lista para firmar",
+    detalle: "En el Generador, el botón 🖨 Hoja de asistencia imprime la semana en tamaño carta con el turno programado de cada colaborador y el espacio para su firma."
+  },
+  {
     id: 10, fecha: "2026-10-15", version: "1.7", tipo: "Nuevo", para: "Todos",
     titulo: "Cambio de contraseña cada 60 días",
     detalle: "Por seguridad, RITMO te pedirá una contraseña nueva cada 60 días, contados desde tu primer ingreso. Te avisamos 7 días antes. También puedes cambiarla cuando quieras con el botón 🔑 de arriba."

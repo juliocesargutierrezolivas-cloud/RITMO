@@ -23,7 +23,10 @@ Sin servidor propio ni costos en el plan gratuito (Spark).
 | Archivo | Función |
 |---|---|
 | `index.html` | Bienvenida y login |
-| `panel.html` | Panel por rol: Seguimiento, Mi tienda, Calendario de planilla, Novedades, Administración |
+| `panel.html` | Panel por rol: Seguimiento, Mi tienda, Calendario de planilla, Novedades, Guardados aquí, Administración |
+| `visor.html` | Abre una entrega en solo lectura dentro del Generador |
+| `generador.html` | Generador de Horarios (misma versión que usan las tiendas) con modo visor `?visor=1` y hoja de asistencia |
+| `js/local.js` | Copias en el navegador (IndexedDB) |
 | `js/firebase-config.js` | Identificadores del proyecto Firebase y correo del superusuario inicial |
 | `js/nube.js` | Conexión a Firebase y utilidades de quincena |
 | `js/novedades.js` | Bitácora de mejoras que ven los usuarios |

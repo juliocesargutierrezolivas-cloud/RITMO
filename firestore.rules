@@ -38,11 +38,12 @@ service cloud.firestore {
         || (owns(request.resource.data.tienda) && request.resource.data.por == email());
       allow delete: if isSuper();
 
-      // Contenido del respaldo (cédulas y salarios): solo la tienda, planilla y superusuario.
+      // Contenido de la entrega (horario, planilla, MBK y hoja de asistencia).
       match /datos/{doc} {
+        // Lo ven la tienda, planilla, GZ, distrito y operaciones dentro de su alcance (solo lectura).
         allow read: if isSuper()
           || owns(resource.data.tienda)
-          || (rol('Descargar') && sees(resource.data.tienda));
+          || (active() && sees(resource.data.tienda));
         allow write: if isSuper() || owns(request.resource.data.tienda);
       }
     }

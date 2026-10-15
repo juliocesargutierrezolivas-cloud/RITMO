@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RITMO · Ver entrega</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#04003f;--orange:#ff8300;--muted:#56678a;--line:#d6ddea;--bg:#eef2f8}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);font:400 14px/1.4 "IBM Plex Sans","Segoe UI",Arial,sans-serif;color:#0f1e36;display:flex;flex-direction:column}
+.bar{background:var(--navy);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 18px;flex-wrap:wrap}
+.bar a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 12px;font-weight:600;font-size:13px}
+.bar b{font-size:15px}.bar span{opacity:.8;font-size:12.5px}
+.tag{background:var(--orange);color:var(--navy);border-radius:999px;padding:3px 10px;font-weight:700;font-size:12px}
+.sp{flex:1}
+iframe{flex:1;width:100%;border:0;background:#fff}
+.msg{margin:40px auto;max-width:520px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="bar"><a href="panel.html">← Volver al panel</a><div><b id="tt">Cargando…</b><br><span id="st"></span></div><div class="sp"></div><span class="tag" id="mode">Solo lectura</span></div>
+<div class="msg" id="msg" hidden></div>
+<iframe id="gen" title="Horario, planilla y MBK de la tienda" hidden></iframe>
+<script type="module">
+import { nube, configurado, correo, quincenaTexto } from "./js/nube.js";
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search), T=P.get('t')||'', Q=P.get('q')||'';
+const fail=t=>{$('msg').textContent=t;$('msg').hidden=false;$('gen').hidden=true;$('tt').textContent='No disponible'};
+if(!T||!Q) fail('Falta indicar la tienda o la quincena.');
+else if(!configurado) fail('Vista previa: esta pantalla funciona cuando RITMO está conectado a la nube.');
+else {
+  const {auth,A,F,db}=await nube();
+  A.onAuthStateChanged(auth,async u=>{
+    if(!u){location.replace('index.html');return}
+    try{
+      const me=await F.getDoc(F.doc(db,'usuarios',correo(u.email))).catch(()=>null);
+      const rol=me&&me.exists()?me.data().rol:'Superusuario';
+      const [ent,res,tie]=await Promise.all([
+        F.getDoc(F.doc(db,'entregas',`${T}_${Q}`)),
+        F.getDoc(F.doc(db,'entregas',`${T}_${Q}`,'datos','respaldo')),
+        F.getDoc(F.doc(db,'tiendas',T)).catch(()=>null)]);
+      if(!res.exists()) return fail('Esta tienda aún no entrega la quincena.');
+      const data=JSON.parse(res.data().contenido), e=ent.exists()?ent.data():{};
+      const descarga=rol==='Descargar'||rol==='Superusuario';
+      $('tt').textContent=`${T} · ${tie&&tie.exists()?tie.data().nombre:''}`;
+      $('st').textContent=`${quincenaTexto(Q)} · entregó ${e.porNombre||e.por||''}`;
+      $('mode').textContent=descarga?'Solo lectura · con descarga':'Solo lectura';
+      // Semana inicial: la primera con horario dentro de la quincena
+      const [y,m,k]=Q.split('-'),ini=new Date(+y,+m-1,k==='Q1'?1:16),fin=k==='Q1'?new Date(+y,+m-1,15):new Date(+y,+m,0);
+      const lun=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
+      const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const ws=Object.keys(data.semanas||{}).sort();const a=iso(lun(ini)),b=iso(fin);
+      const semana=ws.find(w=>w>=a&&w<=b)||ws[ws.length-1];
+      addEventListener('message',ev=>{if(ev.origin!==location.origin||ev.data?.tipo!=='ritmo-listo')return;
+        $('gen').contentWindow.postMessage({tipo:'ritmo-datos',data,semana,meta:{tienda:T,descarga}},location.origin)});
+      $('gen').src='generador.html?visor=1';$('gen').hidden=false;
+    }catch(err){fail('No tienes acceso a esta tienda o no se pudo leer la entrega ('+(err.code||err.message)+').')}
+  });
+}
+</script>
+</body>
+</html>
