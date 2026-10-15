@@ -3,6 +3,16 @@
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 7, fecha: "2026-10-15", version: "1.5", tipo: "Mejora", para: "Todos",
+    titulo: "Saludo personalizado e indicador de conexión",
+    detalle: "Al entrar, RITMO te saluda por tu nombre y te recuerda qué puedes hacer. Arriba a la derecha, la luz verde confirma que estás en línea con conexión segura; si se pierde internet se pone en rojo."
+  },
+  {
+    id: 6, fecha: "2026-10-15", version: "1.5", tipo: "Nuevo", para: ["Superusuario"],
+    titulo: "Ver como: revisa la pantalla de cada rol",
+    detalle: "El superusuario puede ver RITMO como gerente de tienda, gerente de zona, distrito, operaciones o planilla, sin cambiar sus permisos reales. Ideal para revisar antes de producción."
+  },
+  {
     id: 5, fecha: "2026-10-15", version: "1.4", tipo: "Mejora", para: ["Superusuario"],
     titulo: "Tienda de pruebas y envío de acceso a un solo correo",
     detalle: "AMPM Beta (zona Pruebas) solo la ve el superusuario y su gerente de prueba; no cuenta en el cumplimiento. En Administración se puede enviar el acceso a un correo puntual antes de hacerlo masivo."

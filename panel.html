@@ -104,6 +104,19 @@ tr:last-child td{border-bottom:0}
 .nv.unread{background:#fffaf3}
 .dot{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:var(--orange);color:var(--navy);font:700 11px/18px "IBM Plex Sans";text-align:center;padding:0 5px;margin-left:6px}
 #v-adm,#v-cal{display:flex;flex-direction:column;gap:16px}
+.net{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;color:var(--ok);background:var(--ok-bg);white-space:nowrap}
+.net i{width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:ping 2s infinite}
+.net.off{color:var(--bad);background:var(--bad-bg)}.net.off i{background:#ef4444;animation:none}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.hello{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hello h1{margin:0;font-size:26px;color:var(--navy);letter-spacing:-.01em}
+.hello h1 b{color:var(--orange)}
+.hello p{margin:2px 0 0;color:var(--muted)}
+.vc{display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border-radius:12px;padding:10px 14px;flex-wrap:wrap}
+.vc select{border:0;border-radius:8px;padding:7px 10px;font:600 13px "IBM Plex Sans",sans-serif}
+.vc span{font-size:12.5px;opacity:.85}
+.vc.on{background:linear-gradient(90deg,#5b21b6,var(--navy))}
+@media (prefers-reduced-motion:reduce){.net i{animation:none}}
 [hidden]{display:none!important}
 #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:20;color:var(--muted)}
 @media (max-width:860px){.form{grid-template-columns:1fr}.nv{grid-template-columns:1fr;gap:4px}.cd{margin-left:0;text-align:left}.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
@@ -115,12 +128,15 @@ tr:last-child td{border-bottom:0}
   <div class="ritmo"><span class="pulse" aria-hidden="true"><i></i><i></i><i></i><i></i></span>RITMO</div>
   <img class="logo" src="assets/logo-ampm.png" alt="ampm">
   <div class="sp"></div>
+  <span class="net" id="net" role="status" title="Conexión segura (HTTPS)"><i></i><span id="netT">En línea</span></span>
   <div class="who"><div><b id="uName">—</b><span id="uMail"></span></div><span class="badge" id="uRol"></span></div>
   <button class="btn" id="out">Salir</button>
 </div></header>
 
 <main>
   <div class="demo" id="demo" hidden>Vista previa con datos de ejemplo: Firebase aún no está conectado. Nada se guarda.</div>
+  <div class="hello"><div style="flex:1;min-width:240px"><h1 id="saludo">Hola</h1><p id="saludoSub"></p></div></div>
+  <div class="vc" id="vc" hidden><b>👁 Ver como</b><select id="vcSel" aria-label="Ver RITMO como otro rol"></select><span id="vcTxt">Revisa la pantalla de cada rol antes de producción. Tus permisos reales no cambian.</span></div>
 
   <div class="alerta none" id="alerta"></div>
 
@@ -212,7 +228,7 @@ import { nube, authSecundaria, configurado, correo, quincena, quincenaTexto, SUP
 import { NOVEDADES } from "./js/novedades.js";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null, CAL=null, DEMO_CAL={};
+let REAL=null, ALLT=[], C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null, CAL=null, DEMO_CAL={};
 
 // ---------- Quincenas (actual y 5 anteriores)
 (function(){const d=new Date();const qs=[];for(let i=0;i<6;i++){qs.push(quincena(d));d.setDate(d.getDate()<=15?0:15)}
@@ -231,7 +247,7 @@ async function inicio(){
     else if(em===SUPERUSUARIO) ME={correo:em,nombre:'Superusuario',rol:'Superusuario',alcance:'Todas',tiendas:[],activo:true,bootstrap:true};
     else {$('gate').textContent='Tu usuario no tiene acceso asignado. Contacta al superusuario.';return}
     if(ME.activo===false){$('gate').textContent='Tu acceso está desactivado. Contacta al superusuario.';return}
-    await cargarTiendas(); armar(); await cargarEntregas(); $('gate').hidden=true;
+    REAL={...ME}; await cargarTiendas(); ALLT=TIENDAS.slice(); armar(); await cargarEntregas(); $('gate').hidden=true;
   });
   $('out').onclick=()=>C.A.signOut(C.auth);
 }
@@ -256,8 +272,14 @@ async function cargarEntregas(){
 
 // ---------- Interfaz según rol
 function armar(){
-  $('uName').textContent=ME.nombre||ME.correo;$('uMail').textContent=ME.correo;
-  $('uRol').textContent=ME.rol;$('uRol').className='badge r-'+ME.rol;
+  const h=new Date().getHours(),pn=(REAL?.nombre||ME.nombre||'').split(' ')[0]||'';
+  $('saludo').innerHTML=`${h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}${pn&&pn!=='Superusuario'?', <b>'+esc(pn)+'</b>':''} 👋`;
+  const que={Superusuario:'Tienes el control completo de RITMO.',Editor:'Aquí entregas el horario y la planilla de tu tienda.',
+    Visualizar:'Revisa qué tiendas ya entregaron la quincena.',Descargar:'Revisa las entregas y descarga las planillas de tus tiendas.'}[ME.rol]||'';
+  $('saludoSub').textContent=new Date().toLocaleDateString('es-NI',{weekday:'long',day:'numeric',month:'long'})+' · '+que;
+  armarVC();
+  $('uName').textContent=REAL?.nombre||ME.nombre||ME.correo;$('uMail').textContent=ME.correo;
+  $('uRol').textContent=REAL?.rol||ME.rol;$('uRol').className='badge r-'+(REAL?.rol||ME.rol);
   const T=[];
   if(ME.rol==='Editor') T.push(['mia','Mi tienda']);
   else T.push(['seg','Seguimiento']);
@@ -446,6 +468,41 @@ function leerNov(){pintarNov();const m=Math.max(0,...NOVEDADES.map(n=>n.id));try
 
 $('accSel').onchange=()=>{$('accUno').hidden=$('accSel').value!=='uno'};
 
+// ---------- Ver como (solo superusuario): revisar la interfaz de cada rol
+function armarVC(){
+  if(REAL?.rol!=='Superusuario'){$('vc').hidden=true;return}
+  if($('vcSel').options.length){$('vc').hidden=false;return}
+  const gz=[...new Map(ALLT.filter(t=>!t.prueba&&t.correoGZ).map(t=>[t.correoGZ,t.gzNombre||t.correoGZ])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
+  const beta=ALLT.find(t=>t.prueba)||ALLT[0];
+  const O=[['real','Superusuario (yo)']];
+  if(beta)O.push(['ed:'+beta.codigo,`Gerente de tienda · ${beta.codigo}`]);
+  gz.forEach(([c,n])=>O.push(['gz:'+c,`Gerente de zona · ${n}`]));
+  O.push(['rg:FOR','Gerente de distrito · Región FOR'],['rg:MGA','Gerente de distrito · Región MGA'],['ops','Gerente de operaciones · Todas'],['pl','Planilla · Encargado (todas)']);
+  $('vcSel').innerHTML=O.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('');
+  $('vc').hidden=false;
+}
+$('vcSel').onchange=async()=>{
+  const v=$('vcSel').value,base=ALLT.filter(t=>!t.prueba);let rol,tiendas,alcance='Todas',nombre=REAL.nombre;
+  if(v==='real'){ME={...REAL};TIENDAS=ALLT.slice()}
+  else{
+    if(v.startsWith('ed:')){rol='Editor';alcance='Tienda';tiendas=[v.slice(3)];nombre='Gerente '+v.slice(3)}
+    else if(v.startsWith('gz:')){rol='Visualizar';alcance='GZ';tiendas=base.filter(t=>t.correoGZ===v.slice(3)).map(t=>t.codigo);nombre=base.find(t=>t.correoGZ===v.slice(3))?.gzNombre||'GZ'}
+    else if(v.startsWith('rg:')){rol='Visualizar';alcance='Región';tiendas=base.filter(t=>t.region===v.slice(3)).map(t=>t.codigo);nombre='Gerente de distrito'}
+    else if(v==='ops'){rol='Visualizar';tiendas=base.map(t=>t.codigo);nombre='Gerente de operaciones'}
+    else {rol='Descargar';tiendas=base.map(t=>t.codigo);nombre='Encargado de planilla'}
+    ME={...REAL,rol,alcance,tiendas,nombre};
+    TIENDAS=ALLT.filter(t=>tiendas.includes(t.codigo));
+  }
+  $('vc').classList.toggle('on',v!=='real');
+  $('vcTxt').textContent=v==='real'?'Revisa la pantalla de cada rol antes de producción. Tus permisos reales no cambian.':`Estás viendo RITMO como lo ve: ${$('vcSel').selectedOptions[0].text}. Tus permisos reales no cambian.`;
+  armar();await cargarEntregas();
+};
+
+// ---------- Indicador de conexión
+function red(){const on=navigator.onLine;$('net').classList.toggle('off',!on);$('netT').textContent=on?'En línea':'Sin conexión';
+  $('net').title=on?'Conectado de forma segura (HTTPS)':'Sin internet: los cambios no se guardarán hasta reconectar'}
+addEventListener('online',red);addEventListener('offline',red);red();
+
 // ---------- Vista previa sin Firebase
 function demo(){
   $('demo').hidden=false;
@@ -456,7 +513,7 @@ function demo(){
   if(r==='Editor')TIENDAS=TIENDAS.slice(0,1);
   {const f=new Date();f.setDate(f.getDate()+2);f.setHours(17,0,0,0);const m=lunes(new Date());const a=new Date(m);a.setDate(a.getDate()-14);const b=new Date(m);b.setDate(b.getDate()-7);
    DEMO_CAL[Q]={quincena:Q,semanas:[iso(a),iso(b)],limite:f,nota:'Ejemplo: incluir subsidios del período.',porNombre:'Encargado de planilla (ejemplo)',fecha:new Date()};CAL=DEMO_CAL[Q]}
-  armar();demoEntregas();pintar();pintarCal();$('gate').hidden=true;
+  REAL={...ME};ALLT=TIENDAS.slice();armar();demoEntregas();pintar();pintarCal();$('gate').hidden=true;
   $('out').onclick=()=>location.href='index.html';
 }
 function demoEntregas(){if(C)return;TIENDAS.forEach((t,i)=>{if(i%3!==2)ENT[t.codigo]={por:'jefe.tienda@ejemplo.com',porNombre:'Gerente de ejemplo',fecha:new Date(Date.now()-i*36e5)}})}
