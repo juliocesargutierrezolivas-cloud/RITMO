@@ -10,6 +10,7 @@ Sistema en línea para sucursales AMPM: los gerentes cargan horarios y planilla 
 
 ## Bitácora
 - 2026-10-15 · v1: pantalla de bienvenida con vistazo animado y 4 niveles de acceso (Editor, Visualizar, Descargar, Superusuario).
+- 2026-10-15 · Repositorio publicado en GitHub y conectado a Claude para subir avances directo.
 - 2026-10-15 · Roles v2: archivo de roles reestructurado en Tiendas / Usuarios / Permisos / Revisión.
 
 ## Próximo
