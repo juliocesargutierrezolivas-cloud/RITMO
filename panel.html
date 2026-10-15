@@ -198,7 +198,8 @@ tr:last-child td{border-bottom:0}
       </div></div>
     <div class="card"><div class="ch"><h3>2 · Crear accesos</h3><span class="sub">Crea la cuenta y envía a cada correo un enlace para definir su contraseña</span></div>
       <div class="pad">
-        <div class="bar"><select class="in" id="accSel"><option value="nuevos">Solo usuarios sin acceso</option><option value="todos">Reenviar enlace a todos</option></select>
+        <div class="bar"><select class="in" id="accSel"><option value="uno">Solo un correo (prueba)</option><option value="nuevos">Todos los usuarios sin acceso</option><option value="todos">Reenviar enlace a todos</option></select>
+        <input class="in" id="accUno" type="email" placeholder="correo@ejemplo.com" style="min-width:280px">
         <button class="btn pri" id="acc">Crear accesos</button></div>
         <div class="log" id="log" style="margin-top:12px" hidden></div>
       </div></div>
@@ -371,10 +372,15 @@ $('acc').onclick=async()=>{
   if(!C){w('Vista previa: en producción se crean las cuentas y se envía un enlace a cada correo.');return}
   $('acc').disabled=true;
   try{const {F,db,A}=C;const s=await F.getDocs(F.collection(db,'usuarios'));const us=s.docs.map(d=>({correo:d.id,...d.data()})).filter(u=>u.activo!==false);
-    const modo=$('accSel').value, a2=await authSecundaria();let nuevos=0,env=0,err=0;
+    const modo=$('accSel').value, uno=correo($('accUno').value);
+    if(modo==='uno'){if(!uno){w('Escribe el correo al que quieres enviar el acceso.');return}
+      const sel=us.filter(u=>u.correo===uno);if(!sel.length){w(`${uno} no está en Usuarios. Publica primero el archivo de roles.`);return}us.splice(0,us.length,...sel)}
+    else if(!confirm(`Se enviará el acceso a ${modo==='todos'?'todos':'todos los usuarios sin acceso'} (${us.length} activos). ¿Continuar?`))return;
+    const a2=await authSecundaria();let nuevos=0,env=0,err=0;
     w(`Usuarios activos: ${us.length}`);
     for(const u of us){
       if(modo==='nuevos'&&u.accesoCreado){continue}
+      if(modo==='uno'&&u.accesoCreado){/* reenvía enlace */}
       try{
         if(!u.accesoCreado){const pw=crypto.getRandomValues(new Uint32Array(4)).join('-')+'Aa!';
           try{await A.createUserWithEmailAndPassword(a2,u.correo,pw);await A.signOut(a2);nuevos++}catch(e){if(e.code!=='auth/email-already-in-use')throw e}}
@@ -437,6 +443,8 @@ function pintarNov(){const v=visto();
   const k=L.filter(n=>n.id>v).length,dot=$('novDot');if(dot){dot.hidden=!k;dot.textContent=k}}
 function leerNov(){pintarNov();const m=Math.max(0,...NOVEDADES.map(n=>n.id));try{localStorage.setItem('ritmo-nov',m)}catch(e){}
   const dot=$('novDot');if(dot)dot.hidden=true}
+
+$('accSel').onchange=()=>{$('accUno').hidden=$('accSel').value!=='uno'};
 
 // ---------- Vista previa sin Firebase
 function demo(){
