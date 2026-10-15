@@ -3,6 +3,16 @@
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 10, fecha: "2026-10-15", version: "1.7", tipo: "Nuevo", para: "Todos",
+    titulo: "Cambio de contraseña cada 60 días",
+    detalle: "Por seguridad, RITMO te pedirá una contraseña nueva cada 60 días, contados desde tu primer ingreso. Te avisamos 7 días antes. También puedes cambiarla cuando quieras con el botón 🔑 de arriba."
+  },
+  {
+    id: 9, fecha: "2026-10-15", version: "1.7", tipo: "Nuevo", para: ["Editor","Descargar","Superusuario"],
+    titulo: "Guardar copias en este navegador",
+    detalle: "Con el botón 💾 o la casilla al entregar, guardas una copia del respaldo y la hoja de asistencia en tu navegador. Las encuentras en la pestaña 'Guardados aquí'. No lo uses en computadoras compartidas."
+  },
+  {
     id: 8, fecha: "2026-10-15", version: "1.6", tipo: "Nuevo", para: "Todos",
     titulo: "Entrega completa: hoja de asistencia y validación del gerente",
     detalle: "El aviso de planilla ahora trae la fecha límite de envío, la fecha de entrega de planilla, las semanas de horas extra (de lunes a domingo) y los requisitos. El gerente sube el respaldo y la foto de la hoja de asistencia y confirma que validó todo. Si entrega después del límite, se marca 'Tarde · sin pago de HE'."

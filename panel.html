@@ -126,6 +126,17 @@ tr:last-child td{border-bottom:0}
 .step.ok i{background:var(--ok);color:#fff}
 .ok-file{font-size:12.5px;color:var(--ok);margin-top:6px}
 .regla{margin-top:8px;font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(4,0,63,.55);display:grid;place-items:center;z-index:30;padding:16px}
+.modal .box{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:22px;box-shadow:0 30px 70px rgba(0,0,0,.35)}
+.modal h3{margin:0 0 4px;color:var(--navy);font-size:19px}
+.modal p{margin:0 0 14px;color:var(--muted);font-size:13px}
+.modal form{display:flex;flex-direction:column;gap:12px}
+.modal .rules{font-size:12px;color:var(--muted);margin:0;padding-left:18px}
+.modal .rules li.ok{color:var(--ok)}
+.loc{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+.loc:last-child{border-bottom:0}
+.loc b{color:var(--navy)}
+.lnk{background:none;border:0;color:var(--blue);font:600 12.5px "IBM Plex Sans",sans-serif;cursor:pointer;padding:0}
 [hidden]{display:none!important}
 #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:20;color:var(--muted)}
 @media (max-width:860px){.form{grid-template-columns:1fr}.nv{grid-template-columns:1fr;gap:4px}.cd{margin-left:0;text-align:left}.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
@@ -139,6 +150,7 @@ tr:last-child td{border-bottom:0}
   <div class="sp"></div>
   <span class="net" id="net" role="status" title="Conexión segura (HTTPS)"><i></i><span id="netT">En línea</span></span>
   <div class="who"><div><b id="uName">—</b><span id="uMail"></span></div><span class="badge" id="uRol"></span></div>
+  <button class="btn" id="pwB" title="Cambiar contraseña">🔑</button>
   <button class="btn" id="out">Salir</button>
 </div></header>
 
@@ -185,6 +197,7 @@ tr:last-child td{border-bottom:0}
               <label class="drop" id="dropA" style="margin-top:8px"><b>Sube la hoja de asistencia</b>Foto clara o PDF (máx. 700 KB)<input type="file" id="fileA" accept="image/*,.pdf" hidden></label>
               <div class="ok-file" id="f2"></div></div>
             <label class="chk" id="wV"><input type="checkbox" id="val">Validé que todo esté reportado: turnos, novedades, horas extra y feriados.</label>
+            <label class="chk" style="border:0;padding:0"><input type="checkbox" id="keep" checked>Guardar también una copia en este navegador</label>
             <button class="btn pri" id="env" disabled>Entregar quincena</button>
           </div>
           <div class="msg" id="miaMsg" style="margin-top:12px"></div>
@@ -229,6 +242,13 @@ tr:last-child td{border-bottom:0}
       <div class="nov" id="novL"></div></div>
   </section>
 
+  <!-- Copias en este navegador -->
+  <section id="v-loc" hidden>
+    <div class="card"><div class="ch"><h3>Guardados en este navegador</h3><button class="btn" id="locDel">Borrar todo</button></div>
+      <div class="pad sub" style="padding-bottom:0">Solo existen en esta computadora y en este navegador. No los guardes en equipos compartidos: contienen datos del personal.</div>
+      <div id="locL"></div></div>
+  </section>
+
   <!-- Administración (Superusuario) -->
   <section id="v-adm" hidden>
     <div class="card"><div class="ch"><h3>1 · Importar roles</h3><span class="sub">Archivo <span class="mono">Roles_de_Ritmo_v2.xlsx</span>, hojas Tiendas y Usuarios</span></div>
@@ -248,10 +268,21 @@ tr:last-child td{border-bottom:0}
   </section>
 </main>
 
+<div class="modal" id="pwM" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="pwT">
+  <h3 id="pwT">Cambia tu contraseña</h3><p id="pwP">Por seguridad, RITMO pide una contraseña nueva cada 60 días.</p>
+  <form id="pwF" autocomplete="off">
+    <label class="fl">Contraseña actual<input class="in" type="password" id="pw0" autocomplete="current-password" required></label>
+    <label class="fl">Nueva contraseña<input class="in" type="password" id="pw1" autocomplete="new-password" required></label>
+    <label class="fl">Confirma la nueva contraseña<input class="in" type="password" id="pw2" autocomplete="new-password" required></label>
+    <ul class="rules" id="pwR"><li data-r="len">Mínimo 8 caracteres</li><li data-r="mix">Al menos una letra y un número</li><li data-r="eq">Las dos nuevas coinciden</li><li data-r="dif">Distinta a la actual</li></ul>
+    <div class="msg" id="pwMsg"></div>
+    <div class="bar"><button class="btn pri" id="pwS" type="submit">Guardar contraseña</button><button class="btn" type="button" id="pwX">Cancelar</button></div>
+  </form></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
 import { nube, authSecundaria, configurado, correo, quincena, quincenaTexto, SUPERUSUARIO } from "./js/nube.js";
 import { NOVEDADES } from "./js/novedades.js";
+import * as LOC from "./js/local.js";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let REAL=null, ALLT=[], C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null, CAL=null, DEMO_CAL={};
@@ -274,6 +305,7 @@ async function inicio(){
     else {$('gate').textContent='Tu usuario no tiene acceso asignado. Contacta al superusuario.';return}
     if(ME.activo===false){$('gate').textContent='Tu acceso está desactivado. Contacta al superusuario.';return}
     REAL={...ME}; await cargarTiendas(); ALLT=TIENDAS.slice(); armar(); await cargarEntregas(); $('gate').hidden=true;
+    await revisarClave(u);
   });
   $('out').onclick=()=>C.A.signOut(C.auth);
 }
@@ -311,6 +343,7 @@ function armar(){
   else T.push(['seg','Seguimiento']);
   if(ME.rol==='Descargar'||ME.rol==='Superusuario') T.push(['cal','Calendario de planilla']);
   T.push(['nov','Novedades']);
+  if(['Editor','Descargar','Superusuario'].includes(ME.rol)&&LOC.disponible()) T.push(['loc','Guardados aquí']);
   if(ME.rol==='Superusuario') T.push(['adm','Administración']);
   $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}${k==='nov'?'<span class="dot" id="novDot" hidden></span>':''}</button>`).join('');
   $('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;[...$('tabs').children].forEach(x=>x.setAttribute('aria-selected',x===b));ver(b.dataset.k)};
@@ -320,8 +353,8 @@ function armar(){
   ['fTxt','fZona','fEst'].forEach(id=>$(id).oninput=pintar);
   ver(T[0][0]);pintarNov();
 }
-function ver(k){['seg','mia','adm','cal','nov'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
-  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',cal:'Calendario de planilla',nov:'Novedades'}[k];}
+function ver(k){if(k==='loc')pintarLoc();['seg','mia','adm','cal','nov','loc'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
+  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador'}[k];}
 
 function pintar(){
   $('qTxt').textContent=quincenaTexto(Q);
@@ -334,7 +367,7 @@ function pintar(){
     <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
     <td>${estado(e)}</td>
     <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
-    ${canDl?`<td style="white-space:nowrap">${e?`<button class="btn" data-dl="${esc(t.codigo)}">Respaldo</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}">Asistencia</button>`:''}`:''}</td>`:''}</tr>`}).join('')
+    ${canDl?`<td style="white-space:nowrap">${e?`<button class="btn" data-dl="${esc(t.codigo)}" title="Descargar archivo">⬇ Respaldo</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar en este navegador">💾</button>`:''}</td>`:''}</tr>`}).join('')
     :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
     $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span>`:'');}
@@ -346,7 +379,13 @@ function estado(e){const L=toD(CAL?.limite);
 const fmt=f=>{const d=f?.toDate?f.toDate():new Date(f);return isNaN(d)?'':d.toLocaleDateString('es-NI',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})};
 
 // ---------- Descargar respaldo (Descargar / Superusuario)
-$('tb').onclick=async e=>{const ba=e.target.closest('[data-as]');if(ba){const cod=ba.dataset.as;
+$('tb').onclick=async e=>{const bs=e.target.closest('[data-sv]');if(bs){const cod=bs.dataset.sv;bs.disabled=true;
+    try{let r=await leerDato(cod,'respaldo');if(!r)throw new Error('sin respaldo');
+      await LOC.guardar({tipo:'respaldo',tienda:cod,quincena:Q,archivo:`RITMO_${cod}_${Q}.json`,contenido:r.contenido,dueño:REAL.correo});
+      const a=ENT[cod]?.asistencia?await leerDato(cod,'asistencia'):null;
+      if(a)await LOC.guardar({tipo:'asistencia',tienda:cod,quincena:Q,archivo:`Asistencia_${cod}_${Q}`,contenido:a.contenido,dueño:REAL.correo});
+      bs.textContent='✔';bs.title='Guardado en este navegador'}catch(err){bs.disabled=false;alert('No se pudo guardar en el navegador: '+err.message)}return}
+  const ba=e.target.closest('[data-as]');if(ba){const cod=ba.dataset.as;
     if(!C)return alert('Vista previa: aquí se descarga la hoja de asistencia.');
     const s=await C.F.getDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`,'datos','asistencia')).catch(()=>null);if(!s||!s.exists())return alert('No se encontró la hoja de asistencia.');
     const d=s.data(),a=document.createElement('a');a.href=d.contenido;a.download=`Asistencia_${cod}_${Q}${d.contenido.startsWith('data:application/pdf')?'.pdf':'.jpg'}`;a.click();return}
@@ -405,6 +444,8 @@ $('env').onclick=async()=>{
     if(PEND.asis)await F.setDoc(F.doc(db,'entregas',id,'datos','asistencia'),{contenido:PEND.asis.url,archivo:PEND.asis.name,tienda:t.codigo});
     await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:PEND.resp.name,bytes:PEND.resp.size,asistencia:!!PEND.asis,
       validado:reqV()?$('val').checked:null,estado:'Entregada',por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()});
+    if($('keep')?.checked&&LOC.disponible()){try{await LOC.guardar({tipo:'respaldo',tienda:t.codigo,quincena:Q,archivo:PEND.resp.name,contenido:PEND.resp.txt,dueño:REAL.correo});
+      if(PEND.asis)await LOC.guardar({tipo:'asistencia',tienda:t.codigo,quincena:Q,archivo:PEND.asis.name,contenido:PEND.asis.url,dueño:REAL.correo})}catch(e){}}
     PEND={};$('f1').textContent=$('f2').textContent='';$('val').checked=false;
     await cargarEntregas();msg('miaMsg','Listo: la quincena quedó entregada. Tu GZ y planilla ya lo ven.','ok');
   }catch(e){msg('miaMsg','No se pudo enviar: '+(e.code||e.message),'bad')}finally{listo()}
@@ -575,6 +616,62 @@ $('vcSel').onchange=async()=>{
 function red(){const on=navigator.onLine;$('net').classList.toggle('off',!on);$('netT').textContent=on?'En línea':'Sin conexión';
   $('net').title=on?'Conectado de forma segura (HTTPS)':'Sin internet: los cambios no se guardarán hasta reconectar'}
 addEventListener('online',red);addEventListener('offline',red);red();
+
+// ---------- Lectura de datos de una entrega
+async function leerDato(cod,doc){
+  if(!C)return doc==='respaldo'?{contenido:JSON.stringify({demo:true,tienda:cod,quincena:Q})}:null;
+  const s=await C.F.getDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`,'datos',doc)).catch(()=>null);return s&&s.exists()?s.data():null}
+
+// ---------- Guardados en este navegador
+async function pintarLoc(){
+  const L=await LOC.listar(REAL.correo).catch(()=>[]);
+  $('locL').innerHTML=L.length?L.map(x=>`<div class="loc"><div><b>${esc(x.tienda)}</b> · ${x.tipo==='respaldo'?'Respaldo del Generador':'Hoja de asistencia'} · ${quincenaTexto(x.quincena)}
+      <div class="sub">Guardado ${fmt(x.fecha)} · ${Math.round(x.bytes*.75/1024)} KB</div></div>
+      <div class="bar"><button class="btn" data-ld="${esc(x.id)}">⬇ Descargar</button><button class="lnk" data-lx="${esc(x.id)}">Eliminar</button></div></div>`).join('')
+    :'<div class="empty">Aún no guardas nada en este navegador. Usa 💾 junto a cada entrega o la casilla al entregar.</div>';
+}
+$('locL').onclick=async e=>{const d=e.target.closest('[data-ld]'),x=e.target.closest('[data-lx]');
+  if(x){if(confirm('¿Eliminar esta copia de este navegador?')){await LOC.borrar(x.dataset.lx);pintarLoc()}return}
+  if(!d)return;const it=(await LOC.listar(REAL.correo)).find(i=>i.id===d.dataset.ld);if(!it)return;
+  const a=document.createElement('a');
+  if(it.contenido.startsWith('data:')){a.href=it.contenido;a.download=it.archivo+(it.contenido.startsWith('data:application/pdf')?'.pdf':(it.archivo.endsWith('.jpg')?'':'.jpg'))}
+  else{a.href=URL.createObjectURL(new Blob([it.contenido],{type:'application/json'}));a.download=it.archivo.endsWith('.json')?it.archivo:it.archivo+'.json'}
+  a.click()};
+$('locDel').onclick=async()=>{if(confirm('¿Borrar todas las copias guardadas en este navegador?')){await LOC.borrarTodo(REAL.correo);pintarLoc()}};
+
+// ---------- Contraseña: cambio obligatorio cada 60 días
+const DIAS_CLAVE=60;
+let forzada=false;
+async function revisarClave(u){
+  if(!C||REAL.bootstrap)return;
+  const {F,db}=C,ref=F.doc(db,'usuarios',REAL.correo);
+  if(!REAL.primerLogin){await F.setDoc(ref,{primerLogin:F.serverTimestamp(),ultimoLogin:F.serverTimestamp()},{merge:true}).catch(()=>{});REAL.primerLogin=new Date()}
+  else F.setDoc(ref,{ultimoLogin:F.serverTimestamp()},{merge:true}).catch(()=>{});
+  const base=toD(REAL.claveCambiada)||toD(REAL.primerLogin)||new Date();
+  const dias=Math.floor((Date.now()-base)/864e5),quedan=DIAS_CLAVE-dias;
+  if(quedan<=0){forzada=true;abrirClave(`Tu contraseña cumplió ${DIAS_CLAVE} días. Para seguir usando RITMO, crea una nueva.`)}
+  else if(quedan<=7)$('saludoSub').textContent+=` · Tu contraseña vence en ${quedan} día${quedan>1?'s':''}.`;
+}
+function abrirClave(t){$('pwP').textContent=t||'Crea una contraseña nueva. Por seguridad, RITMO la pide cada 60 días.';$('pwX').hidden=forzada;
+  ['pw0','pw1','pw2'].forEach(i=>$(i).value='');$('pwMsg').className='msg';reglas();$('pwM').hidden=false;$('pw0').focus()}
+function reglas(){const a=$('pw0').value,n=$('pw1').value,c=$('pw2').value;
+  const R={len:n.length>=8,mix:/[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(n)&&/\d/.test(n),eq:!!n&&n===c,dif:!!n&&n!==a};
+  [...$('pwR').children].forEach(li=>li.classList.toggle('ok',R[li.dataset.r]));return Object.values(R).every(Boolean)}
+['pw0','pw1','pw2'].forEach(i=>$(i).oninput=reglas);
+$('pwB').onclick=()=>{if(!C)return alert('Vista previa: aquí se cambia la contraseña.');abrirClave()};
+$('pwX').onclick=()=>{if(!forzada)$('pwM').hidden=true};
+$('pwF').onsubmit=async e=>{e.preventDefault();
+  if(!reglas())return msg('pwMsg','Revisa los requisitos de la nueva contraseña.','bad');
+  $('pwS').disabled=true;msg('pwMsg','Guardando…','warn');
+  try{const {A,F,db,auth}=C,u=auth.currentUser;
+    await A.reauthenticateWithCredential(u,A.EmailAuthProvider.credential(u.email,$('pw0').value));
+    await A.updatePassword(u,$('pw1').value);
+    if(!REAL.bootstrap)await F.setDoc(F.doc(db,'usuarios',REAL.correo),{claveCambiada:F.serverTimestamp()},{merge:true});
+    REAL.claveCambiada=new Date();forzada=false;msg('pwMsg','Contraseña actualizada. La próxima vez entra con la nueva.','ok');
+    setTimeout(()=>$('pwM').hidden=true,1400);
+  }catch(err){const c=err.code||'';msg('pwMsg',c.includes('wrong-password')||c.includes('invalid-credential')?'La contraseña actual no es correcta.':
+      c.includes('weak-password')?'La contraseña nueva es muy débil.':c.includes('too-many')?'Demasiados intentos. Espera unos minutos.':'No se pudo cambiar: '+c,'bad')}
+  finally{$('pwS').disabled=false}};
 
 // ---------- Vista previa sin Firebase
 function demo(){

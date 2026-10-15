@@ -20,6 +20,9 @@ service cloud.firestore {
     match /usuarios/{u} {
       allow read: if isSuper() || (signed() && email() == u);
       allow write: if isSuper();
+      // Cada usuario solo registra sus fechas de acceso y de cambio de contraseña.
+      allow update: if signed() && email() == u
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['primerLogin', 'ultimoLogin', 'claveCambiada']);
     }
 
     // Tiendas: visibles según alcance; solo el superusuario escribe.
