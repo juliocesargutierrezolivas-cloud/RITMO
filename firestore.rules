@@ -48,6 +48,11 @@ service cloud.firestore {
       }
     }
 
+    // Mi horario: copia de trabajo del Generador de cada tienda (la edita su gerente).
+    match /trabajo/{t} {
+      allow read, write: if isSuper() || owns(t);
+    }
+
     // Calendario de planilla por quincena: lo ven todos; lo publican planilla y superusuario.
     match /calendario/{q} {
       allow read: if isSuper() || active();

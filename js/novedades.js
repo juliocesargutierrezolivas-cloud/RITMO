@@ -3,6 +3,16 @@
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 15, fecha: "2026-10-15", version: "2.0", tipo: "Nuevo", para: ["Editor","Superusuario"],
+    titulo: "Publicar planilla desde el Generador",
+    detalle: "En el módulo Planilla de Mi horario está el botón 📤 Publicar planilla: entrega la quincena a RITMO. Queda en gris (✓ Planilla publicada) y vuelve a color si haces algún cambio, para que lo publiques de nuevo."
+  },
+  {
+    id: 14, fecha: "2026-10-15", version: "2.0", tipo: "Nuevo", para: ["Editor","Superusuario"],
+    titulo: "Mi horario: el Generador dentro de RITMO",
+    detalle: "Ya no necesitas abrir otro archivo: en la pestaña Mi horario creas el horario, la planilla y MBK, y todo se guarda solo en la nube. Trae tu respaldo una sola vez o empieza desde cero."
+  },
+  {
     id: 13, fecha: "2026-10-15", version: "1.9", tipo: "Mejora", para: ["Superusuario"],
     titulo: "Roles Beta y entrega de prueba en un clic",
     detalle: "En Ver como hay un grupo Pruebas con gerente de tienda, GZ, distrito, operaciones y planilla Beta, todos sobre AMPM Beta. En Administración, un botón carga una entrega ficticia en AMPM Beta para revisar cada vista."

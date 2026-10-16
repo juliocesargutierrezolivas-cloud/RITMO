@@ -40,6 +40,7 @@ Sin servidor propio ni costos en el plan gratuito (Spark).
 | `usuarios` | correo en minúsculas | nombre, cargo, rol, alcance, valor, tiendas[], reportaA, activo, accesoCreado |
 | `tiendas` | código (AMPMxx) | numero, nombre, zona, region, correoTienda, correoGZ, gzNombre, auxiliar, activa |
 | `entregas` | `CODIGO_AAAA-MM-Q1/Q2` | tienda, quincena, archivo, bytes, estado, por, porNombre, fecha |
+| `trabajo` | código de tienda | contenido (JSON del Generador en edición), bytes, por, actualizado |
 | `entregas/{id}/datos/respaldo` | — | contenido (JSON del Generador: incluye cédulas y salarios), archivo, tienda |
 | `calendario` | `AAAA-MM-Q1/Q2` | semanas[] (lunes de cada semana), limite, nota, por, porNombre, fecha |
 
@@ -71,4 +72,4 @@ La fuente de verdad de roles es `Roles_de_Ritmo_v2.xlsx` (no está en el reposit
 ## 8. Pendientes conocidos (siguiente fase)
 - Avisos por correo (entrega recibida, recordatorio antes del límite, resumen para planilla).
 - Generar la planilla en Excel directo desde el panel (hoy se descarga el respaldo y se abre en el Generador).
-- Integrar el Generador de Horarios dentro de RITMO para que el gerente no maneje archivos.
+- (Hecho en v2.0) Generador integrado en Mi horario con publicación desde Planilla.

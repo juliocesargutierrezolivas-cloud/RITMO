@@ -55,7 +55,7 @@ else {
       const ws=Object.keys(data.semanas||{}).sort();const a=iso(lun(ini)),b=iso(fin);
       const semana=ws.find(w=>w>=a&&w<=b)||ws[ws.length-1];
       addEventListener('message',ev=>{if(ev.origin!==location.origin||ev.data?.tipo!=='ritmo-listo')return;
-        $('gen').contentWindow.postMessage({tipo:'ritmo-datos',data,semana,meta:{tienda:T,descarga}},location.origin)});
+        $('gen').contentWindow.postMessage({tipo:'ritmo-datos',data,semana,meta:{tienda:T,descarga,q:Q}},location.origin)});
       $('gen').src='generador.html?visor=1';$('gen').hidden=false;
     }catch(err){fail('No tienes acceso a esta tienda o no se pudo leer la entrega ('+(err.code||err.message)+').')}
   });

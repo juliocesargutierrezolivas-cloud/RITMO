@@ -80,6 +80,7 @@ button{cursor:pointer}
 .btn{border:1px solid var(--line);background:var(--surface);padding:8px 12px;border-radius:8px;font-weight:600;font-size:13px;display:inline-flex;gap:6px;align-items:center}
 .btn:hover{border-color:var(--muted)}
 .btn.primary{background:var(--orange);border-color:var(--orange);color:#1b0e00}
+.btn.pubok,.btn.pubok:disabled{background:#e6e9ef;border-color:#d0d5de;color:#6b7690;opacity:1;cursor:default}
 .btn.primary:hover{background:var(--orange-d);border-color:var(--orange-d)}
 .btn.navy{background:var(--navy);border-color:var(--navy);color:#fff}
 .btn.ghost{background:transparent}
@@ -610,11 +611,19 @@ function resumen(k){
 
 /* ===================== Almacenamiento ===================== */
 let DB=null,DL=null;const VISOR=new URLSearchParams(location.search).has("visor");
+const RITMO=!VISOR&&new URLSearchParams(location.search).has("ritmo");
+function plDesdeQ(q){const m=/^(\d{4})-(\d{2})-Q([12])$/.exec(q||"");if(!m)return;const y=+m[1],mm=+m[2]-1,k=+m[3];const [ini,fin]=rangoQuincena(y,mm,k);S.pl={y,m:mm,q:k,ini,fin}}
+function paqueteRITMO(){return {app:"Generador de Horarios AMPM",version:VERSION_DATOS,fecha:new Date().toISOString(),cfg:S.cfg,agentes:S.agentes,
+  semanas:Object.fromEntries(Object.entries(S.semanas).filter(([k,v])=>!v._draft).sort((a,b)=>a[0].localeCompare(b[0])))}}
+let tRITMO=null;
+function guardarRITMO(){clearTimeout(tRITMO);setSave("busy","Guardando…");if(S.pub&&S.pub.ok){S.pub.ok=false;setTimeout(()=>{if(S.tab==="planilla")render()},0)}
+  tRITMO=setTimeout(()=>{try{parent.postMessage({tipo:"ritmo-guardar",data:paqueteRITMO()},location.origin)}catch(e){setSave("err","No se pudo guardar")}},700)}
 const LS="ampm-horarios-v1";const timers={},chains={};
 function setSave(state,txt){const d=document.getElementById("saveDot");d.className="dot "+state;document.getElementById("saveTxt").textContent=txt}
-function lsSave(){if(VISOR)return;try{localStorage.setItem(LS,JSON.stringify({cfg:S.cfg,agentes:S.agentes,semanas:Object.fromEntries(Object.entries(S.semanas).filter(([k,v])=>!v._draft).sort((a,b)=>a[0].localeCompare(b[0])))}));setSave("local","Guardado en este navegador")}catch(e){setSave("err","No se pudo guardar")}}
+function lsSave(){if(VISOR)return;if(RITMO){guardarRITMO();return}try{localStorage.setItem(LS,JSON.stringify({cfg:S.cfg,agentes:S.agentes,semanas:Object.fromEntries(Object.entries(S.semanas).filter(([k,v])=>!v._draft).sort((a,b)=>a[0].localeCompare(b[0])))}));setSave("local","Guardado en este navegador")}catch(e){setSave("err","No se pudo guardar")}}
 function persist(path){
   if(VISOR)return;
+  if(RITMO){guardarRITMO();return}
   if(S.mode!=="nube"){clearTimeout(timers.ls);timers.ls=setTimeout(lsSave,400);return}
   setSave("busy","Guardando…");clearTimeout(timers[path]);
   timers[path]=setTimeout(()=>{
@@ -672,6 +681,24 @@ function hojaAsistencia(wk){
   f.srcdoc=html;f.onload=()=>{setTimeout(()=>{f.contentWindow.focus();f.contentWindow.print();setTimeout(()=>f.remove(),60000)},250)};
 }
 async function cargar(){
+  if(RITMO){
+    S.mode="ritmo";
+    await new Promise(res=>{
+      addEventListener("message",e=>{
+        if(e.origin!==location.origin)return;const d=e.data;if(!d)return;
+        if(d.tipo==="ritmo-datos"){const x=d.data||{};
+          S.cfg=Object.assign(clone(DEF_CFG),x.cfg||{});S.agentes=x.agentes||[];S.semanas=x.semanas||{};
+          if(!S.cfg.tienda&&d.meta&&d.meta.nombre)S.cfg.tienda=d.meta.nombre;if(d.meta&&d.meta.q)plDesdeQ(d.meta.q);res()}
+        else if(d.tipo==="ritmo-quincena"){plDesdeQ(d.q);if(S.loaded)render()}
+        else if(d.tipo==="ritmo-estado"){S.pub={ok:!!d.publicado,fecha:d.fecha||""};if(S.loaded)render()}
+        else if(d.tipo==="ritmo-guardado")setSave(d.ok?"":"err",d.ok?"Guardado en RITMO":"No se guardó: "+(d.error||"sin conexión"));
+      });
+      parent.postMessage({tipo:"ritmo-listo"},location.origin);
+    });
+    migrar();setSave("","Guardado en RITMO");
+    try{S.hideSide=localStorage.getItem("ampm-ui-hide")==="1"}catch(e){}
+    S.loaded=true;render();return;
+  }
   if(VISOR){
     S.mode="visor";
     await new Promise(res=>{
@@ -679,7 +706,7 @@ async function cargar(){
         if(e.origin!==location.origin)return;const d=e.data;
         if(!d||d.tipo!=="ritmo-datos")return;
         S.cfg=Object.assign(clone(DEF_CFG),d.data.cfg||{});S.agentes=d.data.agentes||[];S.semanas=d.data.semanas||{};
-        S.visor=d.meta||{};if(d.semana)S.semana=d.semana;res();
+        S.visor=d.meta||{};if(d.semana)S.semana=d.semana;if(S.visor.q)plDesdeQ(S.visor.q);res();
       });
       parent.postMessage({tipo:"ritmo-listo"},location.origin);
     });
@@ -1193,6 +1220,7 @@ document.addEventListener("click",e=>{
   else if(a==="auto")autollenar();
   else if(a==="undo")deshacer();
   else if(a==="plxlsx")descargarPlanilla();
+  else if(a==="publicar"&&RITMO){clearTimeout(tRITMO);parent.postMessage({tipo:"ritmo-publicar",data:paqueteRITMO()},location.origin);setSave("busy","Publicando…")}
   else if(a==="vtprev"||a==="vtnext"){S.vtSem=wkShift(S.vtSem||S.semana,a==="vtprev"?-1:1);render()}
   else if(a==="vtwa")mostrarTexto("Solicitud de viático · WhatsApp",textoViatico(S.vtSem||S.semana));
   else if(a==="vtimgS"||a==="vtimgD"){const k=S.vtSem||S.semana;copiarLienzo(lienzoViatico(k,a==="vtimgD"?"D":"S"),`Viatico_MBK_${a==="vtimgD"?"detalle":"solicitud"}_${k}.png`,a==="vtimgD"?"Imagen del detalle copiada. Pégala en WhatsApp.":"Imagen de la solicitud copiada. Pégala en WhatsApp.")}
@@ -1444,7 +1472,7 @@ function renderPlanilla(){
   const C=calcPlanilla(P.ini,P.fin),T=tituloQuincena(P),money2=n=>"C$ "+(Math.round(n*100)/100).toLocaleString("es-NI",{minimumFractionDigits:2,maximumFractionDigits:2});
   const falt=C.filas.filter(p=>!p.ag.cedula||!p.ag.nombreCompleto||!p.salario||!p.ag.ingreso);
   const tot=C.filas.reduce((o,p)=>({q:o.q+p.quinc,he:o.he+p.extra,f:o.f+p.ferH}),{q:0,he:0,f:0});
-  let h=`<div class="weekbar"><div class="weeknav"><h2>Planilla</h2></div><div class="actions"><button class="btn navy" data-act="plxlsx">Descargar planilla Excel</button></div></div>
+  let h=`<div class="weekbar"><div class="weeknav"><h2>Planilla</h2></div><div class="actions">${RITMO?(S.pub&&S.pub.ok?`<button class="btn pubok" disabled title="Sin cambios desde la última publicación">✓ Planilla publicada${S.pub.fecha?" · "+esc(S.pub.fecha):""}</button>`:`<button class="btn primary" data-act="publicar" title="Entrega la quincena a RITMO">📤 Publicar planilla</button>`):""}<button class="btn navy" data-act="plxlsx">Descargar planilla Excel</button></div></div>
   <div class="toolbar plbar">
     <label>Mes <input class="in" type="month" id="plMes" value="${P.y}-${pad(P.m+1)}"></label>
     <label>Quincena <select class="in" id="plQ"><option value="1" ${P.q===1?"selected":""}>1ra (1–15)</option><option value="2" ${P.q===2?"selected":""}>2da (16–fin)</option><option value="0" ${P.q===0?"selected":""}>Personalizada</option></select></label>
