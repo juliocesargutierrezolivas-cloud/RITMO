@@ -251,6 +251,9 @@ tr:last-child td{border-bottom:0}
 
   <!-- Administración (Superusuario) -->
   <section id="v-adm" hidden>
+    <div class="card"><div class="ch"><h3>0 · Tienda de pruebas</h3><span class="sub">Datos ficticios: nombres, cédulas y salarios inventados</span></div>
+      <div class="pad"><div class="bar"><button class="btn nav" id="betaL">Cargar entrega de prueba en AMPM Beta (quincena seleccionada)</button><button class="lnk" id="betaX">Borrar entrega de prueba</button></div>
+      <div class="msg" id="betaMsg" style="margin-top:12px"></div></div></div>
     <div class="card"><div class="ch"><h3>1 · Importar roles</h3><span class="sub">Archivo <span class="mono">Roles_de_Ritmo_v2.xlsx</span>, hojas Tiendas y Usuarios</span></div>
       <div class="pad">
         <label class="drop" id="dropX"><b>Elegir archivo de roles</b>Se lee en tu navegador; no se sube el Excel.<input type="file" id="fileX" accept=".xlsx" hidden></label>
@@ -283,6 +286,7 @@ tr:last-child td{border-bottom:0}
 import { nube, authSecundaria, configurado, correo, quincena, quincenaTexto, SUPERUSUARIO } from "./js/nube.js";
 import { NOVEDADES } from "./js/novedades.js";
 import * as LOC from "./js/local.js";
+import { BETA_DEMO } from "./js/beta-demo.js";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let REAL=null, ALLT=[], C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null, CAL=null, DEMO_CAL={};
@@ -363,7 +367,8 @@ function pintar(){
   const tx=$('fTxt').value.toLowerCase(), z=$('fZona').value, es=$('fEst').value;
   const rows=TIENDAS.filter(t=>(!z||t.zona===z)&&(!es||(es==='ok')===!!ENT[t.codigo])&&(!tx||[t.codigo,t.nombre,t.gzNombre].join(' ').toLowerCase().includes(tx)));
   const canDl=ME.rol==='Descargar'||ME.rol==='Superusuario';
-  const ver=c=>`<a class="btn" href="visor.html?t=${encodeURIComponent(c)}&q=${encodeURIComponent(Q)}" title="Ver horario, planilla y MBK (solo lectura)">👁 Ver</a>`;
+  const como=REAL&&REAL.rol!==ME.rol?`&como=${encodeURIComponent(ME.rol)}`:'';
+  const ver=c=>`<a class="btn" href="visor.html?t=${encodeURIComponent(c)}&q=${encodeURIComponent(Q)}${como}" title="Ver horario, planilla y MBK (solo lectura)">👁 Ver</a>`;
   $('tb').innerHTML=rows.length?rows.map(t=>{const e=ENT[t.codigo];return `<tr>
     <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
     <td>${estado(e)}</td>
@@ -371,7 +376,7 @@ function pintar(){
     ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-dl="${esc(t.codigo)}" title="Descargar archivo">⬇ Respaldo</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar en este navegador">💾</button>`:''}</td>`:`<td>${e?ver(t.codigo):''}</td>`}</tr>`}).join('')
     :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
-    $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}">👁 Ver mi entrega</a>`:'');}
+    $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}${REAL&&REAL.rol!==ME.rol?'&como=Editor':''}">👁 Ver mi entrega</a>`:'');}
 }
 const toD=f=>f?.toDate?f.toDate():(f?new Date(f):null);
 function estado(e){const L=toD(CAL?.limite);
@@ -590,17 +595,22 @@ function armarVC(){
   const gz=[...new Map(ALLT.filter(t=>!t.prueba&&t.correoGZ).map(t=>[t.correoGZ,t.gzNombre||t.correoGZ])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
   const beta=ALLT.find(t=>t.prueba)||ALLT[0];
   const O=[['real','Superusuario (yo)']];
-  if(beta)O.push(['ed:'+beta.codigo,`Gerente de tienda · ${beta.codigo}`]);
+  const real=ALLT.filter(t=>!t.prueba)[0];if(real)O.push(['ed:'+real.codigo,`Gerente de tienda · ${real.codigo} (ejemplo)`]);
   gz.forEach(([c,n])=>O.push(['gz:'+c,`Gerente de zona · ${n}`]));
   O.push(['rg:FOR','Gerente de distrito · Región FOR'],['rg:MGA','Gerente de distrito · Región MGA'],['ops','Gerente de operaciones · Todas'],['pl','Planilla · Encargado (todas)']);
-  $('vcSel').innerHTML=O.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('');
+  const B=ALLT.some(t=>t.prueba)?[['b:Editor','Gerente de tienda Beta'],['b:GZ','Gerente de zona Beta'],['b:Distrito','Gerente de distrito Beta'],['b:Operaciones','Gerente de operaciones Beta'],['b:Planilla','Planilla Beta']]:[];
+  const op=([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`;
+  $('vcSel').innerHTML=O.slice(0,1).map(op).join('')+(B.length?`<optgroup label="Pruebas · AMPM Beta">${B.map(op).join('')}</optgroup>`:'')+`<optgroup label="Producción">${O.slice(1).map(op).join('')}</optgroup>`;
   $('vc').hidden=false;
 }
 $('vcSel').onchange=async()=>{
   const v=$('vcSel').value,base=ALLT.filter(t=>!t.prueba);let rol,tiendas,alcance='Todas',nombre=REAL.nombre;
   if(v==='real'){ME={...REAL};TIENDAS=ALLT.slice()}
   else{
-    if(v.startsWith('ed:')){rol='Editor';alcance='Tienda';tiendas=[v.slice(3)];nombre='Gerente '+v.slice(3)}
+    if(v.startsWith('b:')){const r=v.slice(2),pb=ALLT.filter(t=>t.prueba).map(t=>t.codigo);
+      rol={Editor:'Editor',GZ:'Visualizar',Distrito:'Visualizar',Operaciones:'Visualizar',Planilla:'Descargar'}[r];
+      alcance=r==='Editor'?'Tienda':r==='GZ'?'GZ':r==='Distrito'?'Región':r==='Planilla'?'Asignadas':'Todas';tiendas=pb;nombre=`${r==='Editor'?'Gerente de tienda':r==='GZ'?'Gerente de zona':r==='Distrito'?'Gerente de distrito':r==='Operaciones'?'Gerente de operaciones':'Planilla'} Beta`}
+    else if(v.startsWith('ed:')){rol='Editor';alcance='Tienda';tiendas=[v.slice(3)];nombre='Gerente '+v.slice(3)}
     else if(v.startsWith('gz:')){rol='Visualizar';alcance='GZ';tiendas=base.filter(t=>t.correoGZ===v.slice(3)).map(t=>t.codigo);nombre=base.find(t=>t.correoGZ===v.slice(3))?.gzNombre||'GZ'}
     else if(v.startsWith('rg:')){rol='Visualizar';alcance='Región';tiendas=base.filter(t=>t.region===v.slice(3)).map(t=>t.codigo);nombre='Gerente de distrito'}
     else if(v==='ops'){rol='Visualizar';tiendas=base.map(t=>t.codigo);nombre='Gerente de operaciones'}
@@ -674,11 +684,25 @@ $('pwF').onsubmit=async e=>{e.preventDefault();
       c.includes('weak-password')?'La contraseña nueva es muy débil.':c.includes('too-many')?'Demasiados intentos. Espera unos minutos.':'No se pudo cambiar: '+c,'bad')}
   finally{$('pwS').disabled=false}};
 
+// ---------- Tienda de pruebas: cargar / borrar entrega ficticia
+$('betaL').onclick=async()=>{const t=ALLT.find(x=>x.prueba);if(!t)return msg('betaMsg','Primero publica el archivo de roles con la tienda AMPM Beta.','bad');
+  if(!C)return msg('betaMsg','Vista previa: en producción aquí se carga la entrega de prueba.','warn');
+  try{const {F,db}=C,id=`${t.codigo}_${Q}`,txt=JSON.stringify(BETA_DEMO);
+    await F.setDoc(F.doc(db,'entregas',id,'datos','respaldo'),{contenido:txt,archivo:'Respaldo_AMPM_BETA_prueba.json',tienda:t.codigo});
+    await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:'Respaldo_AMPM_BETA_prueba.json',bytes:txt.length,asistencia:false,validado:true,estado:'Entregada',
+      por:REAL.correo,porNombre:'Gerente de tienda Beta (prueba)',fecha:F.serverTimestamp()});
+    await cargarEntregas();msg('betaMsg',`Listo: AMPM Beta tiene entrega en ${quincenaTexto(Q)}. Usa "Ver como" › Pruebas para revisar cada rol.`,'ok')}
+  catch(e){msg('betaMsg','No se pudo cargar: '+(e.code||e.message),'bad')}};
+$('betaX').onclick=async()=>{const t=ALLT.find(x=>x.prueba);if(!t||!C)return;if(!confirm('¿Borrar la entrega de prueba de AMPM Beta en esta quincena?'))return;
+  try{const {F,db}=C,id=`${t.codigo}_${Q}`;for(const d of ['respaldo','asistencia'])await F.deleteDoc(F.doc(db,'entregas',id,'datos',d)).catch(()=>{});
+    await F.deleteDoc(F.doc(db,'entregas',id));await cargarEntregas();msg('betaMsg','Entrega de prueba borrada.','ok')}catch(e){msg('betaMsg','No se pudo borrar: '+(e.code||e.message),'bad')}};
+
 // ---------- Vista previa sin Firebase
 function demo(){
   $('demo').hidden=false;
   const zonas=['Zona Norte','Zona Sur','Zona Centro'];
   TIENDAS=Array.from({length:12},(_,i)=>({codigo:'DEMO'+String(i+1).padStart(2,'0'),numero:i+1,nombre:'Sucursal de ejemplo '+(i+1),zona:zonas[i%3],gzNombre:['GZ Ejemplo A','GZ Ejemplo B','GZ Ejemplo C'][i%3]}));
+  Object.assign(TIENDAS[11],{codigo:'AMPMBETA',nombre:'AMPM Beta - Tienda de pruebas',zona:'Pruebas',prueba:true});
   const r=new URLSearchParams(location.search).get('rol')||'Superusuario';
   ME={correo:'usuario@ejemplo.com',nombre:'Usuario de ejemplo',rol:r,alcance:'Todas'};
   if(r==='Editor')TIENDAS=TIENDAS.slice(0,1);

@@ -35,7 +35,9 @@ else {
     if(!u){location.replace('index.html');return}
     try{
       const me=await F.getDoc(F.doc(db,'usuarios',correo(u.email))).catch(()=>null);
-      const rol=me&&me.exists()?me.data().rol:'Superusuario';
+      let rol=me&&me.exists()?me.data().rol:'Superusuario';
+      // El superusuario puede revisar la vista de otro rol ("Ver como")
+      const como=P.get('como');if(rol==='Superusuario'&&['Editor','Visualizar','Descargar'].includes(como))rol=como;
       const [ent,res,tie]=await Promise.all([
         F.getDoc(F.doc(db,'entregas',`${T}_${Q}`)),
         F.getDoc(F.doc(db,'entregas',`${T}_${Q}`,'datos','respaldo')),
@@ -45,7 +47,7 @@ else {
       const descarga=rol==='Descargar'||rol==='Superusuario';
       $('tt').textContent=`${T} · ${tie&&tie.exists()?tie.data().nombre:''}`;
       $('st').textContent=`${quincenaTexto(Q)} · entregó ${e.porNombre||e.por||''}`;
-      $('mode').textContent=descarga?'Solo lectura · con descarga':'Solo lectura';
+      $('mode').textContent=(P.get('como')?'Vista como '+rol+' · ':'')+(descarga?'Solo lectura · con descarga':'Solo lectura');
       // Semana inicial: la primera con horario dentro de la quincena
       const [y,m,k]=Q.split('-'),ini=new Date(+y,+m-1,k==='Q1'?1:16),fin=k==='Q1'?new Date(+y,+m-1,15):new Date(+y,+m,0);
       const lun=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};

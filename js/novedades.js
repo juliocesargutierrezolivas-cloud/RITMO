@@ -3,6 +3,11 @@
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 13, fecha: "2026-10-15", version: "1.9", tipo: "Mejora", para: ["Superusuario"],
+    titulo: "Roles Beta y entrega de prueba en un clic",
+    detalle: "En Ver como hay un grupo Pruebas con gerente de tienda, GZ, distrito, operaciones y planilla Beta, todos sobre AMPM Beta. En Administración, un botón carga una entrega ficticia en AMPM Beta para revisar cada vista."
+  },
+  {
     id: 12, fecha: "2026-10-15", version: "1.8", tipo: "Nuevo", para: "Todos",
     titulo: "Ver la operación de cada tienda (solo lectura)",
     detalle: "Con el botón 👁 Ver abres el horario, la planilla, la planilla MBK y el historial de la entrega tal como los ve la tienda, sin poder editar. Planilla, además, descarga la planilla en Excel desde ahí."
