@@ -3,6 +3,11 @@
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 16, fecha: "2026-10-15", version: "2.1", tipo: "Mejora", para: "Todos",
+    titulo: "Planilla en Excel directo y semanas en orden",
+    detalle: "Planilla descarga la planilla en Excel de cada tienda con un clic, con las horas extra de las semanas publicadas en el calendario; el 💾 guarda ese Excel en el navegador. El calendario muestra las 4 semanas anteriores y las del mes en curso, en orden. Ver mi entrega del gerente muestra Horario, Planilla y Planilla MBK."
+  },
+  {
     id: 15, fecha: "2026-10-15", version: "2.0", tipo: "Nuevo", para: ["Editor","Superusuario"],
     titulo: "Publicar planilla desde el Generador",
     detalle: "En el módulo Planilla de Mi horario está el botón 📤 Publicar planilla: entrega la quincena a RITMO. Queda en gris (✓ Planilla publicada) y vuelve a color si haces algún cambio, para que lo publiques de nuevo."

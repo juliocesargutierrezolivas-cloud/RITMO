@@ -711,6 +711,9 @@ async function cargar(){
       parent.postMessage({tipo:"ritmo-listo"},location.origin);
     });
     migrar();document.body.classList.add("ro");if(!S.visor.descarga)document.body.classList.add("nodl");
+    if(Array.isArray(S.visor.modulos)){const st=document.createElement("style");
+      st.textContent=["horario","matriz","planilla","mbk","historial","config"].filter(t=>!S.visor.modulos.includes(t)).map(t=>`.ro [data-tab="${t}"]`).join(",")+"{display:none!important}";
+      document.head.appendChild(st);if(!S.visor.modulos.includes(S.tab))S.tab=S.visor.modulos[0]}
     setSave("local","Solo lectura · "+(S.visor.tienda||""));
     S.loaded=true;render();return;
   }
@@ -1652,6 +1655,14 @@ document.addEventListener("change",e=>{const el=e.target;if(el.id!=="vtPres")ret
 
 try{document.getElementById("logoAmpm").src=LOGO_AMPM}catch(e){}
 if(VISOR){
+  addEventListener("message",e=>{
+    if(e.origin!==location.origin||!e.data||e.data.tipo!=="ritmo-exportar")return;
+    try{if(e.data.q)plDesdeQ(e.data.q);const P=S.pl;plCfg();if(Array.isArray(e.data.semanasHE))S.cfg.plHE[P.ini+"_"+P.fin]=e.data.semanasHE.slice();const {blob,T}=libroPlanilla(P);
+      const tnd=(S.cfg.tienda||"AMPM").replace(/[^\w\-]+/g,"").slice(0,30)||"AMPM",b=parse(P.fin);
+      const fn=`${tnd}-Planilla_${T.q==="PRIMERA"?"1ra_Quincena":T.q==="SEGUNDA"?"2da_Quincena":"Periodo"}_de_${MESES[b.getMonth()][0].toUpperCase()+MESES[b.getMonth()].slice(1)}_año_${b.getFullYear()}.xlsx`;
+      blob.arrayBuffer().then(buf=>parent.postMessage({tipo:"ritmo-excel",ok:true,buf,fn},location.origin,[buf]));
+    }catch(err){parent.postMessage({tipo:"ritmo-excel",ok:false,error:String(err&&err.message||err)},location.origin)}
+  });
   const OK='[data-tab],[data-go],[data-open],[data-close],[data-act="prev"],[data-act="next"],[data-act="hoy"],[data-act="vtprev"],[data-act="vtnext"],[data-act="side"],[data-act="img"],[data-act="xlsx"],[data-act="plxlsx"],[data-act="vtxlsx"],[data-act="vtimgS"],[data-act="vtimgD"],[data-act="vtwa"],[data-act="wa"],[data-act="copywa"],[data-act="asis"]';
   const libre=t=>t&&t.closest&&t.closest('#plMes,#plQ');
   document.addEventListener("click",e=>{

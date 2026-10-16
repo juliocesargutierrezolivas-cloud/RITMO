@@ -227,7 +227,7 @@ button.drop{width:100%;background:#fff;font:inherit}
               <label class="drop" id="dropA" style="margin-top:8px"><b>Sube la hoja de asistencia</b>Foto clara o PDF (máx. 700 KB)<input type="file" id="fileA" accept="image/*,.pdf" hidden></label>
               <div class="ok-file" id="f2"></div></div>
             <label class="chk" id="wV"><input type="checkbox" id="val">Validé que todo esté reportado: turnos, novedades, horas extra y feriados.</label>
-            <label class="chk" style="border:0;padding:0"><input type="checkbox" id="keep" checked>Guardar también una copia en este navegador</label>
+            <label class="chk" style="border:0;padding:0"><input type="checkbox" id="keep" checked>Guardar también la planilla en Excel en este navegador</label>
             <button class="btn pri" id="env" disabled>Entregar quincena</button>
           </div>
           <div class="msg" id="miaMsg" style="margin-top:12px"></div>
@@ -403,7 +403,7 @@ function pintar(){
     <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
     <td>${estado(e)}</td>
     <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
-    ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-dl="${esc(t.codigo)}" title="Descargar archivo">⬇ Respaldo</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar en este navegador">💾</button>`:''}</td>`:`<td>${e?ver(t.codigo):''}</td>`}</tr>`}).join('')
+    ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-xl="${esc(t.codigo)}" title="Descargar la planilla en Excel">⬇ Planilla Excel</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar la planilla Excel en este navegador">💾</button>`:''}</td>`:`<td>${e?ver(t.codigo):''}</td>`}</tr>`}).join('')
     :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
     $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}${REAL&&REAL.rol!==ME.rol?'&como=Editor':''}">👁 Ver mi entrega</a>`:'');}
@@ -417,10 +417,15 @@ const fmt=f=>{const d=f?.toDate?f.toDate():new Date(f);return isNaN(d)?'':d.toLo
 // ---------- Descargar respaldo (Descargar / Superusuario)
 $('tb').onclick=async e=>{const bs=e.target.closest('[data-sv]');if(bs){const cod=bs.dataset.sv;bs.disabled=true;
     try{let r=await leerDato(cod,'respaldo');if(!r)throw new Error('sin respaldo');
-      await LOC.guardar({tipo:'respaldo',tienda:cod,quincena:Q,archivo:`RITMO_${cod}_${Q}.json`,contenido:r.contenido,dueño:REAL.correo});
+      const x=await excelPlanilla(JSON.parse(r.contenido));
+      await LOC.guardar({tipo:'planilla',tienda:cod,quincena:Q,archivo:x.fn,contenido:await aDataURL(x.blob),dueño:REAL.correo});
       const a=ENT[cod]?.asistencia?await leerDato(cod,'asistencia'):null;
       if(a)await LOC.guardar({tipo:'asistencia',tienda:cod,quincena:Q,archivo:`Asistencia_${cod}_${Q}`,contenido:a.contenido,dueño:REAL.correo});
       bs.textContent='✔';bs.title='Guardado en este navegador'}catch(err){bs.disabled=false;alert('No se pudo guardar en el navegador: '+err.message)}return}
+  const bx=e.target.closest('[data-xl]');if(bx){const cod=bx.dataset.xl,txt0=bx.textContent;bx.disabled=true;bx.textContent='Generando…';
+    try{const r=await leerDato(cod,'respaldo');if(!r)throw new Error('sin entrega');const x=await excelPlanilla(JSON.parse(r.contenido));
+      const a=document.createElement('a');a.href=URL.createObjectURL(x.blob);a.download=x.fn;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+    catch(err){alert('No se pudo generar la planilla: '+err.message)}finally{bx.disabled=false;bx.textContent=txt0}return}
   const ba=e.target.closest('[data-as]');if(ba){const cod=ba.dataset.as;
     if(!C)return alert('Vista previa: aquí se descarga la hoja de asistencia.');
     const s=await C.F.getDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`,'datos','asistencia')).catch(()=>null);if(!s||!s.exists())return alert('No se encontró la hoja de asistencia.');
@@ -481,7 +486,8 @@ $('env').onclick=async()=>{
     let hh='';try{hh=huella(JSON.parse(PEND.resp.txt))}catch(e){}
     await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:PEND.resp.name,bytes:PEND.resp.size,hash:hh,asistencia:!!PEND.asis,
       validado:reqV()?$('val').checked:null,estado:'Entregada',por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()});
-    if($('keep')?.checked&&LOC.disponible()){try{await LOC.guardar({tipo:'respaldo',tienda:t.codigo,quincena:Q,archivo:PEND.resp.name,contenido:PEND.resp.txt,dueño:REAL.correo});
+    if($('keep')?.checked&&LOC.disponible()){try{const x=await excelPlanilla(JSON.parse(PEND.resp.txt));
+      await LOC.guardar({tipo:'planilla',tienda:t.codigo,quincena:Q,archivo:x.fn,contenido:await aDataURL(x.blob),dueño:REAL.correo});
       if(PEND.asis)await LOC.guardar({tipo:'asistencia',tienda:t.codigo,quincena:Q,archivo:PEND.asis.name,contenido:PEND.asis.url,dueño:REAL.correo})}catch(e){}}
     PEND={};$('f1').textContent=$('f2').textContent='';$('val').checked=false;
     await cargarEntregas();msg('miaMsg','Listo: la quincena quedó entregada. Tu GZ y planilla ya lo ven.','ok');
@@ -584,7 +590,9 @@ function pintarCal(){
   // formulario
   if(!$('calW'))return;
   $('calQ').textContent=quincenaTexto(Q);
-  const fin=lunes(finQ(Q)),ws=[];for(let i=0;i<8;i++){const d=new Date(fin);d.setDate(d.getDate()-7*i);ws.push(iso(d))}
+  // 4 semanas antes del mes de la quincena + todas las semanas del mes, en orden cronológico
+  const [qy,qm]=Q.split('-').map(Number),p1=new Date(qy,qm-1,1),ult=new Date(qy,qm,0),ws=[];
+  {const d=lunes(p1);d.setDate(d.getDate()-28);while(d<=ult){ws.push(iso(d));d.setDate(d.getDate()+7)}}
   const sel=new Set(CAL?.semanas||[]);
   $('calW').innerHTML=ws.map(w=>`<label><input type="checkbox" value="${w}" ${sel.has(w)?'checked':''}>Semana ${semTxt(w)}</label>`).join('');
   const def=new Date(finQ(Q));def.setDate(def.getDate()+2);def.setHours(17,0,0,0);
@@ -660,24 +668,37 @@ function red(){const on=navigator.onLine;$('net').classList.toggle('off',!on);$(
   $('net').title=on?'Conectado de forma segura (HTTPS)':'Sin internet: los cambios no se guardarán hasta reconectar'}
 addEventListener('online',red);addEventListener('offline',red);red();
 
+// ---------- Planilla Excel generada con el mismo Generador (oculto)
+const aDataURL=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
+function excelPlanilla(data){return new Promise((ok,mal)=>{
+  if(!data||!data.semanas)return mal(new Error('la entrega no tiene horario'));
+  const f=document.createElement('iframe');f.style.cssText='position:fixed;width:1200px;height:800px;left:-3000px;top:0;border:0';
+  let t=setTimeout(()=>{fin();mal(new Error('tiempo de espera agotado'))},20000);
+  const fin=()=>{clearTimeout(t);removeEventListener('message',on);f.remove()};
+  const on=ev=>{if(ev.source!==f.contentWindow)return;const d=ev.data||{};
+    if(d.tipo==='ritmo-listo'){f.contentWindow.postMessage({tipo:'ritmo-datos',data,meta:{descarga:true,q:Q}},location.origin);
+      setTimeout(()=>f.contentWindow.postMessage({tipo:'ritmo-exportar',q:Q,semanasHE:CAL&&Array.isArray(CAL.semanas)?CAL.semanas:undefined},location.origin),400)}
+    else if(d.tipo==='ritmo-excel'){fin();d.ok?ok({blob:new Blob([d.buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),fn:d.fn}):mal(new Error(d.error))}};
+  addEventListener('message',on);f.src='generador.html?visor=1';document.body.appendChild(f)})}
+
 // ---------- Lectura de datos de una entrega
 async function leerDato(cod,doc){
-  if(!C)return doc==='respaldo'?{contenido:JSON.stringify({demo:true,tienda:cod,quincena:Q})}:null;
+  if(!C)return doc==='respaldo'?{contenido:JSON.stringify(BETA_DEMO)}:null;
   const s=await C.F.getDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`,'datos',doc)).catch(()=>null);return s&&s.exists()?s.data():null}
 
 // ---------- Guardados en este navegador
 async function pintarLoc(){
   const L=await LOC.listar(REAL.correo).catch(()=>[]);
-  $('locL').innerHTML=L.length?L.map(x=>`<div class="loc"><div><b>${esc(x.tienda)}</b> · ${x.tipo==='respaldo'?'Respaldo del Generador':'Hoja de asistencia'} · ${quincenaTexto(x.quincena)}
+  $('locL').innerHTML=L.length?L.map(x=>`<div class="loc"><div><b>${esc(x.tienda)}</b> · ${x.tipo==='planilla'?'Planilla Excel':x.tipo==='respaldo'?'Respaldo del Generador':'Hoja de asistencia'} · ${quincenaTexto(x.quincena)}
       <div class="sub">Guardado ${fmt(x.fecha)} · ${Math.round(x.bytes*.75/1024)} KB</div></div>
       <div class="bar"><button class="btn" data-ld="${esc(x.id)}">⬇ Descargar</button><button class="lnk" data-lx="${esc(x.id)}">Eliminar</button></div></div>`).join('')
-    :'<div class="empty">Aún no guardas nada en este navegador. Usa 💾 junto a cada entrega o la casilla al entregar.</div>';
+    :'<div class="empty">Aún no guardas nada en este navegador. Usa 💾 junto a cada entrega o la casilla al entregar: se guarda la planilla en Excel.</div>';
 }
 $('locL').onclick=async e=>{const d=e.target.closest('[data-ld]'),x=e.target.closest('[data-lx]');
   if(x){if(confirm('¿Eliminar esta copia de este navegador?')){await LOC.borrar(x.dataset.lx);pintarLoc()}return}
   if(!d)return;const it=(await LOC.listar(REAL.correo)).find(i=>i.id===d.dataset.ld);if(!it)return;
   const a=document.createElement('a');
-  if(it.contenido.startsWith('data:')){a.href=it.contenido;a.download=it.archivo+(it.contenido.startsWith('data:application/pdf')?'.pdf':(it.archivo.endsWith('.jpg')?'':'.jpg'))}
+  if(it.contenido.startsWith('data:')){a.href=it.contenido;a.download=/\.(xlsx|pdf|jpg)$/i.test(it.archivo)?it.archivo:it.archivo+(it.contenido.startsWith('data:application/pdf')?'.pdf':'.jpg')}
   else{a.href=URL.createObjectURL(new Blob([it.contenido],{type:'application/json'}));a.download=it.archivo.endsWith('.json')?it.archivo:it.archivo+'.json'}
   a.click()};
 $('locDel').onclick=async()=>{if(confirm('¿Borrar todas las copias guardadas en este navegador?')){await LOC.borrarTodo(REAL.correo);pintarLoc()}};
