@@ -73,3 +73,15 @@ La fuente de verdad de roles es `Roles_de_Ritmo_v2.xlsx` (no está en el reposit
 - Avisos por correo (entrega recibida, recordatorio antes del límite, resumen para planilla).
 - Generar la planilla en Excel directo desde el panel (hoy se descarga el respaldo y se abre en el Generador).
 - (Hecho en v2.0) Generador integrado en Mi horario con publicación desde Planilla.
+
+## 9. Insumos pendientes (los consigue Julio)
+- [ ] **Plazas por tienda:** cantidad de agentes + gerente de cada tienda, con todos sus datos, para precargarlos automáticamente en cada tienda y que el GT solo arme horarios.
+- [ ] **Salarios por colaborador** (nombre y apellidos) para actualizar los salarios. Dato sensible: se carga por Administración, nunca se sube al repositorio.
+
+## 10. Próxima sesión (orden propuesto)
+1. Alerta: se quita a quien ya entregó; vencida solo a pendientes hasta la fecha de planilla.
+2. Administración: cuadro fijo leído de la nube con la última publicación de roles y accesos.
+3. Cumpleañeros (fecha desde la cédula, solo día y mes, como observación).
+4. Link para compartir (tarjeta de vista previa, QR, mensaje de lanzamiento).
+5. Trabajo sin conexión (app instalable con sincronización).
+6. Rol RRHH: plazas presupuestadas vs reales por semana y ficha del personal.
