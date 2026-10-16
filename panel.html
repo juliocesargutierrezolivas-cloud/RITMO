@@ -553,7 +553,7 @@ $('acc').onclick=async()=>{
       try{
         if(!u.accesoCreado){const pw=crypto.getRandomValues(new Uint32Array(4)).join('-')+'Aa!';
           try{await A.createUserWithEmailAndPassword(a2,u.correo,pw);await A.signOut(a2);nuevos++}catch(e){if(e.code!=='auth/email-already-in-use')throw e}}
-        await A.sendPasswordResetEmail(C.auth,u.correo);env++;
+        await A.sendPasswordResetEmail(C.auth,u.correo,{url:new URL('index.html',location.href).href});env++;
         await F.setDoc(F.doc(db,'usuarios',u.correo),{accesoCreado:true,enlaceEnviado:F.serverTimestamp()},{merge:true});
         w(`✔ ${u.correo}`);
       }catch(e){err++;w(`✖ ${u.correo} · ${e.code||e.message}`)}

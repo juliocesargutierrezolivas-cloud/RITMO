@@ -271,7 +271,7 @@ document.getElementById('forgot').addEventListener('click',async e=>{
   const em=correo(u.value);
   if(!configurado){say('Vista previa: la recuperación se activa al conectar Firebase.');return}
   if(!em){say('Escribe tu correo arriba y vuelve a tocar "¿Olvidaste tu contraseña?".');return}
-  try{const {auth,A}=await nube();await A.sendPasswordResetEmail(auth,em)}catch(e){}
+  try{const {auth,A}=await nube();await A.sendPasswordResetEmail(auth,em,{url:new URL('index.html',location.href).href})}catch(e){}
   say('Si el correo está registrado, te llegará un enlace para crear una nueva contraseña.',true);
 });
 </script>
