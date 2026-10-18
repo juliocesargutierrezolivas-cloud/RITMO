@@ -198,6 +198,22 @@ service cloud.firestore {
       allow delete: if isSuper() || perm('rrhh_eliminar');
     }
 
+    // Planilla MBK (viático de transporte): resumen semanal por tienda, id = TIENDA_AAAA-MM-DD (lunes de la semana).
+    // Lo escribe el gerente de la tienda desde Mi horario; lo ven su GZ, distrito y operaciones (alcance); solo el GZ de la tienda
+    // (o el superusuario) marca la aprobación. Son cifras, sin nombres ni cédulas.
+    match /mbk/{m} {
+      allow read: if sees(m.split('_')[0]);
+      allow create: if owns(m.split('_')[0]) && request.resource.data.tienda == m.split('_')[0]
+        && !('aprobado' in request.resource.data);
+      allow update: if isSuper()
+        || (owns(m.split('_')[0]) && request.resource.data.tienda == resource.data.tienda
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['semana', 'total', 'presupuesto', 'diasUsados', 'solicitado', 'montoSol', 'por', 'actualizado']))
+        || (sees(m.split('_')[0])
+            && get(/databases/$(db)/documents/tiendas/$(m.split('_')[0])).data.get('correoGZ', '') == email()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['aprobado', 'aprobadoPor', 'aprobadoPorNombre', 'aprobadoFecha', 'aprobadoMonto']));
+      allow delete: if isSuper();
+    }
+
     // Resumen de personal de cada tienda (solo cifras: activos sin gerente de tienda). Sin nombres, cédulas ni salarios.
     // Lo escribe el gerente de la tienda al guardar Mi horario; lo ven GZ, distrito, operaciones y planilla dentro de su alcance.
     match /resumen/{t} {
