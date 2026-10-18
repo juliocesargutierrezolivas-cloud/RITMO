@@ -353,6 +353,10 @@ button.drop{width:100%;background:#fff;font:inherit}
   <!-- Reclutamiento: vacantes, tiendas nuevas y puestos nuevos -->
   <section id="v-rec" hidden>
     <div class="kpis" id="rcK"></div>
+    <div class="card"><div class="ch"><h3>Dónde enfocarte: plazas por cubrir</h3><span class="sub">Presupuesto de cada tienda frente al personal activo. Las de arriba son las más urgentes.</span>
+        <div class="bar"><select class="in" id="rcZ" aria-label="Zona"><option value="">Todas las zonas</option></select><button class="btn pri" id="rcAll" hidden>Abrir vacantes de todas</button></div></div>
+      <div class="scroll" style="max-height:380px;overflow-y:auto"><table><thead><tr><th>Tienda</th><th>Zona</th><th>Activos / plazas</th><th>Faltan</th><th>Vacantes abiertas</th><th></th></tr></thead><tbody id="rcFoco"></tbody></table></div>
+      <div class="pad sub" id="rcFocoPie"></div></div>
     <div class="card"><div class="ch"><h3>Vacantes</h3>
         <div class="bar"><button class="btn pri" id="rcNT" hidden>+ Nueva tienda</button><button class="btn pri" id="rcNP" hidden>+ Nuevo puesto</button>
           <input class="in" id="rcTxt" placeholder="Buscar tienda o cargo" autocomplete="off"><select class="in" id="rcEst"><option value="abierta">Abiertas</option><option value="cubierta">Cubiertas</option><option value="cancelada">Canceladas</option><option value="">Todas</option></select></div></div>
@@ -1131,10 +1135,40 @@ async function pintarRec(){
     const st=v.estado==='abierta'?`<span class="rh-tag ${d>=15?'bad':'warn'}">Abierta</span>`:v.estado==='cubierta'?`<span class="rh-tag ok">Cubierta${v.cerrada?.automatica?' (alta de RRHH)':''}</span>`:'<span class="rh-tag">Cancelada</span>';
     const acc=v.estado==='abierta'?`${puedeC?`<button class="btn" data-rcc="${v.id}">✔ Cubierta</button> `:''}${puedeX?`<button class="btn dng" data-rcx="${v.id}" title="Cancelar la vacante">✕</button>`:''}`:'';
     return `<tr><td>${esc(nomTienda(v.tienda))}</td><td>${esc(v.cargo)}</td><td>${esc(v.motivo||'')}</td><td>${st}</td><td class="mono">${tsTxt(v.creada?.fecha)} · ${d} d</td><td style="white-space:nowrap">${acc}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Sin vacantes con ese filtro.</td></tr>';
-  pintarProspectos();
+  await pintarFoco();pintarProspectos();
   $('rcPie').textContent=VAC.length?`Mostrando ${Math.min(100,L.length)} de ${L.length}.`:'Aún no hay vacantes. Se crean al abrir una tienda o agregar un puesto.';
 }
 $('rcTxt').oninput=$('rcEst').onchange=pintarRec;
+
+// ----- Dónde enfocarse: plazas del presupuesto sin cubrir, por tienda. Se pueden abrir como vacantes (quien tiene el permiso de aperturas).
+function focoLista(){
+  const T=(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba&&t.plazas!=null),abiertas={};
+  VAC.filter(v=>v.estado==='abierta').forEach(v=>{abiertas[v.tienda]=(abiertas[v.tienda]||0)+1});
+  const act=c=>PERSOK?PERS.filter(p=>p.tienda===c&&p.estado==='activo'&&p.cargo!=='Gerente de tienda').length:(RES[c]?.activos??0);
+  return T.map(t=>{const a=act(t.codigo),f=Math.max(0,t.plazas-a),ab=abiertas[t.codigo]||0;return {t,a,f,ab,sin:Math.max(0,f-ab)}}).filter(r=>r.f>0||r.ab>0).sort((x,y)=>y.f-x.f||(x.t.numero||0)-(y.t.numero||0));
+}
+async function pintarFoco(){
+  if(!PERSOK&&(esSuper()||tiene('rrhh_ver')))await cargarPersonal();
+  const z=$('rcZ'),zonas=[...new Set((ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba).map(t=>t.zona).filter(Boolean))].sort(),v=z.value;
+  z.innerHTML='<option value="">Todas las zonas</option>'+zonas.map(x=>`<option value="${esc(x)}"${x===v?' selected':''}>${esc(x)}</option>`).join('');
+  const puede=esSuper()||tiene('aperturas'),L=focoLista(),M=L.filter(r=>!z.value||r.t.zona===z.value),total=L.reduce((s,r)=>s+r.f,0),sin=L.reduce((s,r)=>s+r.sin,0);
+  $('rcFoco').innerHTML=M.map(r=>`<tr><td><b>${esc(r.t.codigo)}</b> ${esc(r.t.nombre||'')}</td><td>${esc(r.t.zona||'')}</td><td class="mono">${r.a} / ${r.t.plazas}</td>
+    <td>${r.f?`<span class="rh-tag ${r.f>=3?'bad':'warn'}">${r.f}</span>`:'<span class="rh-tag ok">0</span>'}</td><td>${r.ab||''}</td>
+    <td>${puede&&r.sin?`<button class="btn" data-rcf="${esc(r.t.codigo)}">Abrir ${r.sin} vacante${r.sin>1?'s':''}</button>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No hay plazas por cubrir con ese filtro.</td></tr>';
+  $('rcFocoPie').textContent=`${total} plazas por cubrir en ${L.filter(r=>r.f>0).length} tiendas; ${sin} aún sin vacante abierta. Los activos salen del registro de RRHH (sin gerente de tienda).`;
+  $('rcAll').hidden=!(puede&&sin>0);$('rcAll').textContent=`Abrir vacantes de todas (${sin})`;
+}
+async function abrirDesdeFoco(codigos){
+  const L=focoLista().filter(r=>codigos.includes(r.t.codigo)&&r.sin>0),ops=[];
+  for(const r of L)for(let i=0;i<r.sin;i++)ops.push({col:'vacantes',id:nuevoId('v'),d:vacanteDoc(r.t.codigo,'Agente SAC','Presupuesto: plaza sin cubrir')});
+  if(!ops.length)return;
+  const ok=await dialogo({titulo:'Abrir vacantes',cuerpo:`<p>Se abrirán <b>${ops.length}</b> vacante${ops.length>1?'s':''} de <b>Agente SAC</b> en ${L.length} tienda${L.length>1?'s':''}, por la diferencia entre el presupuesto y el personal activo.</p>`,botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Abrir vacantes',k:'ok',cls:'pri'}]});
+  if(ok.k!=='ok')return;
+  try{await escribirLote(ops);VACOK=false;await pintarRec()}catch(e){alert('No se pudieron abrir: '+(e.code||e.message))}
+}
+$('rcZ').onchange=pintarFoco;
+$('rcFoco').onclick=e=>{const b=e.target.closest('[data-rcf]');if(b)abrirDesdeFoco([b.dataset.rcf])};
+$('rcAll').onclick=()=>abrirDesdeFoco(focoLista().filter(r=>!$('rcZ').value||r.t.zona===$('rcZ').value).map(r=>r.t.codigo));
 
 // ----- Prospectos: proceso del candidato por etapas. Al contratar se crea el alta en RRHH (la tienda la confirma).
 const ETAPAS=[['nuevo','Nuevo'],['entrevista','Entrevista'],['documentos','Documentos'],['aceptado','Aceptado por la tienda'],['contratado','Contratado'],['descartado','Descartado']];
