@@ -30,6 +30,14 @@ Sin servidor propio ni costos en el plan gratuito (Spark).
 | `js/firebase-config.js` | Identificadores del proyecto Firebase y correo del superusuario inicial |
 | `js/nube.js` | Conexión a Firebase y utilidades de quincena |
 | `js/novedades.js` | Bitácora de mejoras que ven los usuarios |
+| `js/asistente.js` | Asistente flotante de ayuda (fase 1, sin IA): menú de 3 niveles, búsqueda por palabras clave y recorridos. Para agregar una ayuda se suma un objeto a la lista `AYUDA` |
+| `sw.js` | Service Worker: guarda la interfaz y la ayuda en el navegador para abrir sin internet. No guarda datos de Firebase. Al publicar una versión nueva de los archivos, cambiar `VERSION` dentro de `sw.js` |
+| `js/roles.js` | Módulos y plantillas de roles (Superusuario, Editor, Visualizar, Descargar, RRHH, Encargado y Auxiliar de Reclutamiento). Los roles creados en la app viven en la colección `roles`; cada usuario guarda una copia de sus permisos en `usuarios/{correo}.permisos` |
+| `js/rrhh.js` | Lógica del registro central de personal (cédulas, lectura del Excel de altas, emparejamiento sin duplicados, control cruzado) |
+| `PUBLICAR_FIREBASE.md` | Lista única de publicación y pruebas de las reglas en Firebase |
+| `js/tutorial.js` | Recorridos guiados (foco oscuro, globos, voz del navegador) y lecciones por rol. Para agregar o cambiar una lección se edita `LECCIONES` al final del archivo |
+| `js/vendor/qrcode.min.js` | Generador de código QR (MIT), incluido en local |
+| `SEGURIDAD.md` | Política de seguridad y protección de datos del personal |
 | `firestore.rules` | Permisos por rol y alcance |
 | `GUIA_FIREBASE.md` | Creación del proyecto Firebase paso a paso |
 | `assets/` | Logos oficiales y animaciones de la bienvenida |
@@ -42,6 +50,12 @@ Sin servidor propio ni costos en el plan gratuito (Spark).
 | `entregas` | `CODIGO_AAAA-MM-Q1/Q2` | tienda, quincena, archivo, bytes, estado, por, porNombre, fecha |
 | `trabajo` | código de tienda | contenido (JSON del Generador en edición), bytes, por, actualizado |
 | `entregas/{id}/datos/respaldo` | — | contenido (JSON del Generador: incluye cédulas y salarios), archivo, tienda |
+| `tiendas` (campos nuevos) | código | `plazas` (agentes presupuestados, sin gerente de tienda) y `plazasFecha`; se cargan desde Administración con el archivo de presupuesto |
+| `entregas` (campos de aprobación) | `CODIGO_AAAA-MM-Q1/Q2` | `bloqueada`, `heAprobada` {por, porNombre, fecha} y `reapertura` {estado: solicitada/aprobada/rechazada, motivo, solicitadaPor, resueltaPor, nota}. Los escribe el GZ de la tienda (campo `correoGZ`) o el superusuario; el gerente solo puede solicitar la reapertura. Lo impone `firestore.rules` |
+| `aperturas` | `CODIGO_AAAA-MM-Q1/Q2` | `tienda`, `por`, `porNombre`, `fecha`, `motivo`. Apertura directa de una quincena cerrada, hecha por el GZ (sirve también si la tienda nunca entregó). Pasada la fecha de entrega de planilla (`fechaPlanilla` del calendario, hasta las 23:59 hora de Nicaragua) la quincena queda cerrada y solo la reabre el GZ; el servidor lo impone en `entregas` y `entregas/{id}/datos`. El cierre de los horarios del Generador es solo en pantalla |
+| `personal` | hash de la cédula | Registro central de RRHH (datos personales). Ver `SEGURIDAD.md` y `firestore.rules` |
+| `resumen` | código de tienda | `activos`, `porIngresar`, `actualizado`. Solo cifras (sin gerente de tienda); lo escribe el gerente al guardar Mi horario y lo leen GZ, distrito, operaciones y planilla |
+| `sistema` | `roles`, `accesos`, `plazas` | Última publicación de roles, de accesos y de presupuesto (cuadro de Administración). Solo superusuario |
 | `calendario` | `AAAA-MM-Q1/Q2` | semanas[] (lunes de cada semana), limite, nota, por, porNombre, fecha |
 
 ## 5. Roles
@@ -56,7 +70,7 @@ La fuente de verdad de roles es `Roles_de_Ritmo_v2.xlsx` (no está en el reposit
 
 ## 6. Cómo publicar un cambio
 1. Editar en una rama, probar abriendo `panel.html` sin configuración (modo vista previa con datos de ejemplo; `?rol=Editor|Visualizar|Descargar|Superusuario`).
-2. Agregar la mejora arriba en `js/novedades.js` (id siguiente).
+2. Agregar la mejora arriba en `js/novedades.js` (id siguiente) y **subir `VERSION`** al inicio de ese archivo. Con eso, las sesiones abiertas muestran el aviso "Hay una versión nueva" y quien cierra sesión y vuelve a entrar ya recibe la versión nueva (el Service Worker pide cada archivo al servidor). Los usuarios no tienen que hacer nada más.
 3. Fusionar a `main`: GitHub Pages publica solo en 1–2 minutos.
 4. Si cambian permisos, publicar `firestore.rules` en la consola de Firebase.
 
@@ -79,9 +93,9 @@ La fuente de verdad de roles es `Roles_de_Ritmo_v2.xlsx` (no está en el reposit
 - [ ] **Salarios por colaborador** (nombre y apellidos) para actualizar los salarios. Dato sensible: se carga por Administración, nunca se sube al repositorio.
 
 ## 10. Próxima sesión (orden propuesto)
-1. Alerta: se quita a quien ya entregó; vencida solo a pendientes hasta la fecha de planilla.
-2. Administración: cuadro fijo leído de la nube con la última publicación de roles y accesos.
-3. Cumpleañeros (fecha desde la cédula, solo día y mes, como observación).
+1. (Hecho en v2.2) Alerta: se quita a quien ya entregó; vencida solo a pendientes hasta la fecha de planilla.
+2. (Hecho en v2.2) Administración: cuadro fijo leído de la nube (colección `sistema`; requiere publicar las reglas nuevas).
+3. (Hecho en v2.3) Cumpleañeros (fecha desde la cédula, solo día y mes, como observación).
 4. Link para compartir (tarjeta de vista previa, QR, mensaje de lanzamiento).
 5. Trabajo sin conexión (app instalable con sincronización).
 6. Rol RRHH: plazas presupuestadas vs reales por semana y ficha del personal.

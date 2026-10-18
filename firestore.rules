@@ -14,7 +14,14 @@ service cloud.firestore {
     function rol(r) { return active() && me().rol == r; }
     function isSuper() { return bootstrap() || rol('Superusuario'); }
     function sees(t) { return isSuper() || (active() && (me().alcance == 'Todas' || t in me().tiendas)); }
-    function owns(t) { return rol('Editor') && t in me().tiendas; }
+    // Gerente de una tienda: rol Editor o un rol creado en la app con el permiso mi_horario, limitado a sus tiendas.
+    function owns(t) { return (rol('Editor') || perm('mi_horario')) && t in me().tiendas; }
+    // Permisos por módulo: cada usuario guarda una copia de los permisos de su rol (campo permisos, lo escribe solo el superusuario).
+    // Los usuarios con rol RRHH creados antes de existir los permisos reciben los de su plantilla.
+    function perm(p) {
+      return active() && (p in me().get('permisos', [])
+        || (!('permisos' in me()) && me().rol == 'RRHH' && p in ['rrhh_ver', 'rrhh_cargar', 'rrhh_eliminar', 'reclutamiento']));
+    }
 
     // Usuarios: cada quien lee su ficha; solo el superusuario escribe.
     match /usuarios/{u} {
@@ -25,26 +32,115 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['primerLogin', 'ultimoLogin', 'claveCambiada']);
     }
 
-    // Tiendas: visibles según alcance; solo el superusuario escribe.
+    // Tiendas: visibles según alcance. Las crea el superusuario o quien tenga el permiso aperturas (Encargado de Reclutamiento);
+    // este último solo puede agregar tiendas nuevas y cambiar las plazas presupuestadas (nuevos puestos).
     match /tiendas/{t} {
       allow read: if sees(t);
-      allow write: if isSuper();
+      allow create: if isSuper() || perm('aperturas');
+      allow update: if isSuper()
+        || (perm('aperturas') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plazas', 'plazasFecha']));
+      allow delete: if isSuper();
     }
 
-    // Entregas por quincena: estado visible para todo el alcance (GZ, distrito, operaciones, planilla).
+    // Vacantes (plazas abiertas por apertura de tienda o puesto nuevo). Las crea y cancela quien tiene aperturas;
+    // quien carga altas (rrhh_cargar) solo puede marcarlas como cubiertas.
+    match /vacantes/{v} {
+      allow read: if isSuper() || perm('reclutamiento') || perm('aperturas');
+      allow create: if isSuper() || perm('aperturas');
+      allow update: if isSuper() || perm('aperturas')
+        || (perm('rrhh_cargar') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'cerrada'])
+            && request.resource.data.estado == 'cubierta');
+      allow delete: if isSuper();
+    }
+
+    // Roles definidos desde la app: solo el superusuario los ve y los administra.
+    match /roles/{r} {
+      allow read, write: if isSuper();
+    }
+
+    // GZ de una tienda: el correo que figura como correoGZ en la ficha de la tienda.
+    function gzDe(t) { return active() && exists(/databases/$(db)/documents/tiendas/$(t))
+      && get(/databases/$(db)/documents/tiendas/$(t)).data.get('correoGZ', '') == email(); }
+
+    // ----- Cierre automático de la quincena -----
+    // Pasada la fecha de entrega de planilla (campo fechaPlanilla del calendario de esa quincena, hasta las 23:59 hora de
+    // Nicaragua = 06:00 UTC del día siguiente), la planilla de la quincena queda CERRADA para la tienda.
+    // Solo el GZ de la tienda la reabre: aprobando la solicitud de reapertura, o con una apertura directa (colección aperturas).
+    function calDe(id) { return /databases/$(db)/documents/calendario/$(id.split('_')[1]); }
+    function finPago(id) {
+      let p = get(calDe(id)).data.fechaPlanilla.split('-');
+      return timestamp.date(int(p[0]), int(p[1]), int(p[2])) + duration.value(30, 'h');
+    }
+    function pagoPasado(id) {
+      return exists(calDe(id)) && get(calDe(id)).data.get('fechaPlanilla', '').matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.time > finPago(id);
+    }
+    function aperturaGZ(id) {
+      return exists(/databases/$(db)/documents/aperturas/$(id))
+        && get(/databases/$(db)/documents/aperturas/$(id)).data.fecha > finPago(id);
+    }
+    function reabierta(d, id) {
+      return d.get('reapertura', {}).get('estado', '') == 'aprobada' && d.reapertura.resueltaFecha > finPago(id);
+    }
+    // Una entrega está cerrada si el GZ aprobó las horas extra (bloqueada) o si pasó la fecha de pago sin reapertura.
+    function cerrada(d, id) {
+      return d.get('bloqueada', false) == true || (pagoPasado(id) && !aperturaGZ(id) && !reabierta(d, id));
+    }
+
+    // Apertura directa de una quincena cerrada, hecha por el GZ (sirve también si la tienda nunca entregó).
+    match /aperturas/{id} {
+      allow read: if signed() && sees(id.split('_')[0]);
+      allow create, update: if isSuper()
+        || (gzDe(request.resource.data.tienda) && request.resource.data.tienda == id.split('_')[0]
+            && request.resource.data.por == email());
+      allow delete: if isSuper();
+    }
+
+    // Entregas por quincena (id = CODIGO_AAAA-MM-Q1/Q2): estado visible para todo el alcance (GZ, distrito, operaciones, planilla).
+    //
+    // Ciclo de la planilla:
+    //  1. El gerente publica (y puede volver a publicar) mientras la entrega no esté cerrada.
+    //  2. Cuando el GZ de la tienda aprueba las horas extra, la entrega queda bloqueada (campos bloqueada y heAprobada).
+    //     Pasada la fecha de entrega de planilla, queda cerrada sola (ver cerrada).
+    //  3. Cerrada: el gerente solo puede pedir la reapertura (campo reapertura, estado 'solicitada').
+    //  4. El GZ aprueba o rechaza la solicitud (o abre la quincena directamente). Al aprobar, el gerente puede publicar de nuevo.
     match /entregas/{id} {
       allow read: if sees(resource.data.tienda);
-      allow create, update: if isSuper()
-        || (owns(request.resource.data.tienda) && request.resource.data.por == email());
+      // La tienda de la entrega debe coincidir con el id: nadie puede reservar el lugar de otra tienda.
+      allow create: if isSuper()
+        || (owns(request.resource.data.tienda) && request.resource.data.tienda == id.split('_')[0]
+            && request.resource.data.por == email()
+            && request.resource.data.fecha == request.time   // la hora de entrega la pone el servidor: no se puede adelantar
+            && (!pagoPasado(id) || aperturaGZ(id)));
+      allow update: if isSuper()
+        // Gerente: publica mientras no esté cerrada y sin tocar los campos de aprobación.
+        || (owns(resource.data.tienda) && request.resource.data.tienda == resource.data.tienda
+            && request.resource.data.por == email()
+            && request.resource.data.fecha == request.time
+            && !cerrada(resource.data, id)
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['bloqueada', 'heAprobada', 'reapertura']))
+        // Gerente: solicita la reapertura de una planilla cerrada.
+        || (owns(resource.data.tienda) && cerrada(resource.data, id)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reapertura'])
+            && request.resource.data.reapertura.estado == 'solicitada'
+            && request.resource.data.reapertura.solicitadaPor == email())
+        // GZ de la tienda: aprueba horas extra (bloquea) o responde la solicitud de reapertura.
+        || (gzDe(resource.data.tienda)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bloqueada', 'heAprobada', 'reapertura']));
       allow delete: if isSuper();
 
       // Contenido de la entrega (horario, planilla, MBK y hoja de asistencia).
       match /datos/{doc} {
+        // La tienda se toma del documento padre, no del contenido enviado.
+        function tiendaDe() { return get(/databases/$(db)/documents/entregas/$(id)).data.tienda; }
         // Lo ven la tienda, planilla, GZ, distrito y operaciones dentro de su alcance (solo lectura).
-        allow read: if isSuper()
-          || owns(resource.data.tienda)
-          || (active() && sees(resource.data.tienda));
-        allow write: if isSuper() || owns(request.resource.data.tienda);
+        allow read: if isSuper() || sees(tiendaDe());
+        // El gerente escribe el contenido de su tienda (la del id) mientras la quincena no esté cerrada.
+        allow write: if isSuper()
+          || (owns(request.resource.data.tienda) && request.resource.data.tienda == id.split('_')[0]
+              && ((!exists(/databases/$(db)/documents/entregas/$(id)) && (!pagoPasado(id) || aperturaGZ(id)))
+                  || (exists(/databases/$(db)/documents/entregas/$(id))
+                      && !cerrada(get(/databases/$(db)/documents/entregas/$(id)).data, id))));
       }
     }
 
@@ -53,10 +149,61 @@ service cloud.firestore {
       allow read, write: if isSuper() || owns(t);
     }
 
+    // ===== Recursos Humanos: registro central de personal con control cruzado tienda ↔ RRHH =====
+    // Datos personales (nombre, cédula, cargo, ingreso). Nunca se publican en GitHub.
+    // Lo ven RRHH y el superusuario (todo) y el gerente de cada tienda (solo su personal). GZ, distrito y operaciones
+    // no leen este registro: ven cifras en `resumen`.
+    // Alta: la registra RRHH (archivo) o la tienda (campo alta.origen); la otra parte la confirma (alta.confirmada).
+    // Baja: igual (campo baja). El campo `por` de alta y baja nunca cambia, para que nadie falsifique quién la registró.
+    match /personal/{p} {
+      allow read: if isSuper() || perm('rrhh_ver') || owns(resource.data.tienda);
+      allow create: if isSuper() || perm('rrhh_cargar')
+        || (owns(request.resource.data.tienda) && request.resource.data.estado == 'activo'
+            && request.resource.data.alta.origen == 'tienda' && request.resource.data.alta.por == email()
+            && request.resource.data.alta.confirmada == false && !('baja' in request.resource.data));
+      allow update: if isSuper() || perm('rrhh_cargar')
+        || (owns(resource.data.tienda) && request.resource.data.tienda == resource.data.tienda
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alta', 'baja', 'estado', 'actualizado'])
+            && request.resource.data.alta.origen == resource.data.alta.origen
+            && request.resource.data.alta.por == resource.data.alta.por
+            // Alta: la tienda solo confirma lo que registró RRHH (nunca su propia alta: eso lo confirma RRHH).
+            && (request.resource.data.alta.get('confirmada', false) == resource.data.alta.get('confirmada', false)
+                || (resource.data.alta.origen == 'rrhh' && request.resource.data.alta.get('confirmadaPor', '') == email()))
+            // Baja: quien la registró no puede cambiarse...
+            && (!('baja' in resource.data) || !('baja' in request.resource.data)
+                || request.resource.data.baja.por == resource.data.baja.por)
+            && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['baja'])
+                // ...la tienda propone una baja nueva (queda por confirmar por RRHH)...
+                || (!('baja' in resource.data) && 'baja' in request.resource.data
+                    && request.resource.data.baja.origen == 'tienda' && request.resource.data.baja.por == email()
+                    && request.resource.data.baja.confirmada == false)
+                // ...confirma o disputa una baja que registró RRHH (nunca confirma la suya)...
+                || ('baja' in resource.data && 'baja' in request.resource.data && resource.data.baja.origen == 'rrhh'
+                    && (request.resource.data.baja.get('confirmadaPor', '') == email()
+                        || request.resource.data.baja.get('disputadaPor', '') == email()))
+                // ...o retira la baja que ella misma propuso y RRHH aún no confirmó (por ejemplo, al eliminar la línea duplicada con ✕).
+                || (!('baja' in request.resource.data) && 'baja' in resource.data
+                    && resource.data.baja.origen == 'tienda' && resource.data.baja.confirmada == false)));
+      // Eliminar una línea errónea o duplicada: solo RRHH (la tienda quita la línea de su propio horario con la ✕).
+      allow delete: if isSuper() || perm('rrhh_eliminar');
+    }
+
+    // Resumen de personal de cada tienda (solo cifras: activos sin gerente de tienda). Sin nombres, cédulas ni salarios.
+    // Lo escribe el gerente de la tienda al guardar Mi horario; lo ven GZ, distrito, operaciones y planilla dentro de su alcance.
+    match /resumen/{t} {
+      allow read: if sees(t);
+      allow write: if isSuper() || owns(t);
+    }
+
     // Calendario de planilla por quincena: lo ven todos; lo publican planilla y superusuario.
     match /calendario/{q} {
       allow read: if isSuper() || active();
-      allow write: if isSuper() || rol('Descargar');
+      allow write: if isSuper() || rol('Descargar') || perm('calendario');
+    }
+
+    // Estado de Administración (última publicación de roles y de accesos): solo el superusuario.
+    match /sistema/{d} {
+      allow read, write: if isSuper();
     }
 
     // Todo lo demás, cerrado.
