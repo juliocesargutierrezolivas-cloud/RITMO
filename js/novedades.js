@@ -1,11 +1,16 @@
 // RITMO · Versión publicada. Subir este número en CADA publicación: las sesiones abiertas lo comparan con el que está en el
 // sitio y avisan al usuario que hay una versión nueva (se aplica al cerrar sesión y volver a entrar).
-export const VERSION = "2.9";
+export const VERSION = "2.10";
 
 // RITMO · Novedades del desarrollador
 // Agregar cada mejora ARRIBA (la más reciente primero). id único y creciente.
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
+  {
+    id: 33, fecha: "2026-10-18", version: "2.10", tipo: "Mejora", para: "Todos",
+    titulo: "Datos de arranque cargados una sola vez",
+    detalle: "Los archivos de roles, presupuesto y altas se cargan una vez desde Administración y alimentan a todos los usuarios: cada tienda ve su presupuesto y su personal activo desde el primer día. A partir de ahí solo se actualiza el día a día. El superusuario tiene un respaldo descargable y un reinicio con confirmación para casos de emergencia. RRHH y Reclutamiento ya no ven la quincena ni la alerta de planilla."
+  },
   {
     id: 32, fecha: "2026-10-18", version: "2.9", tipo: "Nuevo", para: "Todos",
     titulo: "Asistente de ayuda flotante",
