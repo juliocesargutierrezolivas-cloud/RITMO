@@ -7,6 +7,25 @@
 *.pdf
 *.mp4
 Respaldo*
+Roles_de_Ritmo*
+Roles de Ritmo*
+*.docx
+*.pptx
+*.zip
+# Secretos y credenciales: nunca van al repositorio
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*serviceAccount*
+*service-account*
+*adminsdk*
+*credentials*
+.firebase/
+firebase-debug.log
+# Archivos locales de la herramienta
+.claude/
 ~$*
 desktop.ini
 Thumbs.db

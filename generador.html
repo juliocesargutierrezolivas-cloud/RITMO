@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://www.gstatic.com https://*.firebaseio.com wss://*.firebaseio.com; frame-src 'self' blob: https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="same-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Generador de Horarios AMPM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -141,6 +143,16 @@ tr.sep td span{display:inline-flex;align-items:center;gap:6px}
 .nov th,.nov td{border-bottom:1px solid var(--line-2);padding:4px;text-align:center}
 .nov th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 4px}
 .nov td.who{text-align:left;padding:6px 10px;font-weight:600;white-space:nowrap}
+.swbtn{width:26px;height:26px;border-radius:6px;border:1px solid var(--line-2);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);cursor:pointer;padding:0;display:block}
+.swbtn:hover,.swbtn:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
+.pal{position:absolute;z-index:70;width:244px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px 12px;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.pal h5{margin:10px 0 5px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}.pal h5:first-child{margin-top:0}
+.pal .g{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}.pal .gt{display:grid;gap:3px}
+.pal button.c{aspect-ratio:1;border:1px solid rgba(0,0,0,.22);border-radius:3px;padding:0;cursor:pointer}
+.pal button.c:hover:not([disabled]){outline:2px solid var(--orange);outline-offset:1px}
+.pal button.c.cur{outline:2px solid var(--navy);outline-offset:1px}
+.pal button.c[disabled]{opacity:.22;cursor:not-allowed}
+.pal input[type=color]{width:100%;height:32px;border:1px solid var(--line);border-radius:6px;padding:2px;background:var(--surface)}
 .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
 .nbtn{width:100%;min-width:74px;height:32px;border-radius:6px;border:1px dashed var(--line-2);background:transparent;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
 .nbtn:hover{border-color:var(--muted)}
@@ -503,6 +515,7 @@ function normAgentes(){S.agentes.forEach(a=>{a.estudia=diasClase(a)})}
 function diasMBK12(){const v=S.cfg.mbkDias;if(Array.isArray(v))return v.map(Number);return [Number(S.cfg.mbkDia??5)]}
 let UNDO=[];const SNAP={};
 function deshacer(){const e=UNDO.pop();if(!e){toast("No hay movimientos para deshacer.");return}
+  if(semanaCerrada(e.k)){UNDO.push(e);toast("Esa semana está cerrada: solo tu GZ puede reabrirla.");return}
   S.semanas[e.k]=clone(e.prev);SNAP[e.k]=clone(e.prev);S.semana=e.k;S.tab="horario";persist("semanas/"+e.k);render();toast("Movimiento deshecho"+(UNDO.length?" · quedan "+UNDO.length:"")+".")}
 const MAX_NOCHES=2;
 const DEF_CAJAS={AM12:["Compra","Conserjería","Seguridad Interna"],PM12:["Compra","Conserjería","Seguridad Interna"],AM8:["MBK"],PM8:["MBK"],MBK12:["MBK"],ADM8:["Administración","Inducción","Conserjería","Seguridad Interna"]};
@@ -656,6 +669,7 @@ function hojaAsistencia(wk){
         return '<td class="d"><div class="pg">'+sh.map(x=>h12(x[0])+"–"+h12(x[1])).join(" + ")+'<span>'+esc([...new Set(sh.map(x=>x[2]))].join(" / "))+'</span></div><div class="fm">Firma</div></td>'}
       return '<td class="d"><div class="tag">'+(((a.estudia||[]).map(Number)).includes(di)?"Clase":"Libre")+'</div></td>'}).join("");
     return '<tr><td class="nm"><b>'+esc(a.nombreCompleto||a.nombre)+'</b><span>'+esc((a.cargos||[])[0]||"")+(a.cedula?" · Céd. "+esc(a.cedula):"")+'</span></td>'+cs+'<td class="hr">'+th+'</td></tr>'}).join("");
+  const cumObs=cumplesSemana(d0).map(x=>esc(x.a.nombreCompleto||x.a.nombre)+" ("+DN[x.di].toLowerCase()+" "+dias[x.di].getDate()+")").join(", ");
   const tienda=S.cfg.tienda||"",folio="RITMO-"+String(tienda).replace(/[^A-Za-z0-9]/g,"").slice(0,14).toUpperCase()+"-"+wk;
   const rango="lunes "+dias[0].getDate()+(dias[0].getMonth()!==dias[6].getMonth()?" de "+MESL[dias[0].getMonth()]:"")+" al domingo "+dias[6].getDate()+" de "+MESL[dias[6].getMonth()]+" "+dias[6].getFullYear();
   const hoy=new Date(),gen=String(hoy.getDate()).padStart(2,"0")+"/"+String(hoy.getMonth()+1).padStart(2,"0")+"/"+hoy.getFullYear();
@@ -675,7 +689,7 @@ function hojaAsistencia(wk){
   '<div class="ins">Lo programado viene impreso. Cada colaborador <b>firma</b> al terminar su turno. Cualquier cambio de turno se anota en Observaciones y lo firma el gerente.</div>'+
   '<table><colgroup><col style="width:15%">'+'<col>'.repeat(7)+'<col style="width:4.5%"></colgroup><thead><tr><th>Colaborador</th>'+
   dias.map((d,i)=>'<th>'+DN[i]+'<small>'+d.getDate()+" "+MES[d.getMonth()]+'</small></th>').join("")+'<th>Horas<small>prog.</small></th></tr></thead><tbody>'+filas+'</tbody></table>'+
-  '<div class="foot"><div class="obs">Observaciones:</div><div class="sg">Gerente de tienda<span>Nombre y firma</span></div><div class="sg">Gerente de zona<span>Revisado · nombre y firma</span></div><div class="sg">Planilla<span>Recibido · fecha</span></div></div>'+
+  '<div class="foot"><div class="obs">Observaciones:'+(cumObs?'<br><span style="color:#0f1e36">🎂 Cumpleaños: '+cumObs+'</span>':'')+'</div><div class="sg">Gerente de tienda<span>Nombre y firma</span></div><div class="sg">Gerente de zona<span>Revisado · nombre y firma</span></div><div class="sg">Planilla<span>Recibido · fecha</span></div></div>'+
   '<div class="gen"><span>RITMO · Horarios y Planilla · documento de control interno</span><span>Generado el '+gen+'</span></div></body></html>';
   const f=document.createElement("iframe");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";document.body.appendChild(f);
   f.srcdoc=html;f.onload=()=>{setTimeout(()=>{f.contentWindow.focus();f.contentWindow.print();setTimeout(()=>f.remove(),60000)},250)};
@@ -688,9 +702,18 @@ async function cargar(){
         if(e.origin!==location.origin)return;const d=e.data;if(!d)return;
         if(d.tipo==="ritmo-datos"){const x=d.data||{};
           S.cfg=Object.assign(clone(DEF_CFG),x.cfg||{});S.agentes=x.agentes||[];S.semanas=x.semanas||{};
-          if(!S.cfg.tienda&&d.meta&&d.meta.nombre)S.cfg.tienda=d.meta.nombre;if(d.meta&&d.meta.q)plDesdeQ(d.meta.q);res()}
+          if(!S.cfg.tienda&&d.meta&&d.meta.nombre)S.cfg.tienda=d.meta.nombre;if(d.meta&&d.meta.q)plDesdeQ(d.meta.q);if(d.meta&&d.meta.plazas!=null)S.plazas=Number(d.meta.plazas);res()}
         else if(d.tipo==="ritmo-quincena"){plDesdeQ(d.q);if(S.loaded)render()}
-        else if(d.tipo==="ritmo-estado"){S.pub={ok:!!d.publicado,fecha:d.fecha||""};if(S.loaded)render()}
+        else if(d.tipo==="ritmo-personal"){ // RRHH ↔ tienda: incorporar, vincular (sin duplicar), eliminar líneas duplicadas y aplicar bajas confirmadas
+          const nc=s=>String(s||"").toUpperCase().replace(/[^0-9A-Z]/g,""),del=new Set(d.eliminar||[]);let nb=0;
+          (d.vincular||[]).forEach(v=>{const g=S.agentes.find(x=>x.id===v.id);if(g)Object.assign(g,v.datos||{})});
+          (d.bajas||[]).forEach(b=>{const g=S.agentes.find(x=>nc(x.cedula)&&nc(x.cedula)===nc(b.cedula));if(g){g.baja=b.fecha;nb++}});
+          S.agentes=S.agentes.filter(x=>!del.has(x.id));
+          (d.crear||[]).forEach(x=>S.agentes.push(x));
+          normalizarColores();
+          persist("base/agentes");if(S.loaded)render();
+          parent.postMessage({tipo:"ritmo-personal-ok",crear:(d.crear||[]).length,vincular:(d.vincular||[]).length,eliminar:del.size,bajas:nb},location.origin)}
+        else if(d.tipo==="ritmo-estado"){S.pub={ok:!!d.publicado,fecha:d.fecha||"",bloqueada:!!d.bloqueada,cierre:d.cierre||null,q:d.q||""};S.cierres=Array.isArray(d.cierres)?d.cierres:[];if(S.loaded)render()}
         else if(d.tipo==="ritmo-guardado")setSave(d.ok?"":"err",d.ok?"Guardado en RITMO":"No se guardó: "+(d.error||"sin conexión"));
       });
       parent.postMessage({tipo:"ritmo-listo"},location.origin);
@@ -765,10 +788,64 @@ function colorLibre(excluir){const used=new Set(S.agentes.filter(a=>a!==excluir&
 function normalizarColores(){let cambio=false;const seen=new Set();
   S.agentes.forEach(a=>{if("activo" in a){if(a.activo===false&&!a.baja)a.baja="2000-01-01";delete a.activo;cambio=true}
     const c=(a.color||"").toLowerCase();if(!c||seen.has(c)){a.color=colorLibre(a);cambio=true}seen.add(a.color.toLowerCase())});return cambio}
+/* Color por nombre: sugerencia (azules para masculino, rosados para femenino). Nunca pisa un color elegido a mano. */
+const AZULES=["#0055ba","#2f4b7c","#00b8f0","#8ea9db","#003da6","#4472c4","#5b9bd5","#1f3a93","#6fa8dc","#2a7fff","#0b3d91","#9dc3e6"];
+const ROSADOS=["#ff3399","#f4b6e6","#b0007a","#ff69b4","#e91e8c","#f48fb1","#d81b60","#ff85c0","#c2185b","#f8bbd0","#ff4d94","#e75480"];
+const NOMBRES_M=new Set("JOSE JUAN CARLOS LUIS MIGUEL JORGE PEDRO MARIO OSCAR ERICK ERIC ERWIN DANIEL DAVID ALEX ALEXANDER ALEJANDRO ANTONIO FRANCISCO MANUEL RAFAEL RICARDO ROBERTO ROBERT SERGIO VICTOR WILLIAM WILMER JAVIER FERNANDO FELIX FABIAN EDGAR EDUARDO EDWIN ENRIQUE ERNESTO FRANKLIN FRANK GABRIEL GERARDO GUSTAVO HECTOR HUGO IVAN JAIRO JEFFREY JOHNNY JONATHAN JOSUE JULIO KEVIN LENIN LEONARDO LESTER LORENZO MARCOS MARLON MAURICIO MICHAEL NELSON NESTOR NOEL OMAR ORLANDO PABLO RAMON RENE REYNALDO ROLANDO RUBEN SAMUEL SANTIAGO SAUL SEBASTIAN STEVEN TOMAS URIEL WALTER XAVIER YADER ADRIAN ALBERTO ALFREDO ALVARO ANDRES ANGEL ARMANDO AUGUSTO BAYARDO BISMARCK BRAYAN BRYAN CESAR CHRISTIAN CRISTIAN DENIS DENNIS DIEGO DOMINGO ELIAS EMILIO ESTEBAN EVER EZEQUIEL FREDDY GERMAN GILBERTO GUILLERMO HAROLD HENRY HERNAN HUMBERTO ISAAC ISMAEL JAIME JESUS JIMMY JOEL JOAQUIN KENNETH LUCAS MARVIN MATEO NICOLAS OSMAN OSWALDO RAUL ROMMEL SANDRO SIMON TEODORO VICENTE WILFREDO JOSHUA LUCA".split(" "));
+const NOMBRES_F=new Set("MARIA ANA CARMEN ROSA LUZ SANDRA CLAUDIA PATRICIA LUCIA LAURA KARLA CARLA ELENA ELIZABETH GLADYS GLORIA JOSEFA JUANA JENNIFER JESSICA JOHANA JOHANNA KATHERINE KARINA LESLIE LIDIA LILIANA LISSETH LIZETH MARTHA MARITZA MARLENE MAYRA MERCEDES MIRIAM MONICA NANCY NORMA NUBIA PAOLA RAQUEL REBECA ROXANA SILVIA SOFIA SUSANA TANIA TERESA VANESSA VERONICA VICTORIA WENDY XIOMARA YADIRA YAMILETH YESENIA YOLANDA YULISSA ZULEMA ADRIANA ALEJANDRA ALEXA ALICIA AMANDA ANDREA ANGELA ANGELICA BEATRIZ BLANCA BRENDA CAROLINA CECILIA CINTHIA CYNTHIA DANIELA DAYANA DELIA DIANA DORA EDITH EVELIN FATIMA FLOR FRANCISCA GABRIELA GUADALUPE HELEN IRIS ISABEL IVETTE JACQUELINE JAZMIN JULIA JULISSA KAREN KATIA LEYLA LORENA LOURDES LUISA MARCELA MARGARITA MARIELA MARISOL MELISSA MICHELLE NATALIA NIDIA OLGA PAMELA PRISCILA ROCIO SARA SARAHI SHIRLEY SONIA STEFANY STEPHANIE TATIANA VIVIANA YAHAIRA YAMILA YARELI YASMIN".split(" "));
+function genero(nombre){const n=String(nombre||"").normalize("NFD").replace(/[̀-ͯ]/g,"").trim().toUpperCase().split(/\s+/)[0];
+  if(!n||n==="NUEVO")return null;if(NOMBRES_M.has(n))return"M";if(NOMBRES_F.has(n))return"F";
+  return n.length>2?(n.endsWith("A")?"F":n.endsWith("O")?"M":null):null}
+function colorFamilia(g,excluir){const fam=g==="M"?AZULES:ROSADOS,used=new Set(S.agentes.filter(a=>a!==excluir&&a.color).map(a=>a.color.toLowerCase()));
+  for(const c of fam)if(!used.has(c))return c;
+  for(let l=30;l<=84;l+=3){const c=hslHex(g==="M"?212:330,70,l);if(!used.has(c))return c}return null}
+function sugerirColor(a){if(!a||a.colorManual)return false;const g=genero(a.nombre);if(!g)return false;
+  const fam=g==="M"?AZULES:ROSADOS;if(a.color&&fam.includes(a.color.toLowerCase()))return false;
+  const c=colorFamilia(g,a);if(!c)return false;a.color=c;persist("base/agentes");
+  toast("Color sugerido para "+a.nombre+": "+(g==="M"?"azul":"rosado")+". Toca el cuadro de color para cambiarlo.");return true}
+/* Paleta tipo Excel: 10 colores base, 3 tonos claros y 2 oscuros, colores estándar y personalizado. Un color no se repite entre agentes. */
+const BASE10=["#1a1a1a","#7f7f7f","#0055ba","#00a3a3","#5e8c31","#ffc000","#ff8300","#c00000","#b0007a","#7030a0"];
+const ESTANDAR=["#c00000","#ff0000","#ffc000","#ffff00","#92d050","#00b050","#00b0f0","#0070c0","#002060","#7030a0"];
+function mezcla(h,t){const n=parseInt(h.slice(1),16),c=[n>>16&255,n>>8&255,n&255].map(v=>Math.round(t>=0?v+(255-v)*t:v*(1+t)));return"#"+c.map(v=>v.toString(16).padStart(2,"0")).join("")}
+function cerrarPaleta(){document.querySelectorAll(".pal").forEach(p=>p.remove())}
+function abrirPaleta(btn){cerrarPaleta();if(VISOR)return;const a=S.agentes.find(x=>x.id===btn.dataset.color);if(!a)return;
+  const usados=new Map(S.agentes.filter(x=>x!==a&&x.color).map(x=>[x.color.toLowerCase(),x.nombre]));
+  const cell=c=>{const u=usados.get(c.toLowerCase());return `<button type="button" class="c${(a.color||"").toLowerCase()===c.toLowerCase()?" cur":""}" data-pick="${c}" style="background:${c}" ${u?`disabled title="En uso: ${esc(u)}"`:`title="${c}" aria-label="Color ${c}"`}></button>`};
+  const fila=l=>`<div class="g">${l.map(cell).join("")}</div>`;
+  const filas=[BASE10,...[.8,.6,.4].map(t=>BASE10.map(c=>mezcla(c,t))),...[-.25,-.5].map(t=>BASE10.map(c=>mezcla(c,t)))];
+  const g=genero(a.nombre);
+  const p=document.createElement("div");p.className="pal";p.setAttribute("role","dialog");p.setAttribute("aria-label","Elegir color");p.dataset.ag=a.id;
+  p.innerHTML=(g?`<h5>Sugeridos · nombre ${g==="M"?"masculino":"femenino"}</h5>${fila((g==="M"?AZULES:ROSADOS).slice(0,10))}`:"")
+    +`<h5>Colores del tema</h5><div class="gt">${filas.map(fila).join("")}</div><h5>Colores estándar</h5>${fila(ESTANDAR)}<h5>Más colores</h5><input type="color" id="palCustom" value="${esc(a.color||"#888888")}" aria-label="Color personalizado">`;
+  document.body.appendChild(p);
+  const r=btn.getBoundingClientRect(),W=document.documentElement.clientWidth;
+  p.style.top=(window.scrollY+r.bottom+6)+"px";p.style.left=Math.max(8,Math.min(r.left+window.scrollX,W-p.offsetWidth-8))+"px"}
+function asignarColor(id,c){const a=S.agentes.find(x=>x.id===id);if(!a)return;
+  const u=S.agentes.find(x=>x!==a&&x.color&&x.color.toLowerCase()===c.toLowerCase());if(u){toast("Ese color ya lo usa "+u.nombre+". Elige otro.");return}
+  a.color=c.toLowerCase();a.colorManual=true;persist("base/agentes");cerrarPaleta();renderConFoco()}
+function renderConFoco(){setTimeout(()=>{const el=document.activeElement,id=el&&el.id,ss=el&&el.selectionStart,se=el&&el.selectionEnd;
+  render();if(!id)return;const n=document.getElementById(id);if(n&&n!==el){n.focus({preventScroll:true});try{if(ss!=null)n.setSelectionRange(ss,se)}catch(_){}}},0)}
+function fechaValida(v){if(v==="")return true;const m=/^(\d{4})-\d{2}-\d{2}$/.exec(v);return !!m&&+m[1]>=1900&&+m[1]<=2100}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-color]");if(b){abrirPaleta(b);return}
+  const pk=e.target.closest(".pal [data-pick]");if(pk){if(!pk.disabled)asignarColor(pk.closest(".pal").dataset.ag,pk.dataset.pick);return}
+  if(!e.target.closest(".pal"))cerrarPaleta()});
+document.addEventListener("change",e=>{if(e.target.id==="palCustom")asignarColor(e.target.closest(".pal").dataset.ag,e.target.value)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")cerrarPaleta()});
 const fmtF=x=>x?x.split("-").reverse().join("/"):"";
 function vigente(a,fecha){const f=typeof fecha==="string"?fecha:ymd(fecha);return (!a.ingreso||f>=a.ingreso)&&(!a.baja||f<=a.baja)}
 function enSemana(a,k){for(let d=0;d<7;d++)if(vigente(a,addDays(parse(k),d)))return true;return false}
-function chipStyle(a){return `background:${esc(a.color||"#8899aa")};color:${txtColor(a.color)}`}
+// Cumpleaños: solo día y mes, tomados de la cédula (000-DDMMAA-0000X). El año no se usa, no se guarda y no se muestra.
+function cumple(a){const m=String(a&&a.cedula||"").toUpperCase().replace(/[\s-]/g,"").match(/^\d{3}(\d{2})(\d{2})\d{2}\d{4}[A-Z]$/);
+  if(!m)return null;const d=+m[1],mes=+m[2];return d>=1&&d<=31&&mes>=1&&mes<=12?{d,m:mes}:null}
+function cumplesSemana(lun){const out=[];
+  for(let di=0;di<7;di++){const f=addDays(lun,di),y=f.getFullYear(),bis=(y%4===0&&y%100!==0)||y%400===0;
+    S.agentes.forEach(a=>{const c=cumple(a);if(!c||!vigente(a,f))return;
+      if((c.d===f.getDate()&&c.m===f.getMonth()+1)||(c.d===29&&c.m===2&&!bis&&f.getDate()===28&&f.getMonth()===1))out.push({a,di})})}
+  return out}
+// Quien ya tiene baja conserva su nombre en el horario, pero sin color: solo texto en negrita.
+function dadoDeBaja(a){return !!(a&&a.baja&&a.baja<ymd(new Date()))}
+function chipStyle(a){if(dadoDeBaja(a))return "background:transparent;color:var(--ink);font-weight:800;border-color:transparent;box-shadow:none";
+  return `background:${esc(a.color||"#8899aa")};color:${txtColor(a.color)}`}
 let tt;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3600)}
 const SUN='<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3 3l1.1 1.1M11.9 11.9 13 13M3 13l1.1-1.1M11.9 4.1 13 3"/></g></svg>';
 const MOON='<svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 1.5A6.8 6.8 0 1 0 14.5 12 5.8 5.8 0 0 1 10.5 1.5z" fill="currentColor"/></svg>';
@@ -821,6 +898,10 @@ function bloqueHTML(b,k,R,lun){
         <div class="meta">${f.base?`<span class="num">${hora12(p.ini)} – ${hora12(p.fin)}</span>`:`<select class="plsel num" id="ps-${f.id}" data-plrow="${f.id}" aria-label="Horario de la fila">${plParaCaja(f.caja,f.plantilla).map(([id,q])=>`<option value="${id}" ${id===f.plantilla?"selected":""}>${hora12(q.ini)} – ${hora12(q.fin)}</option>`).join("")}</select>`}<span>${p.horas} h</span><span class="tag j-${j.tipo}">${j.tipo}</span>${f.base?'<span class="tag base">Fija</span>':""}${f.refuerzo?'<span class="tag ref">Refuerzo</span>':""}${f.caja==="Inducción"&&!S.agentes.some(a=>a.nuevo&&enSemana(a,k))?'<span class="tag base">Sin nuevos ingresos</span>':""}</div></th>`;
       for(let d=0;d<7;d++)h+=celdaHTML(k,R,s,f,d);h+=`</tr>`})});
   return h+`</tbody></table></div></div>`}
+// Semana cerrada: se puede ver, navegar, imprimir y exportar, pero no editar (la parte interactiva queda inerte).
+function cerrarSemanaUI(v){
+  v.querySelectorAll(".toolbar,.board,table.nov").forEach(el=>{const x=el.tagName==="TABLE"?el.closest(".panel"):el;if(!x)return;x.setAttribute("inert","");x.style.opacity=".72"});
+  v.querySelectorAll('[data-act="auto"],[data-act="dup"],[data-act="limpiar"],[data-act="undo"]').forEach(b=>{b.disabled=true;b.title="Semana cerrada: solo tu GZ puede reabrirla"})}
 function renderHorario(){
   const v=document.getElementById("view-horario"),k=S.semana;
   if(!S.agentes.length){v.innerHTML=`<div class="panel hero-empty"><h3>Empieza por la matriz base</h3><p>Registra a los agentes de la sucursal con sus cargos por prioridad, quién estudia y quién es nuevo ingreso.</p><button class="btn primary" data-go="matriz">Llenar matriz base</button></div>`;return}
@@ -841,9 +922,12 @@ function renderHorario(){
       <button class="btn" data-act="undo" ${UNDO.length?"":"disabled"} title="Deshacer (Ctrl+Z) · hasta 3 movimientos">↶ Deshacer${UNDO.length?` (${UNDO.length})`:""}</button>
       <button class="btn ghost" data-act="limpiar">Limpiar</button>
     </div></div>`;
+  if(semanaCerrada(k))h+=`<div class="banner"><div>🔒</div><div><b>Semana cerrada.</b> Ya pasó la fecha de entrega de planilla de este período: el horario de esta semana no se puede cambiar. Solo tu GZ puede reabrirla; pídele que abra la quincena o solicita la reapertura en la pestaña <i>Entregar</i> del panel.</div></div>`;
   if(ferDias.length)h+=`<div class="banner"><div>🎉</div><div><b>${ferDias.length===1?"Feriado esta semana":"Feriados esta semana"}:</b> ${ferDias.map(x=>DIAS[x.d]+" "+fmtCorta(addDays(lun,x.d))+" · "+esc(x.f.nombre)).join(" · ")}. Quien trabaje ese día cobra <b>pago doble</b> (Arts. 66–68). Evalúa meter refuerzos.</div></div>`;
   const fin=ymd(addDays(lun,6));const altas=S.agentes.filter(a=>a.ingreso&&a.ingreso>=k&&a.ingreso<=fin),bajas=S.agentes.filter(a=>a.baja&&a.baja>=k&&a.baja<=fin);
   if(altas.length||bajas.length)h+=`<div class="banner info"><div>👥</div><div>${altas.length?`<b style="color:var(--ok)">Altas:</b> ${altas.map(a=>esc(a.nombre)+" ingresa "+fmtF(a.ingreso)).join(", ")}. Programa sus 2 turnos de 8 h en Inducción. `:""}${bajas.length?`<b style="color:var(--bad)">Bajas:</b> ${bajas.map(a=>esc(a.nombre)+" (último día "+fmtF(a.baja)+")").join(", ")}. Desde el día siguiente sale del horario; cubre sus posiciones.`:""}</div></div>`;
+  const cum=cumplesSemana(lun),cumSet=new Set(cum.map(x=>x.a.id+"|"+x.di));
+  if(cum.length)h+=`<div class="banner info"><div>🎂</div><div><b>Cumpleaños esta semana:</b> ${cum.map(x=>esc(x.a.nombre)+" · "+DIAS[x.di]+" "+fmtCorta(addDays(lun,x.di))).join(" · ")}.</div></div>`;
   const pend=Object.values(S.cfg.plantillas).filter(p=>!p.confirmado);
   {const pk=pagadaEn(k);if(pk)h+=`<div class="banner"><div>🔒</div><div><b>Las horas extra de esta semana ya se pagaron en la planilla del ${esc(etiquetaPeriodo(pk))}.</b> Si cambias el horario, revisa esa planilla.</div></div>`}
   if(pend.length)h+=`<div class="banner info"><div>⏱️</div><div>Horario de ${pend.map(p=>esc(p.nombre)).join(" y ")} <b>por confirmar</b>. Ajústalo en Configuración.</div></div>`;
@@ -857,11 +941,12 @@ function renderHorario(){
   h+=`<div class="panel"><div class="panel-h"><h3>Novedades del personal</h3><p>Toca una celda para marcar vacaciones, subsidio, extraordinario o ausencia</p></div><div class="scroll"><table class="nov"><thead><tr><th style="text-align:left;padding-left:10px">Agente</th>${DC.map((x,d)=>`<th>${x} ${fmtCorta(addDays(lun,d))}</th>`).join("")}</tr></thead><tbody>`;
   S.agentes.filter(a=>enSemana(a,k)).forEach(a=>{h+=`<tr><td class="who"><span class="swatch" style="background:${esc(a.color)}"></span>${esc(a.nombre)}</td>`;
     for(let d=0;d<7;d++){const n=s.nov[a.id+"|"+d];const cls=esClase(a,d);
+      const ck=cumSet.has(a.id+"|"+d)?'<span title="Cumpleaños" style="font-size:12px">🎂</span>':"";
       let turno=null;for(const f of s.filas){if(s.asig[f.id+"|"+d]===a.id){turno=({"Compra":"Compra","MBK":"MBK","Administración":"Admin","Inducción":"Induc","Conserjería":"Conserj","Seguridad Interna":"Segur"})[f.caja]+" "+(f.plantilla==="MBK12"?"12h":pl(f.plantilla).turno);break}}
       if(!vigente(a,addDays(lun,d)))h+=`<td><button class="nbtn" disabled>${a.baja&&ymd(addDays(lun,d))>a.baja?"BAJA":"—"}</button></td>`;
-      else if(n)h+=`<td><button class="nbtn ${n}" data-nov="${a.id}|${d}">${NOV_TXT[n]||n}</button></td>`;
-      else if(cls)h+=`<td><button class="nbtn CLASE" data-nov="${a.id}|${d}" title="Día de clase: solo turno PM">${turno?esc(turno)+" · CLASE":"CLASE"}</button></td>`;
-      else h+=`<td><button class="nbtn ${turno?"T":""}" data-nov="${a.id}|${d}" title="Marcar vacaciones o subsidio">${turno?esc(turno):"—"}</button></td>`}
+      else if(n)h+=`<td>${ck}<button class="nbtn ${n}" data-nov="${a.id}|${d}">${NOV_TXT[n]||n}</button></td>`;
+      else if(cls)h+=`<td>${ck}<button class="nbtn CLASE" data-nov="${a.id}|${d}" title="Día de clase: solo turno PM">${turno?esc(turno)+" · CLASE":"CLASE"}</button></td>`;
+      else h+=`<td>${ck}<button class="nbtn ${turno?"T":""}" data-nov="${a.id}|${d}" title="Marcar vacaciones o subsidio">${turno?esc(turno):"—"}</button></td>`}
     h+=`</tr>`});
   h+=`</tbody></table></div></div></div>`;
   if(!S.hideSide){
@@ -881,6 +966,7 @@ function renderHorario(){
     ${R.alertas.length?`<ul class="alerts">${R.alertas.map(a=>`<li><span class="sev ${a.sev}"></span><div><b>${a.ag?esc(a.ag.nombre):"Cobertura"}</b> · ${esc(a.msg)}<div class="where">${esc(a.where)}</div></div></li>`).join("")}</ul>`:'<div class="empty">Sin conflictos de reglas en esta semana.</div>'}</div></aside>`}
   h+=`</div>`;
   v.innerHTML=h;
+  if(semanaCerrada(k))cerrarSemanaUI(v);
   const af=document.getElementById("addRowForm");if(af)af.addEventListener("submit",e=>{e.preventDefault();
     const caja=S.addForm.caja,pid=document.getElementById("addPl").value;
     const nf={id:"r"+Date.now().toString(36),caja,plantilla:pid,refuerzo:caja==="Compra"};if(caja==="Administración")nf.dias=[0,1,2,3,4,5];s.filas.push(nf);S.addForm=null;tocarSemana(k);render();toast("Fila agregada: "+CAJA_TXT[caja]+" "+pl(pid).nombre)})}
@@ -1088,7 +1174,7 @@ function imagenHorario(){
         g.fillStyle="#0f1e36";g.font=F(700,13);g.fillText(CAJA_TXT[f.caja]+(f.refuerzo?" (refuerzo)":""),P+14,y+15);
         g.fillStyle="#56678a";g.font=F(500,11);g.fillText(hora12(p.ini)+" a "+hora12(p.fin)+" · "+p.horas+" h",P+14,y+30);
         for(let d=0;d<7;d++){const x=P+LW+d*DW;if(R.fer[d]){g.fillStyle="#fff0dc";g.fillRect(x,y,DW,RH)}const a=agente(s.asig[f.id+"|"+d]);
-          if(a){rr(g,x+6,y+6,DW-12,RH-12,7);g.fillStyle=a.color;g.fill();g.fillStyle=txtColor(a.color);let z=12.5;g.font=F(700,z);while(g.measureText(a.nombre).width>DW-20&&z>8){z-=.5;g.font=F(700,z)}
+          if(a){const bj=dadoDeBaja(a);rr(g,x+6,y+6,DW-12,RH-12,7);if(!bj){g.fillStyle=a.color;g.fill()}g.fillStyle=bj?"#0f1e36":txtColor(a.color);let z=12.5;g.font=F(bj?800:700,z);while(g.measureText(a.nombre).width>DW-20&&z>8){z-=.5;g.font=F(bj?800:700,z)}
             g.textAlign="center";g.fillText(a.nombre,x+DW/2,y+RH/2+1);g.textAlign="left"}}
         g.strokeStyle="#e6ebf3";g.lineWidth=1;g.beginPath();g.moveTo(P,y+RH-.5);g.lineTo(W-P,y+RH-.5);g.stroke();y+=RH})});
     g.strokeStyle="#d6ddea";g.lineWidth=1;for(let d=0;d<=7;d++){const x=P+LW+d*DW+.5;g.beginPath();g.moveTo(x,top);g.lineTo(x,y);g.stroke()}
@@ -1130,7 +1216,7 @@ function renderMatriz(){
   let sepPuesto=false;
   orden.forEach(({a,i})=>{const deBaja=a.baja&&a.baja<hoyM;if(deBaja&&!sepPuesto){sepPuesto=true;h+=`<tr><td colspan="11" style="padding:10px 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)">Dados de baja · se conservan para el historial</td></tr>`}
     h+=`<tr style="${deBaja?"opacity:.6":""}">
-    <td><span class="swatch" style="width:24px;height:24px;margin:0;border-radius:6px;background:${esc(a.color)}" title="Color asignado automáticamente"></span></td>
+    <td><button type="button" class="swbtn" data-color="${a.id}" style="background:${esc(a.color)}" title="Cambiar color" aria-label="Cambiar el color de ${esc(a.nombre)}"></button></td>
     <td><input class="in" id="n-${a.id}" data-f="nombre" data-i="${i}" value="${esc(a.nombre)}" aria-label="Nombre"></td>
     ${[0,1,2].map(j=>`<td><select class="in" id="g${j}-${a.id}" data-f="cargo${j}" data-i="${i}" aria-label="Cargo ${j+1}">${opt(a.cargos[j]||"",CARGOS,j?"—":"Elegir…")}</select></td>`).join("")}
     <td><div class="dayck" role="group" aria-label="Días de clase de ${esc(a.nombre)}">${["L","M","X","J","V","S","D"].map((x,d)=>`<label title="${DIAS[d]}"><input type="checkbox" id="e${d}-${a.id}" data-f="estudia" data-i="${i}" data-d="${d}" ${esClase(a,d)?"checked":""}><span>${x}</span></label>`).join("")}</div></td>
@@ -1140,7 +1226,7 @@ function renderMatriz(){
     <td><input class="in num" type="number" min="0" step="100" id="s-${a.id}" data-f="salario" data-i="${i}" value="${a.salario??""}" placeholder="Opcional" aria-label="Salario mensual"></td>
     <td>${S.confirmDel===a.id?`<span class="inline-confirm">¿Eliminar? <button class="btn danger" data-delag="${a.id}">Sí</button><button class="btn" data-act="nodel">No</button></span>`:`<button class="delrow" data-askdel="${a.id}" aria-label="Eliminar ${esc(a.nombre)}">×</button>`}</td></tr>`});
   if(!S.agentes.length)h+=`<tr><td colspan="11" class="empty">Aún no hay agentes. Agrega el primero.</td></tr>`;
-  h+=`</tbody></table></div><div class="legend"><span><b>Compra</b> = Agente SAC</span><span><b>MBK</b> = Agente SAC MBK</span><span><b>Administración</b> = Gerente de tienda o Gerente en entrenamiento</span><span><b>Inducción</b> = Nuevo ingreso</span><span><b>Conserjería</b> = Conserje</span><span><b>Seguridad Interna</b> = Seguridad Interna</span><span>Clase: ese día solo puede trabajar turno PM, y la noche anterior no puede ir de noche para no llegar desvelado. Se pueden marcar varios días.</span><span>Colores asignados automáticamente, nunca se repiten.</span><span><b>Baja</b> = último día laborado: desde el día siguiente sale del horario y sus turnos se marcan para cubrir. Para un error de captura usa ×.</span></div></div>
+  h+=`</tbody></table></div><div class="legend"><span><b>Compra</b> = Agente SAC</span><span><b>MBK</b> = Agente SAC MBK</span><span><b>Administración</b> = Gerente de tienda o Gerente en entrenamiento</span><span><b>Inducción</b> = Nuevo ingreso</span><span><b>Conserjería</b> = Conserje</span><span><b>Seguridad Interna</b> = Seguridad Interna</span><span>Clase: ese día solo puede trabajar turno PM, y la noche anterior no puede ir de noche para no llegar desvelado. Se pueden marcar varios días.</span><span>Color: se asigna solo (azul o rosado si el nombre lo permite) y nunca se repite. Toca el cuadro de color para elegir otro de la paleta.</span><span><b>Baja</b> = último día laborado: desde el día siguiente sale del horario y sus turnos se marcan para cubrir. Para un error de captura usa ×.</span></div></div>
   <p class="note">La matriz usa solo el primer nombre. El nombre completo, la cédula y el salario se registran en el módulo Planilla.</p>`;
   v.innerHTML=h}
 function editAgente(el){
@@ -1264,7 +1350,13 @@ document.addEventListener("input",e=>{const el=e.target;if(el.id==="gPres"){pres
   if(el.dataset.i!==undefined&&el.dataset.f==="salario"){editAgente(el);return}
   if(el.dataset.fi!==undefined&&el.dataset.f==="nombre"){S.cfg.fiestas[Number(el.dataset.fi)].nombre=el.value;persist("base/config")}});
 document.addEventListener("change",e=>{const el=e.target;
-  if(el.dataset.i!==undefined){editAgente(el);if(el.dataset.f!=="nombre"&&el.dataset.f!=="salario")render();return}
+  if(el.dataset.i!==undefined){const f=el.dataset.f;
+    // Al teclear el año el navegador emite fechas parciales (0002, 0020…): se ignoran y no se redibuja, así el campo no se cierra.
+    if((f==="ingreso"||f==="baja")&&!fechaValida(el.value))return;
+    editAgente(el);
+    if(f==="nombre"){if(sugerirColor(S.agentes[Number(el.dataset.i)]))renderConFoco();return}
+    if(f==="salario"||f==="ingreso")return;
+    renderConFoco();return}
   if(el.dataset.plc){const [id,c]=el.dataset.plc.split("|"),p=S.cfg.plantillas[id];const cur=new Set(cajasDe(id));if(el.checked)cur.add(c);else cur.delete(c);
     if(!cur.size){el.checked=true;toast("El horario debe servir al menos para un puesto.");return}p.cajas=[...cur];persist("base/config");return}
   if(el.id==="pres"){S.cfg.presupuesto=el.value===""?null:Math.max(0,Number(el.value));persist("base/config");render();return}
@@ -1324,9 +1416,18 @@ function comentarioAuto(p){const c=[];if(p.ferFechas.length)c.push(textoFeriados
   const cf=plCfg(),pc=x=>Number(x)>=100?"":" ("+(Number(x)||0)+"% empresa)";
   if(p.vac)c.push("Vacaciones "+p.vac+" día"+(p.vac>1?"s":"")+pc(cf.pctVac));if(p.sub)c.push("Subsidio "+p.sub+" día"+(p.sub>1?"s":"")+pc(cf.pctSub));if(p.ext)c.push("Extraordinario "+p.ext+" día"+(p.ext>1?"s":"")+pc(cf.pctExt));
   if(p.a8||p.a12){const sp=p.septimo||0,d=(p.a8||0)+(p.a12||0)*1.5+sp;c.push([p.a8?"Ausencia 8 h ×"+p.a8:"",p.a12?"Ausencia 12 h ×"+p.a12:""].filter(Boolean).join(", ")+(sp?" + séptimo día"+(sp>1?" ×"+sp:""):"")+" (descuento "+d+" día"+(d===1?"":"s")+")")}
-  if(p.altaEn)c.push("Ingreso "+fmtDMA(p.altaEn));if(p.bajaEn)c.push("Baja "+fmtDMA(p.bajaEn));return c}
+  if(p.difAqui&&p.ag)c.push("Ingreso "+fmtDMA(p.ag.ingreso)+" · se paga en la siguiente quincena");
+  else if(p.difPrev&&p.ag)c.push("Ingreso "+fmtDMA(p.ag.ingreso)+" · pago desde su ingreso ("+p.dias+" días)");
+  else if(p.altaEn)c.push("Ingreso "+fmtDMA(p.altaEn));
+  if(p.bajaEn)c.push("Baja "+fmtDMA(p.bajaEn));return c}
+// Pago diferido: quien ingresa en la semana de lunes a domingo que contiene el corte de la quincena (el 15 o el último día del mes)
+// no se paga en esa quincena sino en la siguiente, con los días reales desde su ingreso (sin el tope de 15).
+// Ej.: ingreso el 12 de octubre → semana 12–18 → se paga en la 2da de octubre con 20 días.
+function semanaCorte(fin){const l=lunes(parse(fin));return [ymd(l),ymd(addDays(l,6))]}
+function ingresaEnSemanaCorte(a,finPeriodo){if(!a.ingreso)return false;const [d,h]=semanaCorte(finPeriodo);return a.ingreso>=d&&a.ingreso<=h}
 function calcPlanilla(ini,fin){
   const cfg=plCfg(),dias=diasEntre(ini,fin),hf=Number(cfg.horasFeriado)||0,dq=Number(cfg.diasQuincena)||15,cacheE={},faltan=[],semanas=new Set();
+  const finPrev=ymd(addDays(parse(ini),-1)); // fin de la quincena anterior
   const per={};
   const key0=ini+"_"+fin,selHE=semanasHE(key0,fin),heSem={};selHE.forEach(k=>{const t=totExtrasSem(k);for(const id in t.por){(heSem[id]=heSem[id]||[]).push([k,t.por[id]])}});
   const agentes=S.agentes.filter(a=>dias.some(d=>vigente(a,d))||heSem[a.id]);
@@ -1342,13 +1443,18 @@ function calcPlanilla(ini,fin){
       const n=s.nov[a.id+"|"+d];if(!vigente(a,dt))return;if(n==="VAC")p.vac++;if(n==="SUB")p.sub++;if(n==="EXT")p.ext++;if(n==="A8")p.a8++;if(n==="A12")p.a12++;if(n==="A8"||n==="A12")(p.ausSem=p.ausSem||new Set()).add(k)})});
   agentes.forEach(a=>{const l=heSem[a.id]||[];per[a.id].extra=l.reduce((x,y)=>x+y[1],0);per[a.id].heSemanas=l.map(y=>y[0])});
   const key=ini+"_"+fin,notas=S.cfg.plNotas[key]||{};
-  const filas=ordenPlanilla(agentes).map(a=>{const p=per[a.id];const base=Math.min(dq,p.diasVig);
+  const filas=ordenPlanilla(agentes).map(a=>{const p=per[a.id];let base=Math.min(dq,p.diasVig);
+    p.difAqui=!!a.ingreso&&a.ingreso<=fin&&ingresaEnSemanaCorte(a,fin);   // ingresó en la semana de corte: se paga en la siguiente quincena
+    p.difPrev=ingresaEnSemanaCorte(a,finPrev);                             // venía diferida de la quincena anterior: se paga desde su ingreso
+    if(p.difPrev&&a.ingreso&&a.ingreso<=fin){const hasta=a.baja&&a.baja<fin?a.baja:fin;base=a.ingreso<=hasta?diasEntre(a.ingreso,hasta).length:0}
     p.parciales=[[p.vac,cfg.pctVac,"vacaciones"],[p.sub,cfg.pctSub,"subsidio"],[p.ext,cfg.pctExt,"extraordinario"]].filter(([n,pc])=>n>0&&Number(pc)<100).map(([n,pc,t])=>({n,pct:Math.max(0,Number(pc)||0),t}));
     p.septimo=0;if(cfg.septimoAus&&p.ausSem)p.ausSem.forEach(k=>{const s=S.semanas[k];let d0=null;for(let d=0;d<7;d++){const n=s.nov[a.id+"|"+d];if(n==="A8"||n==="A12"){d0=d;break}}
       if(d0!==null){const f=ymd(addDays(parse(k),d0));if(f>=ini&&f<=fin)p.septimo++}});
     p.ausDias=(p.a8||0)+(p.a12||0)*1.5+p.septimo;const red=p.parciales.reduce((x,y)=>x+y.n,0);p.dias=Math.max(0,base-red-p.ausDias);
     p.auto=comentarioAuto(p);p.nota=notas[a.id]||"";p.coment=[...p.auto,...(p.nota?[p.nota]:[])].join("/");p.salario=Number(a.salario)||0;
-    p.completo=p.dias>=dq&&!p.parciales.length;p.quinc=p.completo?p.salario/2:p.salario/30*p.dias+p.parciales.reduce((x,y)=>x+p.salario/30*y.n*y.pct/100,0);return p});
+    p.completo=!p.difAqui&&!p.difPrev&&p.dias>=dq&&!p.parciales.length;p.quinc=p.completo?p.salario/2:p.salario/30*p.dias+p.parciales.reduce((x,y)=>x+p.salario/30*y.n*y.pct/100,0);
+    if(p.difAqui){p.dias=0;p.quinc=0;p.completo=false} // no se paga en esta quincena
+    p.auto=comentarioAuto(p);p.coment=[...p.auto,...(p.nota?[p.nota]:[])].join("/");return p});
   return{ini,fin,dias,filas,faltan,semanas:[...semanas].sort(),key,dq,selHE}}
 function semanasPeriodo(ini,fin){const out=[];let k=ymd(lunes(parse(ini)));while(k<=fin){if(semGuardada(k))out.push(k);k=wkShift(k,1)}return out}
 function resumenSemanaPl(k){const s=semGuardada(k),lun=parse(k),hf=Number(plCfg().horasFeriado)||0,E=extrasSemana(k),res=[];
@@ -1469,18 +1575,45 @@ async function descargarPlanilla(){
   toast("Planilla descargada"+(C.faltan.length?" · ojo: "+C.faltan.length+" días del período sin horario guardado":"")+".")}
 
 /* ---------- Vista Planilla ---------- */
+// Planilla bloqueada: el GZ aprobó las horas extra de la quincena publicada. Solo afecta al período que se está viendo en Planilla.
+// Cierres que manda el panel: quincenas bloqueadas (el GZ aprobó las horas extra) o cerradas (pasó la fecha de entrega de planilla).
+// pago:true = ya pasó la fecha de entrega: además de la planilla, se cierran los horarios (en pantalla; el servidor impone el cierre de la planilla).
+function planillaBloqueada(){
+  const P=S.pl;if(!RITMO||!P)return false;
+  if(S.pub&&S.pub.bloqueada&&S.pub.q&&`${P.y}-${String(P.m+1).padStart(2,"0")}-Q${P.q}`===S.pub.q)return true;
+  return (S.cierres||[]).some(c=>c.ini===P.ini&&c.fin===P.fin)}
+function diaCerrado(f){return (S.cierres||[]).some(c=>c.pago&&f>=c.ini&&f<=c.fin)}
+// Una semana queda cerrada si todos sus días están en quincenas cerradas, o si es una de las semanas pagadas (horas extra) en una planilla cerrada.
+function semanaCerrada(k){
+  if(!RITMO||!(S.cierres||[]).length)return false;
+  const lun=parse(k);let todos=true;for(let d=0;d<7;d++)if(!diaCerrado(ymd(addDays(lun,d)))){todos=false;break}
+  if(todos)return true;
+  return S.cierres.some(c=>c.pago&&Array.isArray(S.cfg.plHE&&S.cfg.plHE[c.ini+"_"+c.fin])&&S.cfg.plHE[c.ini+"_"+c.fin].includes(k))}
+function bannerBloqueo(){
+  if(!planillaBloqueada())return "";
+  const P=S.pl,cerrada=(S.cierres||[]).some(c=>c.pago&&P&&c.ini===P.ini&&c.fin===P.fin)||!!(S.pub&&S.pub.cierre==="cerrada"&&P&&`${P.y}-${String(P.m+1).padStart(2,"0")}-Q${P.q}`===S.pub.q);
+  return cerrada?`<div class="banner"><div>🔒</div><div><b>Esta quincena está cerrada.</b> Ya pasó la fecha de entrega de planilla: la planilla y los horarios de este período no se pueden cambiar. Solo tu GZ puede reabrirla; pídele que abra la quincena o solicita la reapertura en la pestaña <i>Entregar</i> del panel.</div></div>`
+    :`<div class="banner"><div>🔒</div><div><b>Esta quincena está bloqueada.</b> Tu GZ aprobó las horas extra, así que la planilla de este período ya no se puede cambiar ni publicar. Si necesitas corregir algo, solicita la reapertura en la pestaña <i>Entregar</i> del panel.</div></div>`}
+// Personal activo frente a las plazas presupuestadas de la tienda (sin contar gerente de tienda). El presupuesto lo carga el superusuario.
+function bannerPersonal(){
+  const p=S.plazas!=null?S.plazas:(S.visor&&S.visor.plazas!=null?Number(S.visor.plazas):null);if(p==null||isNaN(p))return"";
+  const hoy=ymd(new Date());let act=0,por=0;
+  S.agentes.forEach(a=>{if(esGerenteTienda(a))return;if(a.ingreso&&a.ingreso>hoy){por++;return}if(a.baja&&a.baja<hoy)return;act++});
+  const d=act-p,txt=d<0?`<b style="color:var(--bad)">Faltan ${-d}</b>`:d>0?`<b style="color:var(--warn)">Sobran ${d}</b>`:`<b style="color:var(--ok)">Plazas completas</b>`;
+  return `<div class="banner info"><div>👥</div><div><b>Personal activo: ${act} de ${p} plazas presupuestadas</b> (sin contar gerente de tienda) · ${txt}.${por?` ${por} por ingresar.`:""}</div></div>`}
 function renderPlanilla(){
   const v=document.getElementById("view-planilla");if(!S.pl)S.pl=plDefault();const P=S.pl,cfg=plCfg();
   if(!S.agentes.length){v.innerHTML=`<div class="panel hero-empty"><h3>Primero la matriz base</h3><p>La planilla se alimenta de los horarios generados. Registra al personal y genera al menos una semana.</p><button class="btn primary" data-go="matriz">Ir a la matriz base</button></div>`;return}
   const C=calcPlanilla(P.ini,P.fin),T=tituloQuincena(P),money2=n=>"C$ "+(Math.round(n*100)/100).toLocaleString("es-NI",{minimumFractionDigits:2,maximumFractionDigits:2});
   const falt=C.filas.filter(p=>!p.ag.cedula||!p.ag.nombreCompleto||!p.salario||!p.ag.ingreso);
   const tot=C.filas.reduce((o,p)=>({q:o.q+p.quinc,he:o.he+p.extra,f:o.f+p.ferH}),{q:0,he:0,f:0});
-  let h=`<div class="weekbar"><div class="weeknav"><h2>Planilla</h2></div><div class="actions">${RITMO?(S.pub&&S.pub.ok?`<button class="btn pubok" disabled title="Sin cambios desde la última publicación">✓ Planilla publicada${S.pub.fecha?" · "+esc(S.pub.fecha):""}</button>`:`<button class="btn primary" data-act="publicar" title="Entrega la quincena a RITMO">📤 Publicar planilla</button>`):""}<button class="btn navy" data-act="plxlsx">Descargar planilla Excel</button></div></div>
+  let h=`<div class="weekbar"><div class="weeknav"><h2>Planilla</h2></div><div class="actions">${RITMO?(planillaBloqueada()?`<button class="btn pubok" disabled title="Las horas extra ya fueron aprobadas por GZ">🔒 Planilla bloqueada</button>`:S.pub&&S.pub.ok?`<button class="btn pubok" disabled title="Sin cambios desde la última publicación">✓ Planilla publicada${S.pub.fecha?" · "+esc(S.pub.fecha):""}</button>`:`<button class="btn primary" data-act="publicar" title="Entrega la quincena a RITMO">📤 Publicar planilla</button>`):""}<button class="btn navy" data-act="plxlsx">Descargar planilla Excel</button></div></div>
   <div class="toolbar plbar">
     <label>Mes <input class="in" type="month" id="plMes" value="${P.y}-${pad(P.m+1)}"></label>
     <label>Quincena <select class="in" id="plQ"><option value="1" ${P.q===1?"selected":""}>1ra (1–15)</option><option value="2" ${P.q===2?"selected":""}>2da (16–fin)</option><option value="0" ${P.q===0?"selected":""}>Personalizada</option></select></label>
     <label>Del <input class="in" type="date" id="plIni" value="${P.ini}"></label><label>Al <input class="in" type="date" id="plFin" value="${P.fin}"></label>
     <span class="note" style="margin:0">${esc(T.tit)} · ${esc(T.per)}</span></div>`;
+  h+=bannerBloqueo()+bannerPersonal();
   if(C.faltan.length)h+=`<div class="banner"><div>⚠️</div><div><b>${C.faltan.length} día${C.faltan.length>1?"s":""} del período sin horario guardado</b> (${C.faltan.map(d=>fmtCorta(d)).join(", ")}). Las horas extra y feriados de esos días no se cuentan. Genera o guarda esas semanas en Horario.</div></div>`;
   if(falt.length)h+=`<div class="banner info"><div>🪪</div><div>Completa los datos de planilla de: <b>${falt.map(p=>esc(p.ag.nombre)).join(", ")}</b> (cédula, nombre y apellido, ingreso o salario) en la tabla de abajo.</div></div>`;
   h+=`<div class="panel"><div class="panel-h"><h3>${esc((S.cfg.tienda||"Tienda AMPM").toUpperCase())}</h3><p>Semanas tomadas del historial: ${C.semanas.length?C.semanas.map(fmtRango).join(" · "):"ninguna"}</p></div>
@@ -1489,7 +1622,7 @@ function renderPlanilla(){
   ${C.filas.map((p,i)=>{const a=p.ag;return `<tr><td class="num">${i+1}</td><td class="num">${a.cedula?esc(a.cedula):'<span class="miss">falta</span>'}</td><td><span class="swatch" style="background:${esc(a.color)}"></span>${esc(a.nombreCompleto||a.nombre)}</td><td>${esc(cargoPlanilla(a))}</td>
     <td class="num">${a.ingreso?fmtDMA(a.ingreso):'<span class="miss">falta</span>'}</td><td class="num">${p.dias}</td><td class="num">${p.salario?money2(p.salario):'<span class="miss">falta</span>'}</td><td class="num">${money2(p.quinc)}</td>
     <td class="num ${p.extra?"hl":""}">${p.extra}</td><td class="num ${p.ferH?"hl":""}">${p.ferH}</td><td class="cmt">${esc(p.auto.join("/"))||"—"}</td>
-    <td><input class="in" id="pln-${a.id}" data-plnota="${a.id}" value="${esc(p.nota)}" placeholder="Ej. Cubriendo otra tienda"></td></tr>`}).join("")}
+    <td><input class="in" id="pln-${a.id}" data-plnota="${a.id}" value="${esc(p.nota)}" placeholder="Ej. Cubriendo otra tienda" ${planillaBloqueada()?"disabled":""}></td></tr>`}).join("")}
   </tbody></table></div>
   <div class="legend"><span>H.E = horas por encima de ${Number(S.cfg.tope)||48} h de las semanas seleccionadas para pago.</span><span>Feriado = ${cfg.horasFeriado} h por cada feriado trabajado.</span><span>Días = ${cfg.diasQuincena} por quincena, menos los días antes del ingreso o después de la baja.</span><span>Quincenal = salario ÷ 2; si hay días con pago parcial: salario ÷ 30 × días + salario ÷ 30 × días de novedad × % que paga la empresa.</span><span>Novedades: vacaciones ${cfg.pctVac}% · subsidio ${cfg.pctSub}% · extraordinario ${cfg.pctExt}% a cargo de la empresa. Ausencia 8 h descuenta 1 día y ausencia 12 h 1.5 días${cfg.septimoAus?", más el séptimo día de esa semana":""}.</span><span>Feriado: también lo gana quien amanece en el feriado con un turno nocturno iniciado la víspera.</span></div></div>`;
   // semanas de horas extra a pagar
@@ -1499,7 +1632,7 @@ function renderPlanilla(){
    h+=`<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Semanas de horas extra a pagar</h3><p>${guard?"Selección guardada":"Sugerido: semanas cumplidas con horas extra que aún no se pagan"} · ${C.selHE.length} semana${C.selHE.length===1?"":"s"} · ${totSel} h</p></div>
    ${lista.length?`<div class="scroll"><table class="hetable"><thead><tr><th></th><th>Semana</th><th>Estado</th><th>Horas extra</th><th>Detalle por persona</th></tr></thead><tbody>${lista.map(k=>{const t=totExtrasSem(k),pg=pagadaEn(k,key),fin=ymd(addDays(parse(k),6)),abierta=fin>ymd(new Date());
      const est=pg?`<span class="pill" style="background:var(--ok-bg);color:var(--ok)">Pagada en ${esc(etiquetaPeriodo(pg))}</span>`:sel.has(k)?'<span class="pill x">Se paga en esta planilla</span>':abierta?'<span class="pill">Semana en curso</span>':'<span class="pill" style="background:var(--bad-bg);color:var(--bad)">Pendiente de pago</span>';
-     return `<tr class="${pg?"paid":""}"><td><input type="checkbox" id="he-${k}" data-hesem="${k}" ${sel.has(k)?"checked":""} ${pg?"disabled":""} aria-label="Pagar horas extra de la semana ${fmtRango(k)}"></td><td><b>${fmtRango(k)}</b></td><td>${est}</td><td class="num"><b>${t.tot}</b> h</td>
+     return `<tr class="${pg?"paid":""}"><td><input type="checkbox" id="he-${k}" data-hesem="${k}" ${sel.has(k)?"checked":""} ${pg||planillaBloqueada()?"disabled":""} aria-label="Pagar horas extra de la semana ${fmtRango(k)}"></td><td><b>${fmtRango(k)}</b></td><td>${est}</td><td class="num"><b>${t.tot}</b> h</td>
        <td>${Object.entries(t.por).map(([id,hh])=>{const a=agente(id);return a?`<span class="hechip"><span class="swatch" style="background:${esc(a.color)}"></span>${esc(a.nombre)} ${hh} h</span>`:""}).join("")||"—"}</td></tr>`}).join("")}</tbody></table></div>`:'<div class="empty">No hay semanas guardadas con horas extra hasta esta fecha.</div>'}
    <div class="legend"><span>Marca las semanas ya cumplidas cuyas horas extra pagas en esta planilla. Antes de pagar, ajusta en Horario lo que realmente se trabajó: el pago sale del horario guardado, no de lo programado.</span><span>Una semana pagada en otra planilla queda bloqueada para no pagarla dos veces; desmárcala allá si fue un error.</span></div></div>`}
   // detalle semanal
@@ -1533,8 +1666,9 @@ document.addEventListener("change",e=>{const el=e.target;if(S.tab!=="planilla"&&
   if(el.dataset.plpct){plCfg()[el.dataset.plpct]=Math.min(100,Math.max(0,Number(el.value)||0));persist("base/config");render();return}
   if(el.id==="plDQ"){plCfg().diasQuincena=Math.max(1,Number(el.value)||15);persist("base/config");render();return}
   if(el.dataset.pf){const a=S.agentes[Number(el.dataset.pi)],f=el.dataset.pf;if(!a)return;
+    if(f==="ingreso"&&!fechaValida(el.value))return;
     a[f]=f==="salario"?(el.value===""?null:Math.max(0,Number(el.value))):f==="ingreso"?(el.value||null):el.value.trim();if(f==="cedula")a.cedula=a.cedula.toUpperCase();
-    persist("base/agentes");render();return}
+    persist("base/agentes");renderConFoco();return}
   if(el.dataset.hesem){const key=S.pl.ini+"_"+S.pl.fin,cur=new Set(semanasHE(key,S.pl.fin));if(el.checked)cur.add(el.dataset.hesem);else cur.delete(el.dataset.hesem);
     S.cfg.plHE[key]=[...cur].sort();persist("base/config");render();toast(el.checked?"Semana agregada al pago de horas extra.":"Semana quitada del pago de horas extra.");return}
   if(el.dataset.plnota){const key=S.pl.ini+"_"+S.pl.fin;plCfg();const n=S.cfg.plNotas[key]=S.cfg.plNotas[key]||{};if(el.value.trim())n[el.dataset.plnota]=el.value.trim();else delete n[el.dataset.plnota];persist("base/config");render();return}
