@@ -182,11 +182,20 @@ button.drop{width:100%;background:#fff;font:inherit}
 @media (max-width:860px){.opt{grid-template-columns:1fr}}
 [hidden]{display:none!important}
 #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:20;color:var(--muted)}
+#gate .gt{display:flex;flex-direction:column;align-items:center;gap:14px;font-size:14px}
+#gate .pulse{height:54px;gap:8px}#gate .pulse i{width:11px;border-radius:5px;animation:barras 1.1s ease-in-out infinite}
+#gate .pulse i:nth-child(2){animation-delay:.15s}#gate .pulse i:nth-child(3){animation-delay:.3s}#gate .pulse i:nth-child(4){animation-delay:.45s}
+#gate .rt{font-weight:700;letter-spacing:.2em;font-size:26px;color:var(--navy)}
+@keyframes barras{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
+#gate .pulse i{transform-origin:bottom}
+@media (prefers-reduced-motion:reduce){#gate .pulse i{animation:none}}
+.manual-t{font:600 12.5px "IBM Plex Sans",sans-serif;background:none;border:0;color:var(--blue);cursor:pointer;text-decoration:underline}
 @media (max-width:860px){.form{grid-template-columns:1fr}.nv{grid-template-columns:1fr;gap:4px}.cd{margin-left:0;text-align:left}.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
 </style>
+<link rel="stylesheet" href="css/ritmo-a11y.css"><script src="js/a11y.js"></script>
 </head>
 <body>
-<div id="gate">Cargando RITMO…</div>
+<div id="gate" role="status" aria-live="polite"><div class="gt"><span class="pulse" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="rt">RITMO</span><span>Cargando…</span></div></div>
 <header><div class="hin">
   <div class="ritmo"><span class="pulse" aria-hidden="true"><i></i><i></i><i></i><i></i></span>RITMO</div>
   <img class="logo" src="assets/logo-ampm.png" alt="ampm">
@@ -271,8 +280,8 @@ button.drop{width:100%;background:#fff;font:inherit}
           </div>
           <div class="msg" id="miaMsg" style="margin-top:12px"></div>
         </div></div>
-      <div class="card"><div class="ch"><h3>Cómo se entrega</h3></div>
-        <div class="pad"><ol class="steps">
+      <div class="card"><div class="ch"><h3>Cómo se entrega</h3><button class="manual-t" id="manualT" aria-expanded="true" aria-controls="manualB">Ocultar manual</button></div>
+        <div class="pad" id="manualB"><ol class="steps">
           <li>Trabaja tu horario en la pestaña <b>Mi horario</b>; se guarda solo.</li>
           <li>Aquí toca <b>Usar lo que tengo en Mi horario</b> (o sube un respaldo si trabajaste sin internet).</li>
           <li>Sube aquí ese archivo y, si planilla lo pide, la foto de la hoja de asistencia.</li><li>Confirma que validaste todo y toca <b>Entregar quincena</b>.</li>
@@ -313,7 +322,14 @@ button.drop{width:100%;background:#fff;font:inherit}
 
   <!-- Recursos Humanos: altas, bajas y control cruzado con las tiendas (RRHH y Superusuario) -->
   <section id="v-rrh" hidden>
+    <div class="bar" id="rhFil" style="gap:8px"><b class="sub" style="margin:0">Ver:</b>
+      <select class="in" id="rhFR" aria-label="Región"><option value="">Todas las regiones</option></select>
+      <select class="in" id="rhFZ" aria-label="Zona"><option value="">Todas las zonas</option></select>
+      <select class="in" id="rhFT" aria-label="Tienda"><option value="">Todas las tiendas</option></select>
+      <button class="lnk" id="rhFL" hidden>Quitar filtros</button></div>
     <div class="kpis" id="rhK"></div>
+    <div class="card"><div class="ch"><h3>Estado por tienda</h3><span class="sub">Personal activo frente al presupuesto y días sin completar. Toca una tienda para filtrar.</span></div>
+      <div class="scroll" style="max-height:360px;overflow-y:auto"><table><thead><tr><th>Tienda</th><th>Zona</th><th>Activos / plazas</th><th>Faltan</th><th>Por confirmar</th><th>Días sin completar</th></tr></thead><tbody id="rhTT"></tbody></table></div></div>
     <div class="card" id="rhCarga"><div class="ch"><h3>1 · Cargar altas</h3><span class="sub">Carga inicial y de emergencia (solo Superusuario). El día a día se registra tienda por tienda.</span></div>
       <div class="pad">
         <label class="drop" id="dropH"><b>Elegir archivo de altas</b>Se lee en tu navegador; el Excel no se sube. Solo se guardan nombre, cédula, cargo, categoría, empresa, tienda e ingreso.<input type="file" id="fileH" accept=".xlsx" hidden></label>
@@ -327,7 +343,7 @@ button.drop{width:100%;background:#fff;font:inherit}
       <div class="pad"><input class="in" id="rhBuscaB" placeholder="Buscar por nombre, cédula o tienda (mínimo 3 letras)" style="width:100%;max-width:420px" autocomplete="off">
         <div id="rhBajaRes" style="margin-top:10px"></div></div></div>
     <div class="card"><div class="ch"><h3>4 · Personal registrado</h3>
-        <div class="bar"><input class="in" id="rhTxt" placeholder="Buscar nombre, cédula o tienda" autocomplete="off"><select class="in" id="rhEst"><option value="">Todos</option><option value="activo">Activos</option><option value="baja">Bajas</option><option value="pend">Pendientes de confirmar</option></select>
+        <div class="bar"><input class="in" id="rhTxt" placeholder="Buscar nombre, cédula o tienda" autocomplete="off"><select class="in" id="rhEst"><option value="">Todos</option><option value="activo">Activos</option><option value="baja">Bajas</option><option value="pend">Pendientes de confirmar</option><option value="altp">Altas por confirmar</option><option value="bajp">Bajas por confirmar</option><option value="atr">Atrasados</option></select>
           <label class="sub" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="rhVer">Mostrar cédulas</label>
           <button class="btn" id="rhRef" title="Volver a leer el registro">↻</button></div></div>
       <div class="scroll"><table><thead><tr><th>Colaborador</th><th>Cédula</th><th>Tienda</th><th>Cargo</th><th>Ingreso</th><th>Estado</th><th></th></tr></thead><tbody id="rhTb"></tbody></table></div>
@@ -342,6 +358,10 @@ button.drop{width:100%;background:#fff;font:inherit}
           <input class="in" id="rcTxt" placeholder="Buscar tienda o cargo" autocomplete="off"><select class="in" id="rcEst"><option value="abierta">Abiertas</option><option value="cubierta">Cubiertas</option><option value="cancelada">Canceladas</option><option value="">Todas</option></select></div></div>
       <div class="scroll"><table><thead><tr><th>Tienda</th><th>Cargo</th><th>Motivo</th><th>Estado</th><th>Abierta</th><th></th></tr></thead><tbody id="rcTb"></tbody></table></div>
       <div class="pad sub" id="rcPie"></div></div>
+    <div class="card" id="rcPC"><div class="ch"><h3>Prospectos</h3><span class="sub">Candidatos en proceso, antes de ser empleados (guarda solo lo necesario)</span>
+        <div class="bar"><button class="btn pri" id="pcNew">+ Nuevo prospecto</button><input class="in" id="pcTxt" placeholder="Buscar nombre, cargo o tienda" autocomplete="off"><select class="in" id="pcEst" aria-label="Etapa"><option value="">Activos (sin contratar ni descartar)</option><option value="todos">Todos</option></select></div></div>
+      <div class="scroll"><table><thead><tr><th>Candidato</th><th>Cargo</th><th>Tienda</th><th>Etapa</th><th>Reclutador</th><th>Días</th><th></th></tr></thead><tbody id="pcTb"></tbody></table></div>
+      <div class="pad sub" id="pcPie"></div></div>
   </section>
 
   <!-- Tutoriales: lecciones según el rol -->
@@ -457,6 +477,10 @@ let REAL=null, ALLT=[], C=null, ME=null, TIENDAS=[], ENT={}, RES={}, Q=quincena(
 (function(){const d=new Date();const qs=[];for(let i=0;i<6;i++){qs.push(quincena(d));d.setDate(d.getDate()<=15?0:15)}
   $('qSel').innerHTML=qs.map(q=>`<option value="${q}">${quincenaTexto(q)}</option>`).join('');})();
 $('qSel').onchange=()=>{Q=$('qSel').value;cargarEntregas()};
+// Manual de entrega ocultable (el navegador recuerda la elección)
+{const KM='ritmo_manual_oculto',pon=o=>{$('manualB').hidden=o;$('manualT').textContent=o?'Mostrar manual':'Ocultar manual';$('manualT').setAttribute('aria-expanded',String(!o))};
+  let o=false;try{o=localStorage.getItem(KM)==='1'}catch(e){}pon(o);
+  $('manualT').onclick=()=>{o=!o;pon(o);try{localStorage.setItem(KM,o?'1':'0')}catch(e){}}}
 
 // ---------- Inicio
 async function inicio(){
@@ -789,13 +813,63 @@ const rhCargar=()=>esSuper()||tiene('rrhh_cargar'),rhX=()=>esSuper()||tiene('rrh
 async function pintarRRH(){
   $('rhCarga').hidden=!esSuper();$('rhBuscaB').closest('.card').hidden=!rhCargar(); // sin permiso de cargar solo se consulta
   if(!PERSOK)await cargarPersonal();
-  const pend=RH.pendientes(PERS),atr=pend.filter(x=>x.atrasado).length;
-  const k=(b,l,c='')=>`<div class="kpi ${c}"><b>${b}</b><span>${l}</span></div>`;
-  $('rhK').innerHTML=k(PERS.length,'Registrados')+k(PERS.filter(p=>p.estado==='activo').length,'Activos')+k(pend.filter(x=>x.tipo==='alta').length,'Altas por confirmar','hot')+k(pend.filter(x=>x.tipo==='baja').length,'Bajas por confirmar','hot')+k(atr,`Atrasados (${RH.DIAS_ALERTA}+ días)`,atr?'hot':'');
-  pintarRhPend();pintarRhTb();pintarRhBaja();
+  RHM=new Map(rhTs().map(t=>[t.codigo,t]));rhOpciones();
+  const L=PERS.filter(enAlcance),pend=RH.pendientes(L),atr=pend.filter(x=>x.atrasado).length;
+  const act=L.filter(p=>p.estado==='activo').length,k=(b,l,key,c='')=>`<button type="button" class="kpi ${c}" data-rhk="${key}" style="text-align:left;cursor:pointer;font:inherit" title="Toca para filtrar la lista"><b>${b}</b><span>${l}</span></button>`;
+  const inc=rhTiendas(L,pend).filter(r=>r.faltan>0).length;
+  $('rhK').innerHTML=k(L.length,'Registrados','')+k(act,'Activos','activo')+k(pend.filter(x=>x.tipo==='alta').length,'Altas por confirmar','altp','hot')+k(pend.filter(x=>x.tipo==='baja').length,'Bajas por confirmar','bajp','hot')+k(atr,`Atrasados (${RH.DIAS_ALERTA}+ días)`,'atr',atr?'hot':'')+k(inc,'Tiendas con plazas por cubrir','tt',inc?'hot':'');
+  pintarRhTT(L,pend);pintarRhPend();pintarRhTb();pintarRhBaja();
 }
+// Tablero: filtros por región, zona y tienda; tarjetas que filtran; estado por tienda y ficha de la persona
+let RHM=new Map();const RHF={r:'',z:'',t:''},rhTs=()=>(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba);
+const enAlcance=p=>{if(RHF.t&&p.tienda!==RHF.t)return false;const t=RHM.get(p.tienda);return (!RHF.r||t?.region===RHF.r)&&(!RHF.z||t?.zona===RHF.z)};
+function rhOpciones(){
+  const T=rhTs(),u=a=>[...new Set(a.filter(Boolean))].sort(),op=(el,vals,v,todo,txt=x=>x)=>{el.innerHTML=`<option value="">${todo}</option>`+vals.map(x=>`<option value="${esc(x)}"${x===v?' selected':''}>${esc(txt(x))}</option>`).join('')};
+  op($('rhFR'),u(T.map(t=>t.region)),RHF.r,'Todas las regiones');
+  const TR=T.filter(t=>!RHF.r||t.region===RHF.r);op($('rhFZ'),u(TR.map(t=>t.zona)),RHF.z,'Todas las zonas');
+  const TZ=TR.filter(t=>!RHF.z||t.zona===RHF.z);op($('rhFT'),TZ.map(t=>t.codigo),RHF.t,'Todas las tiendas',c=>nomTienda(c));
+  $('rhFL').hidden=!(RHF.r||RHF.z||RHF.t);
+}
+function rhTiendas(L,pend){
+  const hoy=RH.hoyISO(),T=rhTs().filter(t=>(!RHF.t||t.codigo===RHF.t)&&(!RHF.r||t.region===RHF.r)&&(!RHF.z||t.zona===RHF.z));
+  return T.map(t=>{const act=L.filter(p=>p.tienda===t.codigo&&p.estado==='activo'&&p.cargo!=='Gerente de tienda').length,
+    pa=pend.filter(x=>x.p.tienda===t.codigo&&x.tipo==='alta'),dias=pa.length?Math.max(...pa.map(x=>x.dias)):0;
+    return {t,act,plazas:t.plazas,faltan:t.plazas!=null?Math.max(0,t.plazas-act):0,pend:pa.length,dias}})
+    .sort((a,b)=>b.dias-a.dias||b.faltan-a.faltan||(a.t.numero||0)-(b.t.numero||0));
+}
+function pintarRhTT(L,pend){
+  const R=rhTiendas(L,pend);
+  $('rhTT').innerHTML=R.map(r=>`<tr style="cursor:pointer" data-rhtt="${esc(r.t.codigo)}"><td><b>${esc(r.t.codigo)}</b> ${esc(r.t.nombre||'')}</td><td>${esc(r.t.zona||'')}</td>
+    <td class="mono">${r.act}${r.plazas!=null?' / '+r.plazas:' / —'}</td><td>${r.plazas==null?'<span class="sub">sin presupuesto</span>':r.faltan?`<span class="rh-tag warn">${r.faltan}</span>`:'<span class="rh-tag ok">completa</span>'}</td>
+    <td>${r.pend||''}</td><td>${r.dias?`<span class="rh-tag ${r.dias>=RH.DIAS_ALERTA?'bad':'warn'}">${r.dias} d</span>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Sin tiendas con ese filtro.</td></tr>';
+}
+function rhFicha(id){
+  const p=PERS.find(x=>x.id===id);if(!p)return;
+  const t=RHM.get(p.tienda),fila=(a,b)=>b?`<div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--line-2)"><span class="sub" style="width:130px;flex:none">${a}</span><span>${b}</span></div>`:'';
+  const ant=p.ingreso?(()=>{const d=Math.floor((Date.now()-new Date(p.ingreso+'T00:00').getTime())/864e5),m=Math.floor(d/30.4);return m>=12?`${Math.floor(m/12)} año(s) ${m%12} mes(es)`:`${m} mes(es)`})():'';
+  const al=p.alta?`${p.alta.origen==='tienda'?'La tienda':'RRHH'} · ${p.alta.confirmada===false?'<b>por confirmar</b>':'confirmada'}`:'',ba=p.baja?`${fISO(p.baja.fecha)} · ${p.baja.confirmada===false?'<b>por confirmar</b>':'confirmada'}`:'';
+  const mT=p.baja?(p.baja.origen==='rrhh'?p.baja.motivoTienda:p.baja.motivo):'',mR=p.baja?(p.baja.origen==='rrhh'?p.baja.motivo:p.baja.motivoRRHH):'';
+  return dialogo({titulo:esc(p.nombre),ancho:520,cuerpo:`<div>${fila('Cédula',esc(cedMasc(p.cedula)))}${fila('Tienda',esc(nomTienda(p.tienda)))}${fila('Zona / región',t?esc((t.zona||'')+' · '+(t.region||'')):'')}${fila('Cargo',esc(p.cargo||''))}${fila('Categoría',esc(p.categoria||''))}${fila('Empresa',esc(p.empresa||''))}${fila('Ingreso',p.ingreso?fISO(p.ingreso)+(ant?' · '+ant:''):'')}${fila('Estado',p.estado==='baja'?'Baja':'Activo')}${fila('Alta',al)}${fila('Baja',ba)}${p.baja?fila('Motivo (tienda)',esc(mT||'—'))+fila('Motivo (RRHH)',esc(mR||'—')):''}</div>`,
+    botones:[{t:'Cerrar',k:'cancel',cancel:true},...(rhCargar()&&p.baja?[{t:mR?'Editar motivo de RRHH':'Agregar motivo de RRHH',k:'motivo'}]:[]),...(rhCargar()&&p.estado==='activo'?[{t:'Registrar baja',k:'baja'}]:[]),...(rhX()?[{t:'✕ Eliminar línea',k:'del',cls:'dng'}]:[])]}).then(r=>{if(r.k==='baja')rhRegistrarBaja(id);else if(r.k==='del')rhEliminar(id);else if(r.k==='motivo')rhMotivo(id,mR)});
+}
+async function rhMotivo(id,actual){
+  const p=PERS.find(x=>x.id===id);if(!p||!p.baja)return;
+  const r=await dialogo({titulo:'Motivo de RRHH',cuerpo:`<p class="sub">Es el motivo de la salida según RRHH (entrevista de salida, renuncia, despido…). El motivo que escribió la tienda se conserva aparte.</p><textarea id="dlgMotB" maxlength="400">${esc(actual||'')}</textarea>`,botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Guardar',k:'ok',cls:'pri'}]});
+  if(r.k!=='ok')return;
+  const campo=p.baja.origen==='rrhh'?'motivo':'motivoRRHH',d={baja:{...p.baja,[campo]:(r.texto||'').trim()},actualizado:ahoraTS()};
+  try{await guardarPers(id,d);aplicarLocal(id,d);pintarRRH()}catch(e){alert('No se pudo guardar: '+(e.code||e.message))}
+}
+$('rhFR').onchange=e=>{RHF.r=e.target.value;RHF.z='';RHF.t='';pintarRRH()};
+$('rhFZ').onchange=e=>{RHF.z=e.target.value;RHF.t='';pintarRRH()};
+$('rhFT').onchange=e=>{RHF.t=e.target.value;pintarRRH()};
+$('rhFL').onclick=()=>{RHF.r=RHF.z=RHF.t='';pintarRRH()};
+$('rhTT').onclick=e=>{const r=e.target.closest('[data-rhtt]');if(r){RHF.t=r.dataset.rhtt;pintarRRH()}};
+$('rhK').onclick=e=>{const b=e.target.closest('[data-rhk]');if(!b)return;const k=b.dataset.rhk;
+  if(k==='tt'){$('rhTT').closest('.card').scrollIntoView({behavior:'smooth',block:'start'});return}
+  $('rhEst').value=k;pintarRhTb();$('rhTb').closest('.card').scrollIntoView({behavior:'smooth',block:'start'})};
+$('rhTb').addEventListener('click',e=>{const f=e.target.closest('[data-rhf]');if(f)rhFicha(f.dataset.rhf)});
 function pintarRhPend(){
-  const pend=RH.pendientes(PERS),E=$('rhPend');
+  const pend=RH.pendientes(PERS).filter(x=>enAlcance(x.p)),E=$('rhPend');
   if(!pend.length){E.innerHTML='<div class="sub">✔ No hay movimientos pendientes de confirmar.</div>';return}
   E.innerHTML=pend.slice(0,40).map(x=>{const p=x.p,m=x.tipo==='alta'?p.alta:p.baja,de=x.origen==='tienda'?'la tienda':'RRHH';
     const disp=x.tipo==='baja'&&x.disputada;
@@ -806,15 +880,18 @@ function pintarRhPend(){
       <div class="alj-a">${acc}${rhX()?`<button class="btn dng" data-rhx="${p.id}" title="Eliminar esta línea (error o duplicado). No queda como baja.">✕</button>`:''}</div></div>`}).join('')+(pend.length>40?`<div class="sub" style="padding-top:8px">Mostrando 40 de ${pend.length}, los más atrasados primero.</div>`:'');
 }
 function pintarRhTb(){
-  const q=RH.normNombre($('rhTxt').value),qc=RH.normCed($('rhTxt').value),es=$('rhEst').value,pend=new Set(RH.pendientes(PERS).map(x=>x.p.id));
+  const q=RH.normNombre($('rhTxt').value),qc=RH.normCed($('rhTxt').value),es=$('rhEst').value,PD=RH.pendientes(PERS),pend=new Set(PD.map(x=>x.p.id)),
+    pA=new Set(PD.filter(x=>x.tipo==='alta').map(x=>x.p.id)),pB=new Set(PD.filter(x=>x.tipo==='baja').map(x=>x.p.id)),pT=new Set(PD.filter(x=>x.atrasado).map(x=>x.p.id));
   const L=PERS.filter(p=>{
+    if(!enAlcance(p))return false;
     if(es==='activo'&&p.estado!=='activo')return false;if(es==='baja'&&p.estado!=='baja')return false;if(es==='pend'&&!pend.has(p.id))return false;
+    if(es==='altp'&&!pA.has(p.id))return false;if(es==='bajp'&&!pB.has(p.id))return false;if(es==='atr'&&!pT.has(p.id))return false;
     if(!q&&!qc)return true;
     return RH.normNombre(p.nombre+' '+p.tienda+' '+nomTienda(p.tienda)).includes(q)||(qc.length>=4&&RH.normCed(p.cedula).includes(qc))}).sort((a,b)=>String(a.tienda).localeCompare(b.tienda)||String(a.nombre).localeCompare(b.nombre));
   $('rhTb').innerHTML=L.slice(0,100).map(p=>{
     const st=p.estado==='baja'?`<span class="rh-tag bad">Baja ${fISO(p.baja?.fecha)}</span>`:'<span class="rh-tag ok">Activo</span>';
     const pa=(p.alta&&p.alta.confirmada===false?` <span class="rh-tag warn">Alta por confirmar (${p.alta.origen==='tienda'?'RRHH':'tienda'})</span>`:'')+(p.baja&&p.baja.confirmada===false?` <span class="rh-tag warn">Baja por confirmar (${p.baja.origen==='tienda'?'RRHH':'tienda'})</span>`:'');
-    return `<tr><td>${esc(p.nombre)}</td><td class="mono">${esc(cedMasc(p.cedula))}${p.cedulaRevisar?' <span class="rh-tag warn" title="Formato de cédula por revisar">revisar</span>':''}</td><td>${esc(nomTienda(p.tienda))}</td><td>${esc(p.cargo||'')}</td><td class="mono">${fISO(p.ingreso)}</td><td>${st}${pa}</td>
+    return `<tr><td><button type="button" class="lnk" data-rhf="${p.id}" title="Ver ficha">${esc(p.nombre)}</button></td><td class="mono">${esc(cedMasc(p.cedula))}${p.cedulaRevisar?' <span class="rh-tag warn" title="Formato de cédula por revisar">revisar</span>':''}</td><td>${esc(nomTienda(p.tienda))}</td><td>${esc(p.cargo||'')}</td><td class="mono">${fISO(p.ingreso)}</td><td>${st}${pa}</td>
       <td>${rhX()?`<button class="btn dng" data-rhx="${p.id}" title="Eliminar esta línea (error o duplicado)">✕</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="7" class="empty">Sin resultados.</td></tr>';
   $('rhPie').textContent=PERS.length?`Mostrando ${Math.min(100,L.length)} de ${L.length} (afina la búsqueda para ver más).`:'Aún no hay personal registrado. Carga el archivo de altas en el paso 1.';
 }
@@ -1054,9 +1131,71 @@ async function pintarRec(){
     const st=v.estado==='abierta'?`<span class="rh-tag ${d>=15?'bad':'warn'}">Abierta</span>`:v.estado==='cubierta'?`<span class="rh-tag ok">Cubierta${v.cerrada?.automatica?' (alta de RRHH)':''}</span>`:'<span class="rh-tag">Cancelada</span>';
     const acc=v.estado==='abierta'?`${puedeC?`<button class="btn" data-rcc="${v.id}">✔ Cubierta</button> `:''}${puedeX?`<button class="btn dng" data-rcx="${v.id}" title="Cancelar la vacante">✕</button>`:''}`:'';
     return `<tr><td>${esc(nomTienda(v.tienda))}</td><td>${esc(v.cargo)}</td><td>${esc(v.motivo||'')}</td><td>${st}</td><td class="mono">${tsTxt(v.creada?.fecha)} · ${d} d</td><td style="white-space:nowrap">${acc}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Sin vacantes con ese filtro.</td></tr>';
+  pintarProspectos();
   $('rcPie').textContent=VAC.length?`Mostrando ${Math.min(100,L.length)} de ${L.length}.`:'Aún no hay vacantes. Se crean al abrir una tienda o agregar un puesto.';
 }
 $('rcTxt').oninput=$('rcEst').onchange=pintarRec;
+
+// ----- Prospectos: proceso del candidato por etapas. Al contratar se crea el alta en RRHH (la tienda la confirma).
+const ETAPAS=[['nuevo','Nuevo'],['entrevista','Entrevista'],['documentos','Documentos'],['aceptado','Aceptado por la tienda'],['contratado','Contratado'],['descartado','Descartado']];
+const etapaTxt=k=>(ETAPAS.find(e=>e[0]===k)||[0,k])[1];
+let PROS=[],PROSOK=false;const DEMOPC=new Map();
+async function cargarProspectos(){
+  try{if(!C)PROS=[...DEMOPC.entries()].map(([id,v])=>({id,...v}));
+    else{const s=await C.F.getDocs(C.F.collection(C.db,'prospectos'));PROS=s.docs.map(d=>({id:d.id,...d.data()}))}
+    PROSOK=true}catch(e){PROS=[];PROSOK=false}
+}
+async function guardarPros(id,d){if(!C){DEMOPC.set(id,{...(DEMOPC.get(id)||{}),...d});return}await C.F.setDoc(C.F.doc(C.db,'prospectos',id),d,{merge:true})}
+function pintarPros(){
+  const E=$('pcEst');if(E.options.length<3)E.innerHTML+=ETAPAS.map(([k,t])=>`<option value="${k}">${t}</option>`).join('');
+  const q=RH.normNombre($('pcTxt').value),es=$('pcEst').value,cx=rhX();
+  const L=PROS.filter(p=>(es==='todos'||(es?p.etapa===es:!['contratado','descartado'].includes(p.etapa)))&&(!q||RH.normNombre(p.nombre+' '+(p.cargo||'')+' '+nomTienda(p.tienda||'')).includes(q))).sort((a,b)=>RH.diasDesde(b.creado?.fecha)-RH.diasDesde(a.creado?.fecha));
+  $('pcTb').innerHTML=L.slice(0,100).map(p=>{const fin=['contratado','descartado'].includes(p.etapa);
+    const sel=fin?`<span class="rh-tag ${p.etapa==='contratado'?'ok':''}">${etapaTxt(p.etapa)}</span>`:`<select class="in" data-pce="${p.id}" aria-label="Etapa de ${esc(p.nombre)}">${ETAPAS.filter(e=>e[0]!=='contratado').map(([k,t])=>`<option value="${k}"${k===p.etapa?' selected':''}>${t}</option>`).join('')}</select>`;
+    return `<tr><td><b>${esc(p.nombre)}</b>${p.telefono?`<br><span class="sub">${esc(p.telefono)}</span>`:''}</td><td>${esc(p.cargo||'')}</td><td>${esc(p.tienda?nomTienda(p.tienda):'')}</td><td>${sel}</td><td>${esc(p.reclutadorNombre||'')}</td><td class="mono">${RH.diasDesde(p.creado?.fecha)} d</td>
+      <td style="white-space:nowrap">${p.etapa==='aceptado'?`<button class="btn pri" data-pcc="${p.id}">Contratar</button> `:''}${cx?`<button class="btn dng" data-pcx="${p.id}" title="Eliminar el prospecto">✕</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="7" class="empty">Sin prospectos con ese filtro.</td></tr>';
+  $('pcPie').textContent=PROS.length?`Mostrando ${Math.min(100,L.length)} de ${L.length}. Los prospectos no tienen cédula hasta que se contratan.`:'Aún no hay prospectos.';
+}
+async function pintarProspectos(){$('rcPC').hidden=!(esSuper()||tiene('rrhh_cargar')||tiene('reclutamiento'));$('pcNew').hidden=!(esSuper()||tiene('rrhh_cargar'));if(!PROSOK)await cargarProspectos();pintarPros()}
+$('pcTxt').oninput=$('pcEst').onchange=pintarPros;
+$('pcNew').onclick=async()=>{
+  const base=(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba),cargos=[...new Set([...PERS.map(p=>p.cargo),...VAC.map(v=>v.cargo)].filter(Boolean))].sort();
+  const r=await dialogo({titulo:'Nuevo prospecto',leer:d=>({nombre:d.querySelector('#pcN').value.trim(),telefono:d.querySelector('#pcT').value.trim(),cargo:d.querySelector('#pcC').value.trim(),tienda:d.querySelector('#pcTi').value}),
+    cuerpo:`<label class="fl">Nombre completo<input class="in" id="pcN" maxlength="80" autocomplete="off"></label><label class="fl">Teléfono (opcional)<input class="in" id="pcT" maxlength="20" autocomplete="off"></label>
+      <label class="fl">Cargo<input class="in" id="pcC" list="pcCl" maxlength="60" autocomplete="off"><datalist id="pcCl">${cargos.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label>
+      <label class="fl">Tienda<select class="in" id="pcTi"><option value="">— elige —</option>${base.map(t=>`<option value="${esc(t.codigo)}">${esc(t.codigo+' · '+(t.nombre||''))}</option>`).join('')}</select></label>
+      <p class="sub">Guarda solo lo necesario. Si el candidato no avanza, se puede eliminar.</p>`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Crear prospecto',k:'ok',cls:'pri',valida:d=>d.querySelector('#pcN').value.trim().length<5?'Escribe el nombre completo.':!d.querySelector('#pcC').value.trim()?'Escribe el cargo.':!d.querySelector('#pcTi').value?'Elige la tienda.':null}]});
+  if(r.k!=='ok')return;
+  const d={...r.datos,etapa:'nuevo',reclutador:REAL.correo,reclutadorNombre:REAL.nombre||'',creado:{por:REAL.correo,fecha:ahoraTS()},actualizado:ahoraTS()},id=nuevoId('p');
+  try{await guardarPros(id,d);PROS.push({id,...d,creado:{por:REAL.correo,fecha:new Date()}});pintarPros()}catch(e){alert('No se pudo crear: '+(e.code||e.message))}
+};
+$('pcTb').onchange=async e=>{const s=e.target.closest('[data-pce]');if(!s)return;
+  const d={etapa:s.value,etapaFecha:ahoraTS(),actualizado:ahoraTS()};
+  try{await guardarPros(s.dataset.pce,d);const p=PROS.find(x=>x.id===s.dataset.pce);if(p)p.etapa=s.value;pintarPros()}catch(err){alert('No se pudo cambiar la etapa: '+(err.code||err.message))}};
+$('pcTb').onclick=async e=>{
+  const x=e.target.closest('[data-pcx]');
+  if(x){const p=PROS.find(y=>y.id===x.dataset.pcx);if(!p)return;const r=await dialogo({titulo:'Eliminar prospecto',cuerpo:`<p>Se borra a <b>${esc(p.nombre)}</b> del proceso. Si solo no avanzó, mejor márcalo como Descartado.</p>`,botones:[{t:'Volver',k:'cancel',cancel:true},{t:'Eliminar',k:'ok',cls:'dng'}]});
+    if(r.k!=='ok')return;try{if(!C)DEMOPC.delete(p.id);else await C.F.deleteDoc(C.F.doc(C.db,'prospectos',p.id));PROS=PROS.filter(y=>y.id!==p.id);pintarPros()}catch(err){alert('No se pudo eliminar: '+(err.code||err.message))}return}
+  const c=e.target.closest('[data-pcc]');if(!c)return;
+  const p=PROS.find(y=>y.id===c.dataset.pcc);if(!p||!(esSuper()||tiene('rrhh_cargar')))return;
+  const r=await dialogo({titulo:'Contratar',leer:d=>({ced:d.querySelector('#pcCe').value,ing:d.querySelector('#pcIn').value}),
+    cuerpo:`<p><b>${esc(p.nombre)}</b> · ${esc(p.cargo||'')} · ${esc(nomTienda(p.tienda||''))}</p><label class="fl">Cédula<input class="in" id="pcCe" placeholder="000-000000-0000X" autocomplete="off"></label><label class="fl">Fecha de ingreso<input class="in" type="date" id="pcIn" value="${RH.hoyISO()}"></label>
+      <p class="sub">Se crea el alta en RRHH, que la tienda debe confirmar, y se cierra la vacante abierta de ese cargo y tienda si existe.</p>`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Contratar',k:'ok',cls:'pri',valida:d=>RH.normCed(d.querySelector('#pcCe').value).length<8?'Escribe la cédula.':!/^\d{4}-\d{2}-\d{2}$/.test(d.querySelector('#pcIn').value)?'Elige una fecha de ingreso.':null}]});
+  if(r.k!=='ok')return;
+  try{
+    const ced=RH.normCed(r.datos.ced),id=await RH.idPersonal(ced);if(!PERSOK)await cargarPersonal();
+    if(PERS.some(y=>y.id===id)){alert('Esa cédula ya está registrada en RRHH. Revisa que no sea un duplicado.');return}
+    const ahora=ahoraTS(),dp={cedula:ced,nombre:p.nombre,cargo:p.cargo,cargoOrigen:p.cargo,categoria:'',empresa:'',tienda:p.tienda,ingreso:r.datos.ing,cedulaRevisar:!/^\d{13}[A-Z]$/.test(ced),estado:'activo',alta:{origen:'rrhh',por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahora,confirmada:false,prospecto:p.id},actualizado:ahora};
+    await guardarPers(id,dp);
+    if(!VACOK)await cargarVacantes();
+    const v=VAC.find(q=>q.estado==='abierta'&&q.tienda===p.tienda&&q.cargo===p.cargo);
+    if(v){const dv={estado:'cubierta',cerrada:{por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahora,personal:id,prospecto:p.id}};await guardarVac(v.id,dv);Object.assign(v,dv)}
+    const dpc={etapa:'contratado',etapaFecha:ahora,actualizado:ahora};await guardarPros(p.id,dpc);p.etapa='contratado';
+    PERSOK=false;pintarRec();alert('Contratado: el alta quedó registrada y la tienda debe confirmarla.'+(v?' Se cerró la vacante.':''));
+  }catch(err){alert('No se pudo contratar: '+(err.code||err.message))}
+};
 $('rcTb').onclick=async e=>{
   const c=e.target.closest('[data-rcc]');
   if(c){try{const d={estado:'cubierta',cerrada:{por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()}};await guardarVac(c.dataset.rcc,d);const v=VAC.find(x=>x.id===c.dataset.rcc);if(v)Object.assign(v,d);pintarRec()}catch(err){alert('No se pudo cerrar: '+(err.code||err.message))}return}

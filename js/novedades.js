@@ -1,11 +1,36 @@
 // RITMO · Versión publicada. Subir este número en CADA publicación: las sesiones abiertas lo comparan con el que está en el
 // sitio y avisan al usuario que hay una versión nueva (se aplica al cerrar sesión y volver a entrar).
-export const VERSION = "2.10";
+export const VERSION = "3.1";
 
 // RITMO · Novedades del desarrollador
 // Agregar cada mejora ARRIBA (la más reciente primero). id único y creciente.
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
+  {
+    id: 38, fecha: "2026-10-18", version: "3.1", tipo: "Nuevo", para: "Reclutamiento",
+    titulo: "Prospectos: del candidato a la contratación",
+    detalle: "En Reclutamiento hay una lista de prospectos con etapas (nuevo, entrevista, documentos, aceptado por la tienda). Al contratar se pide la cédula y la fecha de ingreso: se crea el alta en RRHH para que la tienda la confirme y se cierra la vacante abierta de ese cargo. Los prospectos no guardan cédula hasta que se contratan."
+  },
+  {
+    id: 37, fecha: "2026-10-18", version: "3.1", tipo: "Mejora", para: "Recursos Humanos",
+    titulo: "Doble motivo de baja",
+    detalle: "En la ficha de una persona dada de baja se ven dos motivos: el que escribió la tienda y el de RRHH. RRHH puede agregar o editar el suyo sin borrar el de la tienda."
+  },
+  {
+    id: 36, fecha: "2026-10-18", version: "3.0", tipo: "Nuevo", para: "Recursos Humanos",
+    titulo: "Tablero de RRHH: filtros, tarjetas y ficha",
+    detalle: "Filtra por región, zona o tienda. Las tarjetas de arriba filtran la lista al tocarlas. El cuadro Estado por tienda muestra activos frente al presupuesto y los días sin completar; toca una tienda para ver solo a su gente. Al tocar el nombre de una persona se abre su ficha."
+  },
+  {
+    id: 35, fecha: "2026-10-18", version: "3.0", tipo: "Nuevo", para: "Todos",
+    titulo: "Accesibilidad: tema, letra y luz nocturna",
+    detalle: "El botón Aa (arriba, junto a Ayuda) permite elegir tema claro u oscuro, tamaño de letra al 100, 112 o 125 % y luz nocturna suave. Se recuerda en este navegador. Dentro del Generador se aplica el tamaño de letra y la luz nocturna; el tema oscuro cubre el panel."
+  },
+  {
+    id: 34, fecha: "2026-10-18", version: "3.0", tipo: "Mejora", para: "Todos",
+    titulo: "Pantalla de carga y manual ocultable",
+    detalle: "RITMO abre con el logo y sus barras en movimiento (se detienen si pediste reducir animaciones). El manual Cómo se entrega se puede ocultar y el navegador recuerda tu elección."
+  },
   {
     id: 33, fecha: "2026-10-18", version: "2.10", tipo: "Mejora", para: "Todos",
     titulo: "Datos de arranque cargados una sola vez",

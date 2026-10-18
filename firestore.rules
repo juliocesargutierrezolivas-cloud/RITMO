@@ -188,6 +188,16 @@ service cloud.firestore {
       allow delete: if isSuper() || perm('rrhh_eliminar');
     }
 
+    // Prospectos de reclutamiento: candidatos en proceso (nombre, teléfono, cargo, tienda y etapa; sin cédula hasta contratar).
+    // Los ven y mueven RRHH y reclutamiento; solo quien elimina líneas (o el superusuario) los borra.
+    match /prospectos/{p} {
+      allow read: if isSuper() || perm('rrhh_ver') || perm('reclutamiento');
+      allow create, update: if (isSuper() || perm('rrhh_cargar'))
+        && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 80
+        && request.resource.data.etapa in ['nuevo', 'entrevista', 'documentos', 'aceptado', 'contratado', 'descartado'];
+      allow delete: if isSuper() || perm('rrhh_eliminar');
+    }
+
     // Resumen de personal de cada tienda (solo cifras: activos sin gerente de tienda). Sin nombres, cédulas ni salarios.
     // Lo escribe el gerente de la tienda al guardar Mi horario; lo ven GZ, distrito, operaciones y planilla dentro de su alcance.
     match /resumen/{t} {

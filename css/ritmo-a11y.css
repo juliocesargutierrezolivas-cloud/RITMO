@@ -1,0 +1,44 @@
+/* RITMO · Accesibilidad. Tema oscuro derivado del azul marino de la marca (#04003f), no negro puro. */
+#a11yBox{position:fixed;right:16px;top:64px;z-index:2147483001;width:280px;max-width:calc(100vw - 32px);background:#fff;color:#0f1e36;border:1px solid #d6ddea;border-radius:12px;box-shadow:0 12px 32px rgba(4,0,63,.25);padding:14px;font:400 14px/1.4 "IBM Plex Sans","Segoe UI",Arial,sans-serif}
+#a11yBox[hidden]{display:none}
+#a11yBox .a11y-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#04003f}
+#a11yBox .a11y-h button{border:0;background:none;font-size:16px;cursor:pointer;color:inherit}
+#a11yBox .a11y-g{margin:10px 0}
+#a11yBox .a11y-g b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#56678a;margin-bottom:6px}
+#a11yBox .a11y-g div{display:flex;gap:6px;flex-wrap:wrap}
+#a11yBox .a11y-op{border:1px solid #d6ddea;background:#fff;color:#0f1e36;border-radius:8px;padding:6px 10px;font:600 13px inherit;cursor:pointer}
+#a11yBox .a11y-op.on{background:#04003f;border-color:#04003f;color:#fff}
+#a11yBox .a11y-r{margin-top:6px;border:0;background:none;color:#0055ba;text-decoration:underline;cursor:pointer;font:600 12.5px inherit}
+#a11yBox button:focus-visible,#a11yB:focus-visible{outline:3px solid #ff8300;outline-offset:2px}
+.a11y-flot{position:fixed;left:14px;bottom:14px;z-index:2147482000;border:1px solid #d6ddea;background:#fff;color:#04003f;border-radius:999px;padding:8px 12px;font:700 13px "IBM Plex Sans",Arial,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(4,0,63,.2)}
+
+/* ---- Tema oscuro */
+html[data-tema="oscuro"]{color-scheme:dark;
+  --bg:#0a1233;--card:#111c45;--ink:#e8edf8;--muted:#a9b6d3;--line:#2a386b;--line-2:#1f2b58;
+  --ok:#5fd394;--ok-bg:#0f3a28;--warn:#ffcf70;--warn-bg:#41300a;--bad:#ff8e84;--bad-bg:#4a1a1a}
+html[data-tema="oscuro"] body{background:var(--bg);color:var(--ink)}
+html[data-tema="oscuro"] header{background:#0d1640;border-bottom-color:#ff8300}
+html[data-tema="oscuro"] .ritmo,html[data-tema="oscuro"] h1,html[data-tema="oscuro"] h2,html[data-tema="oscuro"] .ch h3,html[data-tema="oscuro"] .kpi b,html[data-tema="oscuro"] .who b{color:#f3f6ff}
+html[data-tema="oscuro"] .logo{background:#fff;border-radius:6px;padding:2px 6px}
+html[data-tema="oscuro"] .btn,html[data-tema="oscuro"] .in,html[data-tema="oscuro"] select,html[data-tema="oscuro"] textarea,html[data-tema="oscuro"] input{background:#0d1640;color:var(--ink);border-color:var(--line)}
+html[data-tema="oscuro"] .btn.pri{background:#ff8300;color:#04003f;border-color:#ff8300}
+html[data-tema="oscuro"] .btn.nav,html[data-tema="oscuro"] .tab[aria-selected="true"]{background:#0055ba;border-color:#0055ba;color:#fff}
+html[data-tema="oscuro"] th{background:#0d1640;color:var(--muted)}
+html[data-tema="oscuro"] tr:hover td{background:#16224f}
+html[data-tema="oscuro"] .r-Superusuario{background:#0055ba}
+html[data-tema="oscuro"] .drop,html[data-tema="oscuro"] .mini,html[data-tema="oscuro"] .rhr{background:#0d1640;border-color:var(--line);color:var(--ink)}
+html[data-tema="oscuro"] .modal .box,html[data-tema="oscuro"] dialog{background:#111c45;color:var(--ink)}
+html[data-tema="oscuro"] a{color:#7db7ff}
+html[data-tema="oscuro"] ::placeholder{color:#8393b8}
+html[data-tema="oscuro"] #gate{background:var(--bg)}
+html[data-tema="oscuro"] #gate .rt{color:#f3f6ff}
+html[data-tema="oscuro"] #a11yBox{background:#111c45;color:#e8edf8;border-color:#2a386b}
+html[data-tema="oscuro"] #a11yBox .a11y-h{color:#f3f6ff}
+html[data-tema="oscuro"] #a11yBox .a11y-op{background:#0d1640;color:#e8edf8;border-color:#2a386b}
+html[data-tema="oscuro"] #a11yBox .a11y-op.on{background:#ff8300;border-color:#ff8300;color:#04003f}
+html[data-tema="oscuro"] .a11y-flot{background:#111c45;color:#fff;border-color:#2a386b}
+html[data-tema="oscuro"] iframe#genF{background:#fff;border-radius:8px}
+
+/* Foco visible para teclado */
+:focus-visible{outline:3px solid #ff8300;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}}
