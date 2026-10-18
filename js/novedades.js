@@ -1,11 +1,21 @@
 // RITMO · Versión publicada. Subir este número en CADA publicación: las sesiones abiertas lo comparan con el que está en el
 // sitio y avisan al usuario que hay una versión nueva (se aplica al cerrar sesión y volver a entrar).
-export const VERSION = "3.2";
+export const VERSION = "3.3";
 
 // RITMO · Novedades del desarrollador
 // Agregar cada mejora ARRIBA (la más reciente primero). id único y creciente.
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
+  {
+    id: 40, fecha: "2026-10-18", version: "3.3", tipo: "Nuevo", para: "GZ, GD y GO",
+    titulo: "Planilla MBK: resumen a solicitar",
+    detalle: "En Seguimiento, debajo del detalle por tienda, hay un cuadro con el monto de MBK que solicita cada tienda por semana, con observaciones: qué semana pide, si una tienda pide otra semana distinta a las demás o si cambió el horario después de solicitar. El GZ marca Aprobado y puede descargar la imagen; GD y GO lo consultan."
+  },
+  {
+    id: 41, fecha: "2026-10-18", version: "3.3", tipo: "Mejora", para: "Reclutamiento y RRHH",
+    titulo: "Reclutamiento y RRHH más completos",
+    detalle: "Los prospectos se pueden editar. Vacantes y plazas por cubrir tienen scroll, se ven por tienda o por zona, y las vacantes abiertas se pueden quitar todas. RRHH muestra cuántas personas faltan y permite editar cargo, categoría, empresa o tienda del personal activo (ascensos y traslados), con historial."
+  },
   {
     id: 39, fecha: "2026-10-18", version: "3.2", tipo: "Mejora", para: "Reclutamiento",
     titulo: "Reclutamiento: dónde enfocarte",

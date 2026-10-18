@@ -630,7 +630,7 @@ function paqueteRITMO(){return {app:"Generador de Horarios AMPM",version:VERSION
   semanas:Object.fromEntries(Object.entries(S.semanas).filter(([k,v])=>!v._draft).sort((a,b)=>a[0].localeCompare(b[0])))}}
 let tRITMO=null;
 function guardarRITMO(){clearTimeout(tRITMO);setSave("busy","Guardando…");if(S.pub&&S.pub.ok){S.pub.ok=false;setTimeout(()=>{if(S.tab==="planilla")render()},0)}
-  tRITMO=setTimeout(()=>{try{parent.postMessage({tipo:"ritmo-guardar",data:paqueteRITMO()},location.origin)}catch(e){setSave("err","No se pudo guardar")}},700)}
+  tRITMO=setTimeout(()=>{try{parent.postMessage({tipo:"ritmo-guardar",data:paqueteRITMO(),mbk:resumenMBK()},location.origin)}catch(e){setSave("err","No se pudo guardar")}},700)}
 const LS="ampm-horarios-v1";const timers={},chains={};
 function setSave(state,txt){const d=document.getElementById("saveDot");d.className="dot "+state;document.getElementById("saveTxt").textContent=txt}
 function lsSave(){if(VISOR)return;if(RITMO){guardarRITMO();return}try{localStorage.setItem(LS,JSON.stringify({cfg:S.cfg,agentes:S.agentes,semanas:Object.fromEntries(Object.entries(S.semanas).filter(([k,v])=>!v._draft).sort((a,b)=>a[0].localeCompare(b[0])))}));setSave("local","Guardado en este navegador")}catch(e){setSave("err","No se pudo guardar")}}
@@ -1309,7 +1309,7 @@ document.addEventListener("click",e=>{
   else if(a==="auto")autollenar();
   else if(a==="undo")deshacer();
   else if(a==="plxlsx")descargarPlanilla();
-  else if(a==="publicar"&&RITMO){clearTimeout(tRITMO);parent.postMessage({tipo:"ritmo-publicar",data:paqueteRITMO()},location.origin);setSave("busy","Publicando…")}
+  else if(a==="publicar"&&RITMO){clearTimeout(tRITMO);parent.postMessage({tipo:"ritmo-publicar",data:paqueteRITMO(),mbk:resumenMBK()},location.origin);setSave("busy","Publicando…")}
   else if(a==="vtprev"||a==="vtnext"){S.vtSem=wkShift(S.vtSem||S.semana,a==="vtprev"?-1:1);render()}
   else if(a==="vtwa")mostrarTexto("Solicitud de viático · WhatsApp",textoViatico(S.vtSem||S.semana));
   else if(a==="vtimgS"||a==="vtimgD"){const k=S.vtSem||S.semana;copiarLienzo(lienzoViatico(k,a==="vtimgD"?"D":"S"),`Viatico_MBK_${a==="vtimgD"?"detalle":"solicitud"}_${k}.png`,a==="vtimgD"?"Imagen del detalle copiada. Pégala en WhatsApp.":"Imagen de la solicitud copiada. Pégala en WhatsApp.")}
@@ -1692,6 +1692,8 @@ function calcViatico(k){
   const total=r2(agentes.reduce((x,a)=>x+a.total,0)),diasUsados=dias.filter(x=>x.salidas).length;
   return{k,P,diario,dias,agentes,salidas:agentes.reduce((x,a)=>x+a.salidas,0),diasUsados,total,sinUso:P?r2(P-total):0,guardada:!s._draft}}
 function horaCorta(t){const [h]=t.split(":").map(Number);return (h%12||12)+" "+(h<12?"AM":"PM")}
+// Resumen semanal del viático MBK que el panel guarda en RITMO para que el GZ, GD y GO vean lo que solicita la tienda
+function resumenMBK(){try{return semanasConMBK().slice(-8).map(k=>{const V=calcViatico(k),w=vtCfg().semanas[k]||{};return{semana:k,total:V.total,presupuesto:V.P??null,diasUsados:V.diasUsados,solicitado:!!w.solicitado,montoSol:w.montoSol??null}})}catch(e){return[]}}
 function semanasConMBK(){return Object.keys(S.semanas).filter(k=>!S.semanas[k]._draft&&S.semanas[k].filas.some(f=>f.caja==="MBK")).sort()}
 function renderMBK(){
   const v=document.getElementById("view-mbk");if(!S.vtSem)S.vtSem=S.semana;const k=S.vtSem,V=calcViatico(k),vc=vtCfg(),w=vc.semanas[k]||{},lun=parse(k);
