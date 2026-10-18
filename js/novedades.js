@@ -1,11 +1,16 @@
 // RITMO · Versión publicada. Subir este número en CADA publicación: las sesiones abiertas lo comparan con el que está en el
 // sitio y avisan al usuario que hay una versión nueva (se aplica al cerrar sesión y volver a entrar).
-export const VERSION = "3.1";
+export const VERSION = "3.2";
 
 // RITMO · Novedades del desarrollador
 // Agregar cada mejora ARRIBA (la más reciente primero). id único y creciente.
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
+  {
+    id: 39, fecha: "2026-10-18", version: "3.2", tipo: "Mejora", para: "Reclutamiento",
+    titulo: "Reclutamiento: dónde enfocarte",
+    detalle: "Reclutamiento abre con las plazas por cubrir de cada tienda (presupuesto menos personal activo), de la más urgente a la menos, con filtro por zona. Quien tiene el permiso de aperturas puede abrir las vacantes de una tienda o de todas con un clic; al contratar o dar de alta a alguien, la vacante se cierra sola."
+  },
   {
     id: 38, fecha: "2026-10-18", version: "3.1", tipo: "Nuevo", para: "Reclutamiento",
     titulo: "Prospectos: del candidato a la contratación",
