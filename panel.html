@@ -314,7 +314,7 @@ button.drop{width:100%;background:#fff;font:inherit}
   <!-- Recursos Humanos: altas, bajas y control cruzado con las tiendas (RRHH y Superusuario) -->
   <section id="v-rrh" hidden>
     <div class="kpis" id="rhK"></div>
-    <div class="card"><div class="ch"><h3>1 · Cargar altas</h3><span class="sub">Excel de altas de RRHH: Nombre, Cargo, Tiendas, Cédula y Fecha de ingreso</span></div>
+    <div class="card" id="rhCarga"><div class="ch"><h3>1 · Cargar altas</h3><span class="sub">Carga inicial y de emergencia (solo Superusuario). El día a día se registra tienda por tienda.</span></div>
       <div class="pad">
         <label class="drop" id="dropH"><b>Elegir archivo de altas</b>Se lee en tu navegador; el Excel no se sube. Solo se guardan nombre, cédula, cargo, categoría, empresa, tienda e ingreso.<input type="file" id="fileH" accept=".xlsx" hidden></label>
         <div class="grid2" id="rhSum" style="margin-top:12px" hidden></div>
@@ -408,6 +408,17 @@ button.drop{width:100%;background:#fff;font:inherit}
         <div class="msg" id="pMsg" style="margin-top:12px"></div>
         <div class="bar" style="margin-top:12px"><button class="btn nav" id="pubP" disabled>Publicar presupuesto</button></div>
       </div></div>
+    <div class="card"><div class="ch"><h3>4 · Respaldo y reinicio</h3><span class="sub">Solo para una caída o un mal manejo: vuelve a empezar con los Excel</span></div>
+      <div class="pad">
+        <div class="sub" style="margin-bottom:10px">El <b>respaldo</b> descarga un archivo con el personal, las vacantes y las plazas actuales. El <b>reinicio</b> borra lo que marques (siempre descarga antes el respaldo) y después se vuelve a cargar con los pasos 1 y 3 y el archivo de altas. No toca usuarios, roles, entregas ni horarios.</div>
+        <div class="bar"><button class="btn" id="rspBaja">⬇ Descargar respaldo</button></div>
+        <div style="margin-top:14px;display:grid;gap:6px">
+          <label class="sub" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="rstPers" checked>Personal (altas y bajas)</label>
+          <label class="sub" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="rstVac">Vacantes</label>
+          <label class="sub" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="rstPlz">Presupuesto de plazas y resumen de activos</label></div>
+        <div class="bar" style="margin-top:12px"><button class="btn dng" id="rstGo">Reiniciar…</button></div>
+        <div class="msg" id="rstMsg" style="margin-top:12px"></div>
+      </div></div>
   </section>
 </main>
 
@@ -488,7 +499,9 @@ function resumenPersonal(d){
 let ultimoRes='';
 async function guardarResumen(data){
   if(!genTienda||!data)return;
-  const r=resumenPersonal(data),k=genTienda+JSON.stringify(r);if(k===ultimoRes)return;ultimoRes=k;
+  const r=resumenPersonal(data);
+  if(!r.activos&&!r.porIngresar&&(RES[genTienda]?.activos||0)>0)return; // horario aún sin precargar: no borres la cifra que dejó la carga de altas
+  const k=genTienda+JSON.stringify(r);if(k===ultimoRes)return;ultimoRes=k;
   RES[genTienda]={...r};
   if(!C)return;
   try{await C.F.setDoc(C.F.doc(C.db,'resumen',genTienda),{...r,tienda:genTienda,por:REAL.correo,actualizado:C.F.serverTimestamp()})}catch(e){ultimoRes=''}
@@ -553,11 +566,13 @@ async function estadoAdm(){
   const card=(t,v,s)=>`<div class="mini"><b style="font-size:15px">${v}</b><span>${t}${s?'<br>'+s:''}</span></div>`;
   if(!C){E.innerHTML=card('Última publicación de roles','Vista previa','Sin conexión a la nube')+card('Último envío de accesos','Vista previa','');return}
   try{const {F,db}=C;
-    const [r,a,pz]=await Promise.all([F.getDoc(F.doc(db,'sistema','roles')),F.getDoc(F.doc(db,'sistema','accesos')),F.getDoc(F.doc(db,'sistema','plazas'))]);
-    const R=r.exists()?r.data():null,A=a.exists()?a.data():null,Z=pz.exists()?pz.data():null;
+    const [r,a,pz,al,rs]=await Promise.all(['roles','accesos','plazas','altas','reinicio'].map(d=>F.getDoc(F.doc(db,'sistema',d))));
+    const R=r.exists()?r.data():null,A=a.exists()?a.data():null,Z=pz.exists()?pz.data():null,AL=al.exists()?al.data():null,RS=rs.exists()?rs.data():null;
     E.innerHTML=(R?card('Última publicación de roles',fmt(R.fecha),`${R.tiendas} tiendas · ${R.usuarios} usuarios<br>por ${esc(R.porNombre||R.por||'')}`):card('Última publicación de roles','Aún sin publicar',''))
       +(A?card('Último envío de accesos',fmt(A.fecha),`${A.nuevos} cuentas nuevas · ${A.enviados} enlaces · ${A.errores} errores<br>por ${esc(A.porNombre||A.por||'')}`):card('Último envío de accesos','Aún sin enviar',''))
-      +(Z?card('Último presupuesto de plazas',fmt(Z.fecha),`${Z.tiendas} tiendas · ${Z.total} plazas<br>por ${esc(Z.porNombre||Z.por||'')}`):card('Último presupuesto de plazas','Aún sin cargar',''));
+      +(Z?card('Último presupuesto de plazas',fmt(Z.fecha),`${Z.tiendas} tiendas · ${Z.total} plazas<br>por ${esc(Z.porNombre||Z.por||'')}`):card('Último presupuesto de plazas','Aún sin cargar',''))
+      +(AL?card('Última carga de altas',fmt(AL.fecha),`${AL.personas} personas · ${AL.activos} activas<br>por ${esc(AL.porNombre||AL.por||'')}`):card('Última carga de altas','Aún sin cargar',''))
+      +(RS?card('Último reinicio',fmt(RS.fecha),`${esc(RS.alcance||'')}<br>por ${esc(RS.porNombre||RS.por||'')}`):'');
   }catch(e){E.innerHTML=card('No se pudo leer el estado',esc(e.code||e.message),'')}
 }
 // Compartir RITMO: enlace oficial, QR (librería local) y mensaje de lanzamiento. Al pasar a un dominio propio, solo cambia este valor.
@@ -646,7 +661,10 @@ function ofertaTour(){
   ofrecerRecorrido({correo:correoTour(),id:'panel',titulo:'¿Un recorrido de 1 minuto?',texto:'Te muestro lo esencial de RITMO, paso a paso, con voz si quieres.',onEmpezar:()=>lanzarLeccion('panel')});
 }
 function ver(k){if(k==='loc')pintarLoc();if(k==='adm'){estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
-  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];ajustarGen();}
+  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];
+  // La quincena y la alerta de planilla solo importan donde se trabaja con quincenas; RRHH y Reclutamiento no las necesitan
+  $('qSel').closest('label').style.display=['seg','mia','cal','gen'].includes(k)?'':'none';$('alerta').style.display=['rrh','rec'].includes(k)?'none':'';
+  ajustarGen();}
 
 function pintar(){
   $('qTxt').textContent=quincenaTexto(Q);
@@ -769,7 +787,7 @@ const cedMasc=n=>{const c=RH.normCed(n);return RH_VER?RH.fmtCed(c):'•••-�
 // ----- Pantalla de RRHH
 const rhCargar=()=>esSuper()||tiene('rrhh_cargar'),rhX=()=>esSuper()||tiene('rrhh_eliminar');
 async function pintarRRH(){
-  $('dropH').closest('.card').hidden=!rhCargar();$('rhBuscaB').closest('.card').hidden=!rhCargar(); // sin permiso de cargar solo se consulta
+  $('rhCarga').hidden=!esSuper();$('rhBuscaB').closest('.card').hidden=!rhCargar(); // sin permiso de cargar solo se consulta
   if(!PERSOK)await cargarPersonal();
   const pend=RH.pendientes(PERS),atr=pend.filter(x=>x.atrasado).length;
   const k=(b,l,c='')=>`<div class="kpi ${c}"><b>${b}</b><span>${l}</span></div>`;
@@ -895,8 +913,26 @@ $('rhPub').onclick=async()=>{
     msg('rhMsg',`Publicado: ${ALTASP.nuevos.length} nuevas, ${ALTASP.cambian.length} actualizadas y ${ALTASP.confirma.length} confirmadas.${cubiertas?` Se cerraron ${cubiertas} vacante${cubiertas>1?'s':''}.`:''}`,'ok');
     if(cubiertas)VACOK=false;
     ALTASP=null;PERSOK=false;await pintarRRH();
+    await publicarResumenAltas(); // la cifra de activos por tienda llega a todos sin esperar a que cada gerente abra su horario
   }catch(err){msg('rhMsg','Error al publicar: '+(err.code||err.message),'bad');$('rhPub').disabled=false}
 };
+
+// Cifras por tienda (sin datos personales) a partir del personal cargado, y registro de la carga en "sistema/altas"
+async function publicarResumenAltas(){
+  if(!esSuper()||!PERSOK)return;
+  const h=new Date(),hoy=`${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`,por={};
+  for(const p of PERS){if(p.estado!=='activo'||p.cargo==='Gerente de tienda'||!p.tienda)continue;
+    const r=por[p.tienda]||(por[p.tienda]={activos:0,porIngresar:0});
+    if(p.ingreso&&p.ingreso>hoy)r.porIngresar++;else r.activos++}
+  const tiendas=(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba);
+  const lista=tiendas.map(t=>[t.codigo,por[t.codigo]||{activos:0,porIngresar:0}]);
+  lista.forEach(([c,r])=>{RES[c]={...r}});
+  if(!C)return;
+  try{const {F,db}=C;let b=F.writeBatch(db),n=0;
+    for(const [c,r] of lista){b.set(F.doc(db,'resumen',c),{...r,tienda:c,por:REAL.correo,actualizado:F.serverTimestamp()});if(++n>=400){await b.commit();b=F.writeBatch(db);n=0}}
+    b.set(F.doc(db,'sistema','altas'),{fecha:F.serverTimestamp(),personas:PERS.length,activos:PERS.filter(p=>p.estado==='activo').length,por:REAL.correo,porNombre:REAL.nombre||''});
+    await b.commit();estadoAdm()}catch(e){}
+}
 
 // ----- Lado de la tienda: precarga con confirmación del gerente, sin duplicar
 async function pintarPersonalTienda(){
@@ -1441,7 +1477,7 @@ $('fileX').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
     const wb=XLSX.read(await f.arrayBuffer());
     const rows=n=>{const ws=wb.Sheets[n];if(!ws)throw new Error(`Falta la hoja "${n}"`);return XLSX.utils.sheet_to_json(ws,{defval:''})};
     const T=rows('Tiendas'),U=rows('Usuarios');
-    const tiendas=T.filter(r=>r['Código']).map(r=>({codigo:String(r['Código']).trim(),numero:+r['N°']||0,nombre:String(r['Nombre comercial']).trim(),
+    const tiendas=T.filter(r=>r['Código']).map(r=>({codigo:String(r['Código']).trim(),numero:+(/(\d+)\s*$/.exec(String(r['Código']))||[])[1]||+r['N°']||0 /* el número real es el del código (AMPM16): la columna N° es solo un consecutivo y en el Excel se desfasa */,nombre:String(r['Nombre comercial']).trim(),
       zona:String(r['Zona']).trim(),region:String(r['Región']).trim(),correoTienda:correo(r['Correo tienda (usuario)']),correoGZ:correo(r['Correo GZ']),
       auxiliar:String(r['Auxiliar de planilla']).trim(),activa:String(r['Activa']).trim()!=='No'}));
     tiendas.forEach(t=>t.prueba=t.zona.toLowerCase()==='pruebas');
@@ -1522,6 +1558,45 @@ $('pubP').onclick=async()=>{if(!PRESUP||!PRESUP.length)return;
     aplicar();estadoAdm();pintar();
     msg('pMsg',`Publicado: ${PRESUP.length} tiendas y ${total} plazas presupuestadas.`,'ok');
   }catch(e){msg('pMsg','Error al publicar: '+(e.code||e.message),'bad');$('pubP').disabled=false}
+};
+
+// ---------- Administración: respaldo y reinicio (solo Superusuario)
+const jsonSeguro=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&typeof v.toDate==='function'?v.toDate().toISOString():v,1);
+async function leerRespaldo(){
+  if(!C)return {personal:[...DEMOP.entries()].map(([id,p])=>({id,...p})),vacantes:[...DEMOV.entries()].map(([id,v])=>({id,...v})),plazas:(ALLT.length?ALLT:TIENDAS).filter(t=>t.plazas!=null).map(t=>({codigo:t.codigo,plazas:t.plazas}))};
+  const {F,db}=C,col=async n=>(await F.getDocs(F.collection(db,n))).docs.map(d=>({id:d.id,...d.data()}));
+  const [personal,vacantes,tiendas]=await Promise.all([col('personal'),col('vacantes'),col('tiendas')]);
+  return {personal,vacantes,plazas:tiendas.filter(t=>t.plazas!=null).map(t=>({codigo:t.id,plazas:t.plazas}))};
+}
+async function descargarRespaldo(){
+  const R=await leerRespaldo(),h=new Date(),sello=`${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}_${String(h.getHours()).padStart(2,'0')}${String(h.getMinutes()).padStart(2,'0')}`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([jsonSeguro({app:'RITMO',version:VERSION,generado:h.toISOString(),por:REAL.correo,...R})],{type:'application/json'}));
+  a.download=`RITMO_respaldo_${sello}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  return R;
+}
+$('rspBaja').onclick=async()=>{if(!esSuper())return;try{const R=await descargarRespaldo();msg('rstMsg',`Respaldo descargado: ${R.personal.length} personas, ${R.vacantes.length} vacantes y plazas de ${R.plazas.length} tiendas. Guárdalo fuera de GitHub (contiene datos personales).`,'ok')}catch(e){msg('rstMsg','No se pudo generar el respaldo: '+(e.code||e.message),'bad')}};
+$('rstGo').onclick=async()=>{
+  if(!esSuper())return;
+  const sel=[$('rstPers').checked&&'personal',$('rstVac').checked&&'vacantes',$('rstPlz').checked&&'plazas'].filter(Boolean);
+  if(!sel.length)return msg('rstMsg','Marca al menos una opción para reiniciar.','warn');
+  const r=await dialogo({titulo:'Reiniciar información',cuerpo:`<p>Se borrará: <b>${sel.join(', ')}</b>. Antes se descarga un respaldo. No se tocan usuarios, roles, entregas ni horarios.</p><p>Para confirmar, escribe <b>REINICIAR</b>:</p><input class="in" id="rstTxt" autocomplete="off" style="width:100%">`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Descargar respaldo y reiniciar',k:'ok',cls:'dng',valida:d=>d.querySelector('#rstTxt').value.trim().toUpperCase()==='REINICIAR'?null:'Escribe REINICIAR para continuar.'}]});
+  if(r.k!=='ok')return;
+  try{
+    msg('rstMsg','Descargando respaldo…','warn');await descargarRespaldo();
+    msg('rstMsg','Reiniciando…','warn');
+    if(!C){if(sel.includes('personal'))DEMOP.clear();if(sel.includes('vacantes'))DEMOV.clear();if(sel.includes('plazas'))[ALLT,TIENDAS].forEach(L=>L.forEach(t=>{delete t.plazas}))}
+    else{const {F,db}=C,borrar=async(n)=>{const s=await F.getDocs(F.collection(db,n));let b=F.writeBatch(db),k=0;for(const d of s.docs){b.delete(d.ref);if(++k>=400){await b.commit();b=F.writeBatch(db);k=0}}if(k)await b.commit();return s.size};
+      if(sel.includes('personal'))await borrar('personal');
+      if(sel.includes('vacantes'))await borrar('vacantes');
+      if(sel.includes('plazas')){await borrar('resumen');const s=await F.getDocs(F.collection(db,'tiendas'));let b=F.writeBatch(db),k=0;
+        for(const d of s.docs){if(d.data().plazas==null)continue;b.update(d.ref,{plazas:F.deleteField(),plazasFecha:F.deleteField()});if(++k>=400){await b.commit();b=F.writeBatch(db);k=0}}
+        if(k)await b.commit();await F.deleteDoc(F.doc(db,'sistema','plazas')).catch(()=>{});[ALLT,TIENDAS].forEach(L=>L.forEach(t=>{delete t.plazas}));RES={}}
+      if(sel.includes('personal'))await F.deleteDoc(F.doc(db,'sistema','altas')).catch(()=>{});
+      await F.setDoc(F.doc(db,'sistema','reinicio'),{fecha:F.serverTimestamp(),alcance:sel.join(', '),por:REAL.correo,porNombre:REAL.nombre||''})}
+    PERS=[];PERSOK=false;VAC=[];VACOK=false;estadoAdm();pintar();
+    msg('rstMsg','Listo: la información marcada quedó vacía. Vuelve a cargar los Excel (roles ya publicados; presupuesto y altas según lo que reiniciaste).','ok');
+  }catch(e){msg('rstMsg','No se pudo reiniciar: '+(e.code||e.message),'bad')}
 };
 
 // ---------- Administración: crear accesos
