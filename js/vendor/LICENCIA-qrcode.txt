@@ -1,0 +1,2 @@
+﻿/* qrcode-generator 1.4.4 (c) Kazuhiko Arase · MIT · https://github.com/kazuhikoarase/qrcode-generator */
+

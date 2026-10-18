@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://www.gstatic.com https://*.firebaseio.com wss://*.firebaseio.com; frame-src 'self' blob: https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="same-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RITMO · Ver entrega</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -55,7 +57,7 @@ else {
       const ws=Object.keys(data.semanas||{}).sort();const a=iso(lun(ini)),b=iso(fin);
       const semana=ws.find(w=>w>=a&&w<=b)||ws[ws.length-1];
       addEventListener('message',ev=>{if(ev.origin!==location.origin||ev.data?.tipo!=='ritmo-listo')return;
-        $('gen').contentWindow.postMessage({tipo:'ritmo-datos',data,semana,meta:{tienda:T,descarga,q:Q,modulos:rol==='Editor'?['horario','planilla','mbk']:null}},location.origin)});
+        $('gen').contentWindow.postMessage({tipo:'ritmo-datos',data,semana,meta:{tienda:T,descarga,q:Q,plazas:tie&&tie.exists()?(tie.data().plazas??null):null,modulos:rol==='Editor'?['horario','planilla','mbk']:null}},location.origin)});
       $('gen').src='generador.html?visor=1';$('gen').hidden=false;
     }catch(err){fail('No tienes acceso a esta tienda o no se pudo leer la entrega ('+(err.code||err.message)+').')}
   });

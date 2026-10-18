@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://www.gstatic.com https://*.firebaseio.com wss://*.firebaseio.com; frame-src 'self' blob: https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="same-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RITMO · Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,7 +45,7 @@ main{max-width:1280px;margin:auto;padding:20px;display:flex;flex-direction:colum
 .in{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:#fff;color:var(--ink)}
 h2{margin:0;font-size:22px;color:var(--navy)}
 .sub{color:var(--muted);margin:2px 0 0;font-size:13px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
 .kpi b{display:block;font:600 26px "IBM Plex Mono",monospace;color:var(--navy)}
 .kpi span{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -138,7 +140,38 @@ tr:last-child td{border-bottom:0}
 .loc b{color:var(--navy)}
 .lnk{background:none;border:0;color:var(--blue);font:600 12.5px "IBM Plex Sans",sans-serif;cursor:pointer;padding:0}
 #v-gen .card{overflow:hidden}
-#genF{display:block;width:100%;height:calc(100vh - 150px);min-height:620px;border:0;background:#fff}
+#genF{display:block;width:100%;height:calc(100vh - 150px);min-height:420px;border:0;background:#fff}
+/* Mi horario: un solo scroll. La página no se desplaza; el Generador ocupa el resto de la pantalla y se desplaza por dentro. */
+html.gen-lock,html.gen-lock body{overflow:hidden}
+/* Tutoriales */
+.lec{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:14px;border:1px solid var(--line);border-radius:12px}
+.lic{font-size:26px;line-height:1}.lbd{flex:1 1 260px;min-width:0}.lbd b{display:block;color:var(--navy)}.lbd span{color:var(--muted);font-size:13.5px}
+.lok{color:var(--ok,#1d7f48);font-weight:600;font-size:13px}.lsoon{color:var(--muted);font-size:13px}
+/* Alertas de incumplimiento al jefe inmediato */
+.alj{background:var(--card);border:1px solid #f4b8b4;border-left:5px solid var(--bad,#b3261e);border-radius:12px;overflow:hidden}
+.alj.ok{border-color:var(--line);border-left-color:var(--ok,#1d7f48)}
+.alj-h{display:flex;gap:6px 14px;align-items:center;flex-wrap:wrap;padding:12px 16px}.alj-h b{font-size:15px;color:var(--navy)}
+.alj-it{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--line)}
+.alj-it.hecho{opacity:.55}.alj-t{flex:1 1 260px;min-width:0}.alj-t b{display:block}.alj-t span{color:var(--muted);font-size:13px}
+.alj-a{display:flex;gap:6px;flex-wrap:wrap}
+/* Diálogos (aprobar horas extra, reapertura) */
+.dlg{border:0;border-radius:14px;padding:0;width:min(480px,calc(100vw - 32px));color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.dlg::backdrop{background:rgba(4,0,63,.6)}
+.dlg form{padding:20px}.dlg h3{margin:0 0 10px;color:var(--navy)}.dlg p{margin:0 0 10px;line-height:1.5}
+.dlg textarea{width:100%;min-height:92px;margin:6px 0 10px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:inherit;color:inherit;resize:vertical}
+.dlg .mot{margin:6px 0 12px;padding:10px 12px;border-left:3px solid var(--orange);background:var(--field,#f5f7fb);border-radius:0 8px 8px 0}
+.dlga{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
+.dlg.ancho{width:min(760px,calc(100vw - 32px))}.dlg.ancho .dlgb{max-height:56vh;overflow:auto}
+.btn.dng{color:var(--bad,#b3261e);border-color:var(--bad,#b3261e)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 14px}
+.fl{display:block;font-size:12.5px;color:var(--muted);font-weight:600}.fl .in{display:block;width:100%;margin-top:4px;font-weight:400;color:var(--ink)}
+/* Recursos Humanos */
+.rhr{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:9px 0;border-top:1px solid var(--line)}.rhr:first-child{border-top:0}
+.rhr .rt{flex:1 1 240px;min-width:0}.rhr .rt b{display:block}.rhr .rt span{color:var(--muted);font-size:13px}
+.rhr select,.rhr label{font-size:13.5px}
+.rh-tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;background:var(--field,#f5f7fb);color:var(--muted)}
+.rh-tag.ok{background:var(--ok-bg,#e4f4ea);color:var(--ok,#1d7f48)}.rh-tag.warn{background:#fff2d6;color:#8a5200}.rh-tag.bad{background:var(--bad-bg,#fde8e6);color:var(--bad,#b3261e)}
+body.gen-on .hello{display:none}
 .gbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line-2);background:#fafbfd}
 .gbar .st2{font-size:12.5px;color:var(--muted)}
 .empty2{padding:28px;text-align:center}
@@ -160,11 +193,13 @@ button.drop{width:100%;background:#fff;font:inherit}
   <div class="sp"></div>
   <span class="net" id="net" role="status" title="Conexión segura (HTTPS)"><i></i><span id="netT">En línea</span></span>
   <div class="who"><div><b id="uName">—</b><span id="uMail"></span></div><span class="badge" id="uRol"></span></div>
+  <button class="btn" id="tutB" title="Ayuda y tutoriales" aria-label="Ayuda y tutoriales">❓</button>
   <button class="btn" id="pwB" title="Cambiar contraseña">🔑</button>
   <button class="btn" id="out">Salir</button>
 </div></header>
 
 <main>
+  <div class="alerta info" id="verNueva" role="status" hidden style="margin-bottom:12px"></div>
   <div class="demo" id="demo" hidden>Vista previa con datos de ejemplo: Firebase aún no está conectado. Nada se guarda.</div>
   <div class="hello"><div style="flex:1;min-width:240px"><h1 id="saludo">Hola</h1><p id="saludoSub"></p></div></div>
   <div class="vc" id="vc" hidden><b>👁 Ver como</b><select id="vcSel" aria-label="Ver RITMO como otro rol"></select><span id="vcTxt">Revisa la pantalla de cada rol antes de producción. Tus permisos reales no cambian.</span></div>
@@ -180,17 +215,19 @@ button.drop{width:100%;background:#fff;font:inherit}
 
   <!-- Seguimiento (Visualizar, Descargar, Superusuario) -->
   <section id="v-seg" hidden>
+    <div id="alJ" style="margin-bottom:16px"></div>
     <div class="kpis">
       <div class="kpi"><b id="kT">0</b><span>Tiendas a cargo</span></div>
       <div class="kpi"><b id="kE">0</b><span>Entregadas</span></div>
       <div class="kpi hot"><b id="kP">0</b><span>Pendientes</span></div>
       <div class="kpi"><b id="kC">0%</b><span>Cumplimiento</span><div class="meter"><i id="kM" style="width:0"></i></div></div>
+      <div class="kpi" title="Personal activo frente a las plazas presupuestadas, sin contar gerente de tienda"><b id="kPl">—</b><span id="kPlT">Plazas cubiertas</span><div class="meter"><i id="kPlM" style="width:0"></i></div></div>
     </div>
     <div class="card" style="margin-top:16px">
       <div class="ch"><h3>Detalle por tienda</h3>
         <div class="bar"><input class="in" id="fTxt" placeholder="Buscar tienda o GZ"><select class="in" id="fZona"><option value="">Todas las zonas</option></select>
         <select class="in" id="fEst"><option value="">Todos los estados</option><option value="ok">Entregadas</option><option value="no">Pendientes</option></select></div></div>
-      <div class="scroll"><table><thead><tr><th>Código</th><th>Tienda</th><th>Zona</th><th>GZ</th><th>Estado</th><th>Entregó</th><th>Fecha</th><th id="thAcc">Acción</th></tr></thead><tbody id="tb"></tbody></table></div>
+      <div class="scroll"><table><thead><tr><th>Código</th><th>Tienda</th><th>Zona</th><th>GZ</th><th title="Personal activo / plazas presupuestadas, sin gerente de tienda">Personal</th><th>Estado</th><th>Entregó</th><th>Fecha</th><th id="thAcc">Acción</th></tr></thead><tbody id="tb"></tbody></table></div>
     </div>
   </section>
 
@@ -199,6 +236,7 @@ button.drop{width:100%;background:#fff;font:inherit}
     <div class="card">
       <div class="gbar"><b>🗓 Mi horario</b><span class="st2" id="genSt">Se guarda solo en RITMO mientras trabajas.</span><div class="sp"></div>
         <button class="btn pri" id="genEnt">Entregar quincena</button></div>
+      <div id="genPers" style="padding:0 16px"></div>
       <div class="empty2" id="genIni" hidden>
         <h4>Empieza tu horario en RITMO</h4>
         <p>Trae tu información una sola vez. Desde ahí trabajas aquí y todo se guarda en la nube; ya no necesitas manejar archivos.</p>
@@ -217,6 +255,7 @@ button.drop{width:100%;background:#fff;font:inherit}
     <div class="mine">
       <div class="card"><div class="ch"><h3>Entregar la quincena</h3><span id="miaSt"></span></div>
         <div class="pad">
+          <div id="miaLock" style="margin-bottom:12px"></div>
           <div class="req">
             <div class="step" id="s1"><i>1</i>Horario y planilla</div>
             <button class="btn nav" id="useGen" type="button">Usar lo que tengo en Mi horario</button>
@@ -272,6 +311,47 @@ button.drop{width:100%;background:#fff;font:inherit}
       <div class="nov" id="novL"></div></div>
   </section>
 
+  <!-- Recursos Humanos: altas, bajas y control cruzado con las tiendas (RRHH y Superusuario) -->
+  <section id="v-rrh" hidden>
+    <div class="kpis" id="rhK"></div>
+    <div class="card"><div class="ch"><h3>1 · Cargar altas</h3><span class="sub">Excel de altas de RRHH: Nombre, Cargo, Tiendas, Cédula y Fecha de ingreso</span></div>
+      <div class="pad">
+        <label class="drop" id="dropH"><b>Elegir archivo de altas</b>Se lee en tu navegador; el Excel no se sube. Solo se guardan nombre, cédula, cargo, categoría, empresa, tienda e ingreso.<input type="file" id="fileH" accept=".xlsx" hidden></label>
+        <div class="grid2" id="rhSum" style="margin-top:12px" hidden></div>
+        <div class="msg" id="rhMsg" style="margin-top:12px"></div>
+        <div class="bar" style="margin-top:12px"><button class="btn nav" id="rhPub" disabled>Publicar altas</button></div>
+      </div></div>
+    <div class="card"><div class="ch"><h3>2 · Control cruzado: pendientes de confirmar</h3><span class="sub">Lo que registra la tienda lo confirma RRHH, y lo que registra RRHH lo confirma la tienda</span></div>
+      <div class="pad" id="rhPend"></div></div>
+    <div class="card"><div class="ch"><h3>3 · Registrar una baja</h3><span class="sub">Úsalo cuando la tienda no la registró</span></div>
+      <div class="pad"><input class="in" id="rhBuscaB" placeholder="Buscar por nombre, cédula o tienda (mínimo 3 letras)" style="width:100%;max-width:420px" autocomplete="off">
+        <div id="rhBajaRes" style="margin-top:10px"></div></div></div>
+    <div class="card"><div class="ch"><h3>4 · Personal registrado</h3>
+        <div class="bar"><input class="in" id="rhTxt" placeholder="Buscar nombre, cédula o tienda" autocomplete="off"><select class="in" id="rhEst"><option value="">Todos</option><option value="activo">Activos</option><option value="baja">Bajas</option><option value="pend">Pendientes de confirmar</option></select>
+          <label class="sub" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="rhVer">Mostrar cédulas</label>
+          <button class="btn" id="rhRef" title="Volver a leer el registro">↻</button></div></div>
+      <div class="scroll"><table><thead><tr><th>Colaborador</th><th>Cédula</th><th>Tienda</th><th>Cargo</th><th>Ingreso</th><th>Estado</th><th></th></tr></thead><tbody id="rhTb"></tbody></table></div>
+      <div class="pad sub" id="rhPie"></div></div>
+  </section>
+
+  <!-- Reclutamiento: vacantes, tiendas nuevas y puestos nuevos -->
+  <section id="v-rec" hidden>
+    <div class="kpis" id="rcK"></div>
+    <div class="card"><div class="ch"><h3>Vacantes</h3>
+        <div class="bar"><button class="btn pri" id="rcNT" hidden>+ Nueva tienda</button><button class="btn pri" id="rcNP" hidden>+ Nuevo puesto</button>
+          <input class="in" id="rcTxt" placeholder="Buscar tienda o cargo" autocomplete="off"><select class="in" id="rcEst"><option value="abierta">Abiertas</option><option value="cubierta">Cubiertas</option><option value="cancelada">Canceladas</option><option value="">Todas</option></select></div></div>
+      <div class="scroll"><table><thead><tr><th>Tienda</th><th>Cargo</th><th>Motivo</th><th>Estado</th><th>Abierta</th><th></th></tr></thead><tbody id="rcTb"></tbody></table></div>
+      <div class="pad sub" id="rcPie"></div></div>
+  </section>
+
+  <!-- Tutoriales: lecciones según el rol -->
+  <section id="v-tut" hidden>
+    <div class="card"><div class="ch"><h3>Tutoriales</h3>
+        <label class="sub" id="tutVozW" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="tutVoz">🔊 Narración con voz</label></div>
+      <div class="pad sub" style="padding-bottom:0">Recorridos paso a paso dentro de RITMO, según tu rol. La pantalla se oscurece y te mostramos dónde hacer clic. Puedes salir cuando quieras con Esc.</div>
+      <div class="pad" id="tutL" style="display:grid;gap:12px"></div></div>
+  </section>
+
   <!-- Copias en este navegador -->
   <section id="v-loc" hidden>
     <div class="card"><div class="ch"><h3>Guardados en este navegador</h3><button class="btn" id="locDel">Borrar todo</button></div>
@@ -281,6 +361,29 @@ button.drop{width:100%;background:#fff;font:inherit}
 
   <!-- Administración (Superusuario) -->
   <section id="v-adm" hidden>
+    <div class="card"><div class="ch"><h3>Estado de roles y accesos</h3><span class="sub">Leído de la nube; no se borra al usar “Ver como”</span></div>
+      <div class="pad"><div class="grid2" id="admEst"></div></div></div>
+    <div class="card"><div class="ch"><h3>Roles y permisos</h3><div class="bar"><button class="btn pri" id="rlNew">+ Nuevo rol</button></div></div>
+      <div class="pad sub" style="padding-bottom:0">Cada rol define los módulos que verá la persona. Los roles de RITMO se pueden consultar; los que crees aquí los puedes editar y eliminar. El módulo Administración es solo del superusuario.</div>
+      <div class="scroll"><table><thead><tr><th>Rol</th><th>Módulos</th><th>Usuarios</th><th></th></tr></thead><tbody id="rlTb"></tbody></table></div></div>
+    <div class="card"><div class="ch"><h3>Usuarios</h3><div class="bar"><input class="in" id="usTxt" placeholder="Buscar por nombre o correo" autocomplete="off"><button class="btn pri" id="usNew">+ Nuevo usuario</button></div></div>
+      <div class="scroll"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acceso</th><th></th></tr></thead><tbody id="usTb"></tbody></table></div>
+      <div class="pad sub" id="usPie"></div></div>
+    <div class="card"><div class="ch"><h3>Compartir RITMO</h3><span class="sub">Enlace, código QR y mensaje de lanzamiento</span></div>
+      <div class="pad" style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+        <div style="text-align:center;width:190px;flex:none">
+          <div id="qrBox" style="width:190px;height:190px;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff"></div>
+          <button class="btn" id="qrDl" style="margin-top:8px">⬇ Descargar QR</button></div>
+        <div style="flex:1 1 320px;min-width:0">
+          <div class="sub" style="margin-bottom:4px">Así se ve la tarjeta al compartir el enlace (WhatsApp, Teams, correo)</div>
+          <img src="assets/og-ritmo.png" alt="Tarjeta de vista previa de RITMO" style="width:100%;max-width:380px;border-radius:10px;border:1px solid var(--line);display:block">
+          <div class="sub" style="margin:14px 0 4px">Enlace oficial</div>
+          <input class="in" id="shUrl" type="url" style="width:100%" aria-label="Enlace oficial de RITMO">
+          <div class="sub" style="margin:14px 0 4px">Mensaje de lanzamiento</div>
+          <textarea class="in" id="shMsg" rows="10" style="width:100%;font:inherit" aria-label="Mensaje de lanzamiento"></textarea>
+          <div class="bar" style="margin-top:10px"><button class="btn pri" id="shCopy">Copiar mensaje</button><a class="btn" id="shWa" target="_blank" rel="noopener">Enviar por WhatsApp</a><span class="sub" id="shOk"></span></div>
+          <div class="sub" style="margin-top:8px">Si cambias la tarjeta o el logo, WhatsApp puede tardar en mostrar la nueva imagen: guarda su vista previa en memoria.</div>
+        </div></div></div>
     <div class="card"><div class="ch"><h3>0 · Tienda de pruebas</h3><span class="sub">Datos ficticios: nombres, cédulas y salarios inventados</span></div>
       <div class="pad"><div class="bar"><button class="btn nav" id="betaL">Cargar entrega de prueba en AMPM Beta (quincena seleccionada)</button><button class="lnk" id="betaX">Borrar entrega de prueba</button></div>
       <div class="msg" id="betaMsg" style="margin-top:12px"></div></div></div>
@@ -298,6 +401,13 @@ button.drop{width:100%;background:#fff;font:inherit}
         <button class="btn pri" id="acc">Crear accesos</button></div>
         <div class="log" id="log" style="margin-top:12px" hidden></div>
       </div></div>
+    <div class="card"><div class="ch"><h3>3 · Presupuesto de plazas</h3><span class="sub">Archivo con Zona, Tienda (AMPM01-Nombre) y Presupuesto de agentes, sin contar gerente de tienda</span></div>
+      <div class="pad">
+        <label class="drop" id="dropP"><b>Elegir archivo de presupuesto</b>Se lee en tu navegador; no se sube el Excel. Solo se guarda la cantidad de plazas de cada tienda.<input type="file" id="fileP" accept=".xlsx" hidden></label>
+        <div class="grid2" id="pSum" style="margin-top:12px" hidden></div>
+        <div class="msg" id="pMsg" style="margin-top:12px"></div>
+        <div class="bar" style="margin-top:12px"><button class="btn nav" id="pubP" disabled>Publicar presupuesto</button></div>
+      </div></div>
   </section>
 </main>
 
@@ -312,14 +422,25 @@ button.drop{width:100%;background:#fff;font:inherit}
     <div class="bar"><button class="btn pri" id="pwS" type="submit">Guardar contraseña</button><button class="btn" type="button" id="pwX">Cancelar</button></div>
   </form></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/vendor/qrcode.min.js"></script>
 <script type="module">
 import { nube, authSecundaria, configurado, correo, quincena, quincenaTexto, SUPERUSUARIO } from "./js/nube.js";
-import { NOVEDADES } from "./js/novedades.js";
+import { NOVEDADES, VERSION } from "./js/novedades.js";
 import * as LOC from "./js/local.js";
 import { BETA_DEMO } from "./js/beta-demo.js";
+// Service Worker: guarda la interfaz y la ayuda para usarlas sin conexión (sw.js)
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+import * as RH from "./js/rrhh.js";
+import * as RL from "./js/roles.js";
+import { iniciarAsistente } from "./js/asistente.js";
+import { iniciarTour, ofrecerRecorrido, leccionesPara, esVisto, marcarVisto, vozDisponible, vozActiva, setVoz } from "./js/tutorial.js";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let REAL=null, ALLT=[], C=null, ME=null, TIENDAS=[], ENT={}, Q=quincena(), IMP=null, CAL=null, DEMO_CAL={};
+// Permisos por módulo (js/roles.js): lo que ve y puede hacer cada rol. El superusuario lo tiene todo.
+const tiene=p=>RL.tiene(ME,p);
+const esSuper=()=>ME?.rol==='Superusuario';
+const esEditor=()=>ME?.rol==='Editor'||(!esSuper()&&tiene('mi_horario')); // gerente de tienda (o un rol personalizado con Mi horario)
+let REAL=null, ALLT=[], C=null, ME=null, TIENDAS=[], ENT={}, RES={}, Q=quincena(), IMP=null, CAL=null, DEMO_CAL={};
 
 // ---------- Quincenas (actual y 5 anteriores)
 (function(){const d=new Date();const qs=[];for(let i=0;i<6;i++){qs.push(quincena(d));d.setDate(d.getDate()<=15?0:15)}
@@ -350,6 +471,36 @@ async function cargarTiendas(){
   // La tienda de pruebas solo la ven el superusuario y su propio gerente de prueba
   if(ME.rol!=='Superusuario') TIENDAS=TIENDAS.filter(t=>!t.prueba||(ME.tiendas||[]).includes(t.codigo));
   TIENDAS.sort((a,b)=>(a.numero||0)-(b.numero||0));
+  // Resumen de personal activo de cada tienda (cifras, sin datos personales)
+  RES={};await Promise.all(TIENDAS.map(async t=>{const s=await C.F.getDoc(C.F.doc(C.db,'resumen',t.codigo)).catch(()=>null);if(s&&s.exists())RES[t.codigo]=s.data()}));
+}
+// Personal activo sin contar al gerente de tienda: solo cifras, para comparar con las plazas presupuestadas.
+function resumenPersonal(d){
+  const h=new Date(),hoy=`${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`;
+  let activos=0,porIngresar=0;
+  for(const a of (d&&d.agentes)||[]){
+    if((a.cargos||[])[0]==='Gerente de tienda')continue;
+    if(a.ingreso&&a.ingreso>hoy){porIngresar++;continue}
+    if(a.baja&&a.baja<hoy)continue;
+    activos++}
+  return {activos,porIngresar};
+}
+let ultimoRes='';
+async function guardarResumen(data){
+  if(!genTienda||!data)return;
+  const r=resumenPersonal(data),k=genTienda+JSON.stringify(r);if(k===ultimoRes)return;ultimoRes=k;
+  RES[genTienda]={...r};
+  if(!C)return;
+  try{await C.F.setDoc(C.F.doc(C.db,'resumen',genTienda),{...r,tienda:genTienda,por:REAL.correo,actualizado:C.F.serverTimestamp()})}catch(e){ultimoRes=''}
+}
+// Estado del personal de una tienda frente a su presupuesto (columna de Seguimiento)
+function personal(t){
+  const p=t.plazas,r=RES[t.codigo];
+  if(p==null)return '<span class="sub">Sin presupuesto</span>';
+  if(!r)return `<span class="mono">— / ${p}</span> <span class="st no"><i></i>Sin datos</span>`;
+  const d=r.activos-p;
+  const st=d<0?`<span class="st bad"><i></i>Faltan ${-d}</span>`:d>0?`<span class="st late"><i></i>Sobran ${d}</span>`:'<span class="st ok"><i></i>Completo</span>';
+  return `<span class="mono" title="Personal activo / plazas presupuestadas, sin gerente de tienda">${r.activos} / ${p}</span> ${st}`;
 }
 async function cargarEntregas(){
   ENT={};
@@ -359,6 +510,11 @@ async function cargarEntregas(){
   CAL=null;
   if(C){const s=await C.F.getDoc(C.F.doc(C.db,'calendario',Q)).catch(()=>null);if(s&&s.exists())CAL=s.data()}
   else CAL=DEMO_CAL[Q]||null;
+  // Aperturas directas del GZ para esta quincena (sirven para tiendas que nunca entregaron)
+  APER={};
+  if(C)await Promise.all(TIENDAS.map(async t=>{const s=await C.F.getDoc(C.F.doc(C.db,'aperturas',`${t.codigo}_${Q}`)).catch(()=>null);if(s&&s.exists())APER[t.codigo]=s.data()}));
+  else TIENDAS.forEach(t=>{const a=DEMOAP.get(`${t.codigo}_${Q}`);if(a)APER[t.codigo]=a});
+  if(esEditor())await cargarCierres();
   pintar();pintarCal();listo();if(genTienda&&$('genF').src){$('genF').contentWindow?.postMessage({tipo:'ritmo-quincena',q:Q},location.origin);estadoPub()}
 }
 
@@ -367,55 +523,836 @@ function armar(){
   const h=new Date().getHours(),pn=(REAL?.nombre||ME.nombre||'').split(' ')[0]||'';
   $('saludo').innerHTML=`${h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'}${pn&&pn!=='Superusuario'?', <b>'+esc(pn)+'</b>':''} 👋`;
   const que={Superusuario:'Tienes el control completo de RITMO.',Editor:'Aquí entregas el horario y la planilla de tu tienda.',
-    Visualizar:'Revisa qué tiendas ya entregaron la quincena.',Descargar:'Revisa las entregas y descarga las planillas de tus tiendas.'}[ME.rol]||'';
+    RRHH:'Carga las altas, controla las bajas y confirma con las tiendas.',Visualizar:'Revisa qué tiendas ya entregaron la quincena.',Descargar:'Revisa las entregas y descarga las planillas de tus tiendas.'}[ME.rol]||RL.PLANTILLAS[ME.rol]?.desc||'';
   $('saludoSub').textContent=new Date().toLocaleDateString('es-NI',{weekday:'long',day:'numeric',month:'long'})+' · '+que;
   armarVC();
   $('uName').textContent=REAL?.nombre||ME.nombre||ME.correo;$('uMail').textContent=ME.correo;
   $('uRol').textContent=REAL?.rol||ME.rol;$('uRol').className='badge r-'+(REAL?.rol||ME.rol);
+  // Pestañas según los permisos del rol (js/roles.js)
   const T=[];
-  if(ME.rol==='Editor') T.push(['gen','Mi horario'],['mia','Entregar']);
-  else T.push(['seg','Seguimiento']);
-  if(ME.rol==='Descargar'||ME.rol==='Superusuario') T.push(['cal','Calendario de planilla']);
+  if(esEditor()) T.push(['gen','Mi horario'],['mia','Entregar']);
+  else if(esSuper()||tiene('seguimiento')) T.push(['seg','Seguimiento']);
+  if(esSuper()||tiene('calendario')) T.push(['cal','Calendario de planilla']);
+  if(tiene('rrhh_ver')) T.push(['rrh','Recursos Humanos']);
+  if(tiene('reclutamiento')||tiene('aperturas')) T.push(['rec','Reclutamiento']);
   T.push(['nov','Novedades']);
-  if(['Editor','Descargar','Superusuario'].includes(ME.rol)&&LOC.disponible()) T.push(['loc','Guardados aquí']);
-  if(ME.rol==='Superusuario') T.push(['adm','Administración']);
-  $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}${k==='nov'?'<span class="dot" id="novDot" hidden></span>':''}</button>`).join('');
+  if((esEditor()||esSuper()||tiene('descargas'))&&LOC.disponible()) T.push(['loc','Guardados aquí']);
+  T.push(['tut','Tutoriales']);
+  if(esSuper()) T.push(['adm','Administración']);
+  $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}${k==='nov'?'<span class="dot" id="novDot" hidden></span>':''}${k==='seg'?'<span class="dot" id="alDot" hidden title="Tiendas con incumplimiento"></span>':''}</button>`).join('');
   $('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;[...$('tabs').children].forEach(x=>x.setAttribute('aria-selected',x===b));ver(b.dataset.k)};
   $('thAcc').hidden=false;
   const zs=[...new Set(TIENDAS.map(t=>t.zona).filter(Boolean))].sort();
   $('fZona').innerHTML='<option value="">Todas las zonas</option>'+zs.map(z=>`<option>${esc(z)}</option>`).join('');
   ['fTxt','fZona','fEst'].forEach(id=>$(id).oninput=pintar);
-  ver(T[0][0]);pintarNov();
+  ver(T[0][0]);pintarNov();montarAsistente();setTimeout(ofertaTour,900);
 }
-function ver(k){if(k==='loc')pintarLoc();if(k==='gen')abrirGen();['seg','mia','adm','cal','nov','loc','gen'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
-  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];}
+// Cuadro fijo de Administración: última publicación de roles y último envío de accesos (colección "sistema").
+async function estadoAdm(){
+  const E=$('admEst');if(!E)return;
+  const card=(t,v,s)=>`<div class="mini"><b style="font-size:15px">${v}</b><span>${t}${s?'<br>'+s:''}</span></div>`;
+  if(!C){E.innerHTML=card('Última publicación de roles','Vista previa','Sin conexión a la nube')+card('Último envío de accesos','Vista previa','');return}
+  try{const {F,db}=C;
+    const [r,a,pz]=await Promise.all([F.getDoc(F.doc(db,'sistema','roles')),F.getDoc(F.doc(db,'sistema','accesos')),F.getDoc(F.doc(db,'sistema','plazas'))]);
+    const R=r.exists()?r.data():null,A=a.exists()?a.data():null,Z=pz.exists()?pz.data():null;
+    E.innerHTML=(R?card('Última publicación de roles',fmt(R.fecha),`${R.tiendas} tiendas · ${R.usuarios} usuarios<br>por ${esc(R.porNombre||R.por||'')}`):card('Última publicación de roles','Aún sin publicar',''))
+      +(A?card('Último envío de accesos',fmt(A.fecha),`${A.nuevos} cuentas nuevas · ${A.enviados} enlaces · ${A.errores} errores<br>por ${esc(A.porNombre||A.por||'')}`):card('Último envío de accesos','Aún sin enviar',''))
+      +(Z?card('Último presupuesto de plazas',fmt(Z.fecha),`${Z.tiendas} tiendas · ${Z.total} plazas<br>por ${esc(Z.porNombre||Z.por||'')}`):card('Último presupuesto de plazas','Aún sin cargar',''));
+  }catch(e){E.innerHTML=card('No se pudo leer el estado',esc(e.code||e.message),'')}
+}
+// Compartir RITMO: enlace oficial, QR (librería local) y mensaje de lanzamiento. Al pasar a un dominio propio, solo cambia este valor.
+const SITIO_OFICIAL='https://juliocesargutierrezolivas-cloud.github.io/RITMO/';
+const mensajeLanzamiento=u=>`🚀 *¡Ya está aquí RITMO!* Tu tienda, a su ritmo.\n\nRITMO es la nueva web de horarios y planilla de las sucursales AMPM: los gerentes arman y entregan el horario y la planilla de la quincena, y zona, distrito, operaciones y planilla les dan seguimiento en un solo lugar.\n\n👉 Ingresa aquí: ${u}\n\n🔐 Tu acceso llega a tu correo corporativo: abre el enlace del correo y crea tu contraseña. Si no lo encuentras, revisa la carpeta de no deseados o avísanos.\n\n— Gerencia de Zona`;
+function compartir(){
+  const U=$('shUrl'),M=$('shMsg');if(!U)return;
+  const url=()=>U.value.trim()||SITIO_OFICIAL;
+  const pintar=()=>{
+    const q=qrcode(0,'M');q.addData(url());q.make();
+    $('qrBox').innerHTML=q.createSvgTag({cellSize:4,margin:2});
+    const s=$('qrBox').querySelector('svg');if(s){s.style.cssText='width:100%;height:auto;display:block'}
+    $('shWa').href='https://wa.me/?text='+encodeURIComponent(M.value);
+  };
+  if(!U.dataset.i){U.dataset.i='1';U.value=SITIO_OFICIAL;M.value=mensajeLanzamiento(SITIO_OFICIAL);
+    U.oninput=()=>{if(!M.dataset.editado)M.value=mensajeLanzamiento(url());pintar()};
+    M.oninput=()=>{M.dataset.editado='1';pintar()};
+    $('shCopy').onclick=async()=>{let ok=true;
+      try{await navigator.clipboard.writeText(M.value)}catch(e){M.select();ok=document.execCommand('copy')}
+      $('shOk').textContent=ok?'✔ Mensaje copiado':'No se pudo copiar: selecciónalo y copia manualmente.'};
+    $('qrDl').onclick=()=>{const s=$('qrBox').querySelector('svg');if(!s)return;
+      const q=qrcode(0,'M');q.addData(url());q.make();const svg=q.createSvgTag({cellSize:12,margin:4});
+      const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+        c.getContext('2d').drawImage(img,0,0);c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='QR_RITMO.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)})};
+      img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)};
+  }
+  pintar();
+}
+// Un solo scroll en Mi horario: en pantallas de 640 px o más de alto se bloquea el scroll de la página y el iframe toma el espacio restante.
+function ajustarGen(){
+  const f=$('genF'),g=$('v-gen');if(!f||!g)return;
+  const en=!g.hidden;document.body.classList.toggle('gen-on',en);
+  const fijo=en&&!f.hidden&&innerHeight>=640;
+  document.documentElement.classList.toggle('gen-lock',fijo);
+  if(!fijo){f.style.height='';return}
+  scrollTo(0,0);
+  f.style.height=Math.max(420,innerHeight-f.getBoundingClientRect().top-14)+'px';
+}
+addEventListener('resize',ajustarGen);
+
+// ---------- Tutoriales: recorridos guiados por rol (motor y lecciones en js/tutorial.js)
+const ctxTour={
+  ir:k=>{const b=document.querySelector(`#tabs [data-k="${k}"]`);if(b&&b.getAttribute('aria-selected')!=='true')b.click()},
+  gen:t=>{const d=$('genF').contentDocument,b=d&&d.getElementById('tab-'+t);if(b)b.click()}
+};
+const correoTour=()=>(REAL||ME)?.correo||'';
+function lanzarLeccion(id){
+  const L=leccionesPara(ME.rol).find(x=>x.id===id);if(!L||L.pronto)return;
+  iniciarTour(L.pasos(ctxTour),{onFin:ok=>{if(ok)marcarVisto(correoTour(),id);if(!$('v-tut').hidden)pintarTut()}});
+}
+function pintarTut(){
+  const c=correoTour();
+  $('tutVozW').hidden=!vozDisponible();$('tutVoz').checked=vozActiva();
+  $('tutL').innerHTML=leccionesPara(ME.rol).map(x=>{const v=esVisto(c,x.id);
+    return `<div class="lec"><div class="lic" aria-hidden="true">${x.icono||'🎓'}</div><div class="lbd"><b>${esc(x.titulo)}</b><span>${esc(x.desc)}</span></div>
+    ${x.pronto?'<span class="lsoon">Próximamente</span>':`${v?'<span class="lok">✔ Visto</span>':''}<button class="btn pri" data-lec="${x.id}">▶ ${v?'Repetir':'Iniciar'} recorrido</button>`}</div>`}).join('');
+}
+$('tutL').onclick=e=>{const b=e.target.closest('[data-lec]');if(b)lanzarLeccion(b.dataset.lec)};
+$('tutVoz').onchange=e=>setVoz(e.target.checked);
+$('tutB').onclick=()=>ctxTour.ir('tut');
+// ---------- Versión nueva: las sesiones abiertas avisan cuando se publica una versión; se aplica al cerrar sesión y volver a entrar
+document.querySelector('header .ritmo')?.setAttribute('title','RITMO v'+VERSION);
+async function vigilarVersion(){
+  try{
+    const t=await (await fetch('js/novedades.js',{cache:'no-store'})).text();
+    const m=/export const VERSION = "([^"]+)"/.exec(t);if(!m||m[1]===VERSION)return;
+    const B=$('verNueva');B.hidden=false;
+    B.innerHTML=`<span class="ic">🔄</span><div><b>Hay una versión nueva de RITMO (${esc(m[1])}).</b> Se actualizará cuando cierres sesión y vuelvas a entrar. Si prefieres, puedes <button class="lnk" id="verAct" type="button">actualizar ahora</button>.</div>`;
+    $('verAct').onclick=()=>{$('verAct').textContent='actualizando…';setTimeout(()=>location.reload(),1300)}; // la espera deja terminar el guardado automático
+  }catch(e){/* sin internet: se vuelve a revisar más tarde */}
+}
+setInterval(vigilarVersion,5*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)vigilarVersion()});
+
+// Asistente flotante de ayuda (js/asistente.js): menú guiado, búsqueda por palabras clave y recorridos. Funciona sin conexión.
+let ASIS=null;
+function montarAsistente(){
+  if(ASIS)return ASIS.refrescar();
+  ASIS=iniciarAsistente({
+    nombre:()=>(REAL?.nombre||ME?.nombre||'').split(' ')[0].replace(/^Superusuario$/,''),
+    puede:p=>p==='mi_horario'?esEditor():p==='administracion'?esSuper():(esSuper()||tiene(p)),
+    ctx:ctxTour,iniciarTour,lanzarLeccion,abrirTutoriales:()=>ctxTour.ir('tut')});
+}
+function ofertaTour(){
+  if(REAL&&REAL.rol!==ME.rol)return; // no se ofrece mientras el superusuario usa "Ver como"
+  ofrecerRecorrido({correo:correoTour(),id:'panel',titulo:'¿Un recorrido de 1 minuto?',texto:'Te muestro lo esencial de RITMO, paso a paso, con voz si quieres.',onEmpezar:()=>lanzarLeccion('panel')});
+}
+function ver(k){if(k==='loc')pintarLoc();if(k==='adm'){estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
+  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];ajustarGen();}
 
 function pintar(){
   $('qTxt').textContent=quincenaTexto(Q);
   const ok=TIENDAS.filter(t=>ENT[t.codigo]).length, n=TIENDAS.length, pct=n?Math.round(ok/n*100):0;
   $('kT').textContent=n;$('kE').textContent=ok;$('kP').textContent=n-ok;$('kC').textContent=pct+'%';$('kM').style.width=pct+'%';
+  {const pl=TIENDAS.filter(t=>t.plazas!=null&&RES[t.codigo]&&!t.prueba),sp=pl.reduce((s,t)=>s+t.plazas,0),sa=pl.reduce((s,t)=>s+Math.min(RES[t.codigo].activos,t.plazas),0),pc=sp?Math.round(sa/sp*100):0;
+    pintarAlertasJefe();
+    $('kPl').textContent=sp?pc+'%':'—';$('kPlM').style.width=pc+'%';$('kPlT').textContent=sp?`Plazas cubiertas · ${sa} de ${sp}`:'Plazas cubiertas · sin datos'}
   const tx=$('fTxt').value.toLowerCase(), z=$('fZona').value, es=$('fEst').value;
   const rows=TIENDAS.filter(t=>(!z||t.zona===z)&&(!es||(es==='ok')===!!ENT[t.codigo])&&(!tx||[t.codigo,t.nombre,t.gzNombre].join(' ').toLowerCase().includes(tx)));
-  const canDl=ME.rol==='Descargar'||ME.rol==='Superusuario';
+  const canDl=ME.rol==='Descargar'||esSuper()||tiene('descargas');
   const como=REAL&&REAL.rol!==ME.rol?`&como=${encodeURIComponent(ME.rol)}`:'';
   const ver=c=>`<a class="btn" href="visor.html?t=${encodeURIComponent(c)}&q=${encodeURIComponent(Q)}${como}" title="Ver horario, planilla y MBK (solo lectura)">👁 Ver</a>`;
   $('tb').innerHTML=rows.length?rows.map(t=>{const e=ENT[t.codigo];return `<tr>
-    <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td>
-    <td>${estado(e)}</td>
+    <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td><td style="white-space:nowrap">${personal(t)}</td>
+    <td>${estado(e)}${insigniaHE(e,t.codigo)}</td>
     <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
-    ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-xl="${esc(t.codigo)}" title="Descargar la planilla en Excel">⬇ Planilla Excel</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar la planilla Excel en este navegador">💾</button>`:''}</td>`:`<td>${e?ver(t.codigo):''}</td>`}</tr>`}).join('')
-    :`<tr><td colspan="8" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
-  if(ME.rol==='Editor'){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
-    $('miaSt').innerHTML=estado(e)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}${REAL&&REAL.rol!==ME.rol?'&como=Editor':''}">👁 Ver mi entrega</a>`:'');}
+    ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-xl="${esc(t.codigo)}" title="Descargar la planilla en Excel">⬇ Planilla Excel</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar la planilla Excel en este navegador">💾</button>`:''}${accionesGZ(t,e)}</td>`:`<td>${e?ver(t.codigo):''}${accionesGZ(t,e)}</td>`}</tr>`}).join('')
+    :`<tr><td colspan="9" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
+  if(esEditor()){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
+    $('miaSt').innerHTML=estado(e)+insigniaHE(e,TIENDAS[0]?.codigo)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}${REAL&&REAL.rol!==ME.rol?'&como=Editor':''}">👁 Ver mi entrega</a>`:'');}
+  pintarBloqueo();
+}
+
+// ---------- Alertas de incumplimiento al jefe inmediato (fase 1: dentro del panel)
+// Cada jefe ve las tiendas de SU alcance (GZ: sus tiendas; distrito y operaciones: las suyas; planilla y superusuario: todas)
+// que no cumplen la fecha límite de la quincena. Sin correos automáticos: el jefe avisa con un clic (correo o mensaje listo).
+const kAviso=c=>`ritmo-avisado:${(REAL||ME)?.correo||''}:${Q}:${c}`;
+const avisadoEn=c=>{try{return Number(localStorage.getItem(kAviso(c)))||0}catch(e){return 0}};
+const marcarAvisado=c=>{try{localStorage.setItem(kAviso(c),String(Date.now()))}catch(e){/* sin almacenamiento */}};
+let ALTODAS=false,ALMSG={};
+const hace=ms=>{const h=Math.max(0,Math.floor(ms/36e5));return h<48?`${h} h`:`${Math.floor(h/24)} d`};
+function alertasJefe(){
+  const L=toD(CAL?.limite);if(!CAL||!L)return null;
+  const fpl=CAL.fechaPlanilla?new Date(CAL.fechaPlanilla+'T23:59:59'):null;if(fpl&&Date.now()>fpl)return null;
+  const ahora=Date.now(),out=[];
+  for(const t of TIENDAS){
+    if(t.prueba)continue;const e=ENT[t.codigo];
+    if(e&&e.reapertura?.estado==='solicitada'&&puedeGZ(t)){out.push({t,nivel:'reab',orden:0,txt:'Solicitó reabrir la planilla'});continue}
+    if(!e){
+      if(ahora>L){const ms=ahora-L;out.push({t,nivel:ms>=48*36e5?'crit':'venc',orden:ms>=48*36e5?1:2,ms,txt:`Vencida hace ${hace(ms)} · sin entregar`})}
+      else if(L-ahora<=24*36e5)out.push({t,nivel:'prox',orden:3,ms:L-ahora,txt:`Vence en ${hace(L-ahora)} · sin entregar`});
+    }else if(toD(e.fecha)>L&&!(e.reapertura&&e.reapertura.estado==='aprobada'))out.push({t,nivel:'tarde',orden:4,txt:'Entregó tarde · sin pago de horas extra'});
+  }
+  return out.sort((a,b)=>a.orden-b.orden||(b.ms||0)-(a.ms||0));
+}
+function textoAviso(it){
+  const t=it.t,L=toD(CAL.limite),q=quincenaTexto(Q),lim=L?fLarga(L):'',yo=REAL?.nombre||'';
+  const cuerpo={
+    prox:`te escribo por la entrega de la planilla de ${t.nombre} (${q}). La fecha límite es el ${lim} y aún no aparece entregada en RITMO. Recuerda que lo que se entrega después del límite no se toma en cuenta para el pago de horas extra.`,
+    venc:`te escribo por la entrega de la planilla de ${t.nombre} (${q}). La fecha límite fue el ${lim} y aún no aparece entregada en RITMO. Entrégala hoy y avísame cuando esté lista. Lo entregado después del límite no cuenta para el pago de horas extra.`,
+    tarde:`la planilla de ${t.nombre} (${q}) se entregó después de la fecha límite (${lim}), por lo que no se tomará en cuenta el pago de horas extra. Para la próxima quincena, por favor entrega antes de la fecha límite.`
+  };
+  return `Hola, ${cuerpo[it.nivel==='crit'?'venc':it.nivel]||cuerpo.venc}\n\n${yo?'— '+yo:''}`.trim();
+}
+function pintarAlertasJefe(){
+  const A=$('alJ'),dot=$('alDot');if(!A)return;
+  const sinDot=()=>{if(dot)dot.hidden=true};
+  if(!(esSuper()||tiene('seguimiento'))){A.innerHTML='';sinDot();return}
+  const lista=alertasJefe();
+  if(!lista){A.innerHTML='';sinDot();return}
+  const cuenta=n=>lista.filter(x=>x.nivel===n).length,pend=lista.filter(x=>x.nivel!=='tarde'&&!avisadoEn(x.t.codigo)).length;
+  if(dot){dot.hidden=!pend;dot.textContent=pend}
+  if(!lista.length){A.innerHTML=`<div class="alj ok"><div class="alj-h"><b>✔ Sin incumplimientos</b><span class="sub">Todas las tiendas de tu alcance van al día con la entrega de ${esc(quincenaTexto(Q))}.</span></div></div>`;return}
+  ALMSG={};
+  const ico={reab:'↩',crit:'⛔',venc:'⚠️',prox:'⏰',tarde:'🕓'},stl={reab:'late',crit:'bad',venc:'bad',prox:'no',tarde:'late'};
+  const mostrar=ALTODAS?lista:lista.slice(0,6);
+  const filas=mostrar.map(it=>{const t=it.t,c=t.codigo,av=avisadoEn(c);let acc='';
+    if(it.nivel==='reab')acc=`<button class="btn pri" data-alr="${esc(c)}">↩ Responder solicitud</button>`;
+    else{ALMSG[c]=textoAviso(it);
+      const mail=t.correoTienda?`<a class="btn" href="mailto:${esc(t.correoTienda)}?subject=${encodeURIComponent('Planilla '+quincenaTexto(Q)+' · '+t.nombre)}&body=${encodeURIComponent(ALMSG[c])}" data-alv="${esc(c)}" title="Abre tu correo con el aviso listo">✉ Avisar</a>`:'';
+      acc=`${mail}<button class="btn" data-alc="${esc(c)}" title="Copia el mensaje para enviarlo por WhatsApp o chat">📋 Copiar mensaje</button>${av?'':`<button class="btn" data-alv="${esc(c)}">✔ Ya avisé</button>`}`}
+    return `<div class="alj-it${av&&it.nivel!=='reab'?' hecho':''}"><span class="st ${stl[it.nivel]}"><i></i>${ico[it.nivel]} ${it.nivel==='crit'?'Crítica':it.nivel==='venc'?'Vencida':it.nivel==='prox'?'Por vencer':it.nivel==='tarde'?'Tarde':'Reapertura'}</span>
+      <div class="alj-t"><b>${esc(t.codigo)} · ${esc(t.nombre)}</b><span>${esc(t.zona||'')}${t.gzNombre?' · GZ '+esc(t.gzNombre):''} · ${esc(it.txt)}${av&&it.nivel!=='reab'?` · <i>avisado hace ${hace(Date.now()-av)}</i>`:''}</span></div>
+      <div class="alj-a">${acc}</div></div>`}).join('');
+  A.innerHTML=`<div class="alj"><div class="alj-h"><b>🔔 Alertas de incumplimiento · ${lista.length}</b>
+    <span class="sub">${[['crit','críticas'],['venc','vencidas'],['prox','por vencer'],['tarde','tarde'],['reab','reaperturas']].filter(([k])=>cuenta(k)).map(([k,l])=>cuenta(k)+' '+l).join(' · ')} · límite ${esc(fLarga(toD(CAL.limite)))}</span></div>
+    ${filas}${lista.length>6?`<div class="alj-it" style="justify-content:center"><button class="btn" data-alm="1">${ALTODAS?'Ver menos':`Ver las ${lista.length} alertas`}</button></div>`:''}</div>`;
+}
+$('alJ').onclick=async e=>{
+  const bc=e.target.closest('[data-alc]');if(bc){const c=bc.dataset.alc,x=bc.textContent;
+    const txt=ALMSG[c]||'';let ok=true;
+    try{await navigator.clipboard.writeText(txt)}
+    catch(err){const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();try{ok=document.execCommand('copy')}catch(e2){ok=false}ta.remove()}
+    bc.textContent=ok?'✔ Copiado':'No se pudo copiar';if(ok)marcarAvisado(c);
+    setTimeout(()=>{bc.textContent=x;pintarAlertasJefe()},1200);return}
+  const bv=e.target.closest('[data-alv]');if(bv){marcarAvisado(bv.dataset.alv);setTimeout(pintarAlertasJefe,300);return} // el enlace mailto sigue su curso
+  const br=e.target.closest('[data-alr]');if(br){responderReapertura(br.dataset.alr);return}
+  if(e.target.closest('[data-alm]')){ALTODAS=!ALTODAS;pintarAlertasJefe()}
+};
+
+// ---------- Recursos Humanos: registro central de personal con control cruzado tienda ↔ RRHH (lógica en js/rrhh.js)
+// Alta y baja las puede registrar RRHH (archivo / pantalla) o la tienda (desde su horario); la otra parte confirma.
+// Si algo es un error o un duplicado, la ✕ elimina la línea para que no quede como una baja irreal.
+let PERS=[],PERSOK=false,RH_VER=false,ALTASP=null,GENLISTO=false,esperaPers=null;
+const DEMOP=new Map(),DEL='__DEL__';
+const ahoraTS=()=>C?C.F.serverTimestamp():new Date();
+const nomTienda=c=>{const t=(ALLT.length?ALLT:TIENDAS).find(x=>x.codigo===c);return t?`${c} · ${t.nombre}`:c};
+const fISO=s=>s?s.split('-').reverse().join('/'):'';
+const tsTxt=f=>f?fmt(f):'';
+async function cargarPersonal(){
+  try{
+    if(!C){PERS=[...DEMOP.entries()].map(([id,p])=>({id,...p})).filter(p=>!esEditor()||p.tienda===TIENDAS[0]?.codigo)}
+    else{const {F,db}=C;
+      const s=esEditor()?(TIENDAS[0]?await F.getDocs(F.query(F.collection(db,'personal'),F.where('tienda','==',TIENDAS[0].codigo))):null):await F.getDocs(F.collection(db,'personal'));
+      PERS=s?s.docs.map(d=>({id:d.id,...d.data()})):[]}
+    PERSOK=true;
+  }catch(e){PERS=[];PERSOK=false}
+}
+async function guardarPers(id,datos){
+  if(!C){const x={...(DEMOP.get(id)||{})};for(const k in datos){if(datos[k]===DEL)delete x[k];else x[k]=datos[k]}DEMOP.set(id,x);return}
+  const d={};for(const k in datos)d[k]=datos[k]===DEL?C.F.deleteField():datos[k];
+  await C.F.setDoc(C.F.doc(C.db,'personal',id),d,{merge:true});
+}
+async function borrarPers(id){if(!C){DEMOP.delete(id);return}await C.F.deleteDoc(C.F.doc(C.db,'personal',id))}
+// Aplica el cambio también en la lista local, para repintar sin volver a leer todo
+function aplicarLocal(id,datos){const p=PERS.find(x=>x.id===id);if(!p)return;for(const k in datos){if(datos[k]===DEL)delete p[k];else p[k]=datos[k]}}
+const cedMasc=n=>{const c=RH.normCed(n);return RH_VER?RH.fmtCed(c):'•••-••••••-'+c.slice(9)};
+
+// ----- Pantalla de RRHH
+const rhCargar=()=>esSuper()||tiene('rrhh_cargar'),rhX=()=>esSuper()||tiene('rrhh_eliminar');
+async function pintarRRH(){
+  $('dropH').closest('.card').hidden=!rhCargar();$('rhBuscaB').closest('.card').hidden=!rhCargar(); // sin permiso de cargar solo se consulta
+  if(!PERSOK)await cargarPersonal();
+  const pend=RH.pendientes(PERS),atr=pend.filter(x=>x.atrasado).length;
+  const k=(b,l,c='')=>`<div class="kpi ${c}"><b>${b}</b><span>${l}</span></div>`;
+  $('rhK').innerHTML=k(PERS.length,'Registrados')+k(PERS.filter(p=>p.estado==='activo').length,'Activos')+k(pend.filter(x=>x.tipo==='alta').length,'Altas por confirmar','hot')+k(pend.filter(x=>x.tipo==='baja').length,'Bajas por confirmar','hot')+k(atr,`Atrasados (${RH.DIAS_ALERTA}+ días)`,atr?'hot':'');
+  pintarRhPend();pintarRhTb();pintarRhBaja();
+}
+function pintarRhPend(){
+  const pend=RH.pendientes(PERS),E=$('rhPend');
+  if(!pend.length){E.innerHTML='<div class="sub">✔ No hay movimientos pendientes de confirmar.</div>';return}
+  E.innerHTML=pend.slice(0,40).map(x=>{const p=x.p,m=x.tipo==='alta'?p.alta:p.baja,de=x.origen==='tienda'?'la tienda':'RRHH';
+    const disp=x.tipo==='baja'&&x.disputada;
+    const acc=disp?`<button class="btn pri" data-rhc="${p.id}|baja" title="Mantener la baja">Mantener baja</button> <button class="btn dng" data-rhq="${p.id}" title="La baja fue un error: se anula">Anular baja</button>`
+      :x.origen==='tienda'?(rhCargar()?`<button class="btn pri" data-rhc="${p.id}|${x.tipo}">✔ Confirmar</button>`:'<span class="sub">Pendiente de RRHH</span>'):'<span class="sub">Esperando a la tienda</span>';
+    return `<div class="rhr"><span class="rh-tag ${x.tipo==='baja'?'bad':'warn'}">${x.tipo==='baja'?'Baja':'Alta'}</span>
+      <div class="rt"><b>${esc(p.nombre)}</b><span>${esc(nomTienda(p.tienda))} · ${esc(p.cargo||'')} · registró ${de}${tsTxt(x.tipo==='alta'?m.fecha:m.fechaRegistro)?' el '+esc(tsTxt(x.tipo==='alta'?m.fecha:m.fechaRegistro)):''} · ${x.dias} d${x.atrasado?' <b style="color:var(--bad,#b3261e)">⚠ atrasado</b>':''}${x.tipo==='baja'?' · último día '+fISO(p.baja.fecha):''}${disp?` · <b>Disputada por la tienda</b>${p.baja.nota?': '+esc(p.baja.nota):''}`:''}</span></div>
+      <div class="alj-a">${acc}${rhX()?`<button class="btn dng" data-rhx="${p.id}" title="Eliminar esta línea (error o duplicado). No queda como baja.">✕</button>`:''}</div></div>`}).join('')+(pend.length>40?`<div class="sub" style="padding-top:8px">Mostrando 40 de ${pend.length}, los más atrasados primero.</div>`:'');
+}
+function pintarRhTb(){
+  const q=RH.normNombre($('rhTxt').value),qc=RH.normCed($('rhTxt').value),es=$('rhEst').value,pend=new Set(RH.pendientes(PERS).map(x=>x.p.id));
+  const L=PERS.filter(p=>{
+    if(es==='activo'&&p.estado!=='activo')return false;if(es==='baja'&&p.estado!=='baja')return false;if(es==='pend'&&!pend.has(p.id))return false;
+    if(!q&&!qc)return true;
+    return RH.normNombre(p.nombre+' '+p.tienda+' '+nomTienda(p.tienda)).includes(q)||(qc.length>=4&&RH.normCed(p.cedula).includes(qc))}).sort((a,b)=>String(a.tienda).localeCompare(b.tienda)||String(a.nombre).localeCompare(b.nombre));
+  $('rhTb').innerHTML=L.slice(0,100).map(p=>{
+    const st=p.estado==='baja'?`<span class="rh-tag bad">Baja ${fISO(p.baja?.fecha)}</span>`:'<span class="rh-tag ok">Activo</span>';
+    const pa=(p.alta&&p.alta.confirmada===false?` <span class="rh-tag warn">Alta por confirmar (${p.alta.origen==='tienda'?'RRHH':'tienda'})</span>`:'')+(p.baja&&p.baja.confirmada===false?` <span class="rh-tag warn">Baja por confirmar (${p.baja.origen==='tienda'?'RRHH':'tienda'})</span>`:'');
+    return `<tr><td>${esc(p.nombre)}</td><td class="mono">${esc(cedMasc(p.cedula))}${p.cedulaRevisar?' <span class="rh-tag warn" title="Formato de cédula por revisar">revisar</span>':''}</td><td>${esc(nomTienda(p.tienda))}</td><td>${esc(p.cargo||'')}</td><td class="mono">${fISO(p.ingreso)}</td><td>${st}${pa}</td>
+      <td>${rhX()?`<button class="btn dng" data-rhx="${p.id}" title="Eliminar esta línea (error o duplicado)">✕</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="7" class="empty">Sin resultados.</td></tr>';
+  $('rhPie').textContent=PERS.length?`Mostrando ${Math.min(100,L.length)} de ${L.length} (afina la búsqueda para ver más).`:'Aún no hay personal registrado. Carga el archivo de altas en el paso 1.';
+}
+function pintarRhBaja(){
+  const t=RH.normNombre($('rhBuscaB').value),tc=RH.normCed($('rhBuscaB').value),E=$('rhBajaRes');
+  if(t.length<3){E.innerHTML='';return}
+  const L=PERS.filter(p=>p.estado==='activo'&&(RH.normNombre(p.nombre+' '+nomTienda(p.tienda)).includes(t)||(tc.length>=4&&RH.normCed(p.cedula).includes(tc)))).slice(0,8);
+  E.innerHTML=L.length?L.map(p=>`<div class="rhr"><div class="rt"><b>${esc(p.nombre)}</b><span>${esc(nomTienda(p.tienda))} · ${esc(p.cargo||'')} · ingreso ${fISO(p.ingreso)}</span></div><button class="btn" data-rhb="${p.id}">Registrar baja</button></div>`).join(''):'<div class="sub">Sin coincidencias entre el personal activo.</div>';
+}
+async function rhConfirmar(id,tipo){
+  const p=PERS.find(x=>x.id===id);if(!p)return;const campo=tipo==='alta'?'alta':'baja';
+  const d={[campo]:{...p[campo],confirmada:true,confirmadaPor:REAL.correo,confirmadaPorNombre:REAL.nombre||'',confirmadaFecha:ahoraTS()},actualizado:ahoraTS()};
+  try{await guardarPers(id,d);aplicarLocal(id,d);pintarRRH()}catch(e){alert('No se pudo confirmar: '+(e.code||e.message))}
+}
+async function rhAnularBaja(id){
+  const r=await dialogo({titulo:'Anular la baja',cuerpo:'<p>La baja era un error: la persona vuelve a <b>activa</b> y la línea de baja se elimina (no queda registro de baja).</p>',botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Anular baja',k:'ok',cls:'pri'}]});
+  if(r.k!=='ok')return;const d={estado:'activo',baja:DEL,actualizado:ahoraTS()};
+  try{await guardarPers(id,d);aplicarLocal(id,d);pintarRRH()}catch(e){alert('No se pudo anular: '+(e.code||e.message))}
+}
+async function rhEliminar(id){
+  const p=PERS.find(x=>x.id===id);if(!p)return;
+  const r=await dialogo({titulo:'Eliminar esta línea',cuerpo:`<p>Vas a eliminar el registro de <b>${esc(p.nombre)}</b> (${esc(nomTienda(p.tienda))}).</p><p>Úsalo cuando la línea es un <b>error o un duplicado</b>: se borra por completo y <b>no queda como una baja</b>. Si la persona sí se fue, usa Registrar baja.</p>`,botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'✕ Eliminar línea',k:'ok',cls:'dng'}]});
+  if(r.k!=='ok')return;
+  try{await borrarPers(id);PERS=PERS.filter(x=>x.id!==id);pintarRRH()}catch(e){alert('No se pudo eliminar: '+(e.code||e.message))}
+}
+async function rhRegistrarBaja(id){
+  const p=PERS.find(x=>x.id===id);if(!p)return;
+  const r=await dialogo({titulo:'Registrar baja',leer:d=>({fecha:d.querySelector('#rhFb').value}),
+    cuerpo:`<p><b>${esc(p.nombre)}</b> · ${esc(nomTienda(p.tienda))}</p><label class="sub" for="rhFb">Último día laborado</label><input class="in" type="date" id="rhFb" value="${RH.hoyISO()}" style="display:block;margin:4px 0 10px">
+      <label class="sub" for="dlgMotB">Motivo (opcional)</label><textarea id="dlgMotB"></textarea><p class="sub">La tienda deberá confirmarla. Si fue un error o un duplicado, usa <b>✕ Eliminar línea</b>: no queda como baja.</p>`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},...(rhX()?[{t:'✕ Eliminar línea',k:'del',cls:'dng'}]:[]),{t:'Registrar baja',k:'ok',cls:'pri'}]});
+  if(r.k==='del')return rhEliminar(id);
+  if(r.k!=='ok')return;
+  const f=r.datos?.fecha;if(!/^\d{4}-\d{2}-\d{2}$/.test(f||'')||+f.slice(0,4)<2000)return alert('Escribe una fecha válida.');
+  const d={estado:'baja',baja:{fecha:f,motivo:r.texto,origen:'rrhh',por:REAL.correo,porNombre:REAL.nombre||'',fechaRegistro:ahoraTS(),confirmada:false},actualizado:ahoraTS()};
+  try{await guardarPers(id,d);aplicarLocal(id,d);pintarRRH()}catch(e){alert('No se pudo registrar: '+(e.code||e.message))}
+}
+$('rhPend').onclick=e=>{
+  const c=e.target.closest('[data-rhc]');if(c){const [id,t]=c.dataset.rhc.split('|');rhConfirmar(id,t);return}
+  const q=e.target.closest('[data-rhq]');if(q){rhAnularBaja(q.dataset.rhq);return}
+  const x=e.target.closest('[data-rhx]');if(x)rhEliminar(x.dataset.rhx)};
+$('rhTb').onclick=e=>{const x=e.target.closest('[data-rhx]');if(x)rhEliminar(x.dataset.rhx)};
+$('rhBajaRes').onclick=e=>{const b=e.target.closest('[data-rhb]');if(b)rhRegistrarBaja(b.dataset.rhb)};
+$('rhBuscaB').oninput=pintarRhBaja;$('rhTxt').oninput=pintarRhTb;$('rhEst').onchange=pintarRhTb;
+$('rhVer').onchange=e=>{RH_VER=e.target.checked;pintarRhTb()};
+$('rhRef').onclick=async()=>{PERSOK=false;await pintarRRH()};
+
+// ----- Cargar el archivo de altas
+$('fileH').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const wb=XLSX.read(await f.arrayBuffer()),aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+    const base=(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba),porNum=new Map(base.map(t=>[Number(t.numero),t]));
+    const r=RH.parsearAltas(aoa,porNum);
+    if(!PERSOK)await cargarPersonal();
+    const ids=await Promise.all(r.registros.map(x=>RH.idPersonal(x.cedula))),mapa=new Map(PERS.map(p=>[p.id,p]));
+    const nuevos=[],cambian=[],confirma=[],iguales=[];
+    r.registros.forEach((x,i)=>{const id=ids[i],ex=mapa.get(id);
+      if(!ex){nuevos.push({id,x});return}
+      const dif=['nombre','cargo','categoria','empresa','tienda','ingreso'].some(k=>(ex[k]||'')!==(x[k]||''));
+      if(ex.alta&&ex.alta.origen==='tienda'&&ex.alta.confirmada===false)confirma.push({id,x,ex});
+      else if(dif)cambian.push({id,x});else iguales.push(id)});
+    ALTASP={nuevos,cambian,confirma,iguales,r};
+    const E=r.errores,fl=a=>a.slice(0,8).join(', ')+(a.length>8?'…':'');
+    $('rhSum').hidden=false;
+    $('rhSum').innerHTML=[[r.registros.length,'Personas válidas'],[nuevos.length,'Nuevas (se cargan)'],[confirma.length,'Confirman lo que ya registró la tienda'],[cambian.length,'Con datos distintos (se actualizan)'],[iguales.length,'Ya registradas, sin cambios'],[E.sinTienda.length,'Sin tienda en RITMO'],[E.repetidas.length,'Repetidas en el archivo'],[E.cedulaRevisar.length,'Cédula por revisar']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
+    const av=[E.sinTienda.length?`Sin tienda (filas ${fl(E.sinTienda)}).`:'',E.repetidas.length?`Cédula repetida, se omite la segunda (filas ${fl(E.repetidas)}).`:'',E.cedulaRevisar.length?`Cédula con formato raro (filas ${fl(E.cedulaRevisar)}).`:'',E.sinCedula.length?`Sin cédula (filas ${fl(E.sinCedula)}).`:''].filter(Boolean).join(' ');
+    const hay=nuevos.length||cambian.length||confirma.length;
+    msg('rhMsg',hay?`Archivo leído. Las personas nuevas quedan “por confirmar” hasta que cada gerente las revise y las incorpore a su horario, sin duplicar a nadie. ${av}`:`No hay cambios que publicar. ${av}`,E.sinTienda.length||E.repetidas.length?'warn':'ok');
+    $('rhPub').disabled=!hay;
+  }catch(err){ALTASP=null;$('rhPub').disabled=true;msg('rhMsg','No se pudo leer el archivo: '+err.message,'bad')}
+};
+$('rhPub').onclick=async()=>{
+  if(!ALTASP)return;$('rhPub').disabled=true;msg('rhMsg','Publicando…','warn');
+  const ahora=ahoraTS(),lote='L'+Date.now().toString(36);
+  const ident=x=>({cedula:x.cedula,nombre:x.nombre,cargo:x.cargo,cargoOrigen:x.cargoOrigen,categoria:x.categoria,empresa:x.empresa,tienda:x.tienda,ingreso:x.ingreso,cedulaRevisar:x.cedulaRevisar});
+  const ops=[
+    ...ALTASP.nuevos.map(({id,x})=>({id,d:{...ident(x),estado:'activo',alta:{origen:'rrhh',por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahora,confirmada:false,lote},actualizado:ahora}})),
+    ...ALTASP.cambian.map(({id,x})=>({id,d:{...ident(x),actualizado:ahora}})),
+    ...ALTASP.confirma.map(({id,x,ex})=>({id,d:{...ident(x),alta:{...ex.alta,confirmada:true,confirmadaPor:REAL.correo,confirmadaPorNombre:REAL.nombre||'',confirmadaFecha:ahora},actualizado:ahora}}))];
+  // Vacantes: un alta reciente en una tienda con una vacante abierta del mismo cargo la cierra sola (solo ingresos de los últimos 45 días,
+  // para que la carga inicial de personal antiguo no cierre vacantes por error).
+  let cubiertas=0;
+  try{
+    if(!VACOK&&(esSuper()||tiene('reclutamiento')))await cargarVacantes();
+    if(VACOK){const libres=VAC.filter(v=>v.estado==='abierta'),usadas=new Set();
+      for(const {id,x} of ALTASP.nuevos){
+        if(!x.ingreso||Date.now()-new Date(x.ingreso+'T00:00').getTime()>45*864e5)continue;
+        const v=libres.find(q=>!usadas.has(q.id)&&q.tienda===x.tienda&&q.cargo===x.cargo);
+        if(v){usadas.add(v.id);cubiertas++;ops.push({col:'vacantes',id:v.id,d:{estado:'cubierta',cerrada:{por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahora,personal:id,automatica:true}}})}}}
+  }catch(e){cubiertas=0;for(let i=ops.length-1;i>=0;i--)if(ops[i].col==='vacantes')ops.splice(i,1)}
+  try{
+    if(!C)for(const o of ops)await(o.col==='vacantes'?guardarVac(o.id,o.d):guardarPers(o.id,o.d));
+    else{const {F,db}=C;let b=F.writeBatch(db),n=0;
+      for(const o of ops){b.set(F.doc(db,o.col||'personal',o.id),o.d,{merge:true});if(++n>=400){await b.commit();b=F.writeBatch(db);n=0}}
+      if(n)await b.commit()}
+    msg('rhMsg',`Publicado: ${ALTASP.nuevos.length} nuevas, ${ALTASP.cambian.length} actualizadas y ${ALTASP.confirma.length} confirmadas.${cubiertas?` Se cerraron ${cubiertas} vacante${cubiertas>1?'s':''}.`:''}`,'ok');
+    if(cubiertas)VACOK=false;
+    ALTASP=null;PERSOK=false;await pintarRRH();
+  }catch(err){msg('rhMsg','Error al publicar: '+(err.code||err.message),'bad');$('rhPub').disabled=false}
+};
+
+// ----- Lado de la tienda: precarga con confirmación del gerente, sin duplicar
+async function pintarPersonalTienda(){
+  const B=$('genPers');if(!B)return;
+  if(!esEditor()||!TIENDAS[0]){B.innerHTML='';return}
+  if(!PERSOK)await cargarPersonal();
+  const pend=RH.pendientes(PERS),altasR=pend.filter(x=>x.tipo==='alta'&&x.origen==='rrhh'),bajasR=pend.filter(x=>x.tipo==='baja'&&x.origen==='rrhh'&&!x.disputada),espera=pend.filter(x=>x.origen==='tienda');
+  let h='';
+  if(altasR.length){const mx=Math.max(...altasR.map(x=>x.dias));
+    h+=`<div class="msg on warn" style="margin-top:12px">👥 <b>RRHH cargó ${altasR.length} colaborador${altasR.length>1?'es':''} en tu tienda.</b> Revísalos y confírmalos para incorporarlos a Mi horario sin duplicar a nadie.${mx>=RH.DIAS_ALERTA?` <b>⚠ Llevan ${mx} días sin confirmar.</b>`:''} <button class="btn pri" id="persRev" style="margin-left:6px">Revisar y confirmar</button></div>`}
+  bajasR.forEach(x=>{const p=x.p;h+=`<div class="msg on bad" style="margin-top:8px">🚪 RRHH registró la baja de <b>${esc(p.nombre)}</b> (último día ${fISO(p.baja.fecha)}). <button class="btn pri" data-pb="ok|${p.id}" style="margin-left:6px">✔ Confirmar baja</button> <button class="btn dng" data-pb="no|${p.id}">✕ No es una baja</button></div>`});
+  if(espera.length)h+=`<div class="msg on" style="margin-top:8px">⏳ Esperando la confirmación de RRHH: ${espera.length} movimiento${espera.length>1?'s':''} que registraste.</div>`;
+  B.innerHTML=h;
+}
+$('genPers').onclick=e=>{
+  if(e.target.closest('#persRev'))return revisarPersonal();
+  const b=e.target.closest('[data-pb]');if(b){const [a,id]=b.dataset.pb.split('|');responderBaja(a,id)}};
+function aplicarEnGenerador(op){
+  return new Promise(async(res,rej)=>{
+    if(!GEN){try{await iniciarCon({agentes:op.crear||[]});res({iniciado:true})}catch(e){rej(e)}return} // tienda sin horario: arranca con el personal de RRHH
+    for(let i=0;i<60&&!GENLISTO;i++)await new Promise(r=>setTimeout(r,100));
+    if(!GENLISTO)return rej(new Error('Mi horario aún no terminó de cargar'));
+    const t=setTimeout(()=>{esperaPers=null;rej(new Error('Mi horario no respondió'))},8000);
+    esperaPers=r=>{clearTimeout(t);res(r)};
+    $('genF').contentWindow.postMessage({tipo:'ritmo-personal',...op},location.origin);
+  });
+}
+async function revisarPersonal(){
+  const t=TIENDAS[0];if(!t)return;
+  if(!GEN)GEN=await leerTrabajo(t.codigo);
+  const agentes=(GEN&&GEN.agentes)||[];
+  const pend=PERS.filter(p=>p.estado==='activo'&&p.alta&&p.alta.confirmada===false&&p.alta.origen==='rrhh').sort((a,b)=>String(a.nombre).localeCompare(b.nombre));
+  if(!pend.length)return pintarPersonalTienda();
+  const filas=pend.map(p=>{const m=RH.emparejar(p,agentes);let ctl,tag;
+    if(m.tipo==='nuevo'){tag='<span class="rh-tag ok">Persona nueva</span>';ctl=`<label><input type="checkbox" data-pr="${p.id}" data-acc="crear" checked> Incorporar a Mi horario</label>`}
+    else if(m.tipo==='vinculado'){tag=`<span class="rh-tag">Ya está en tu horario como ${esc(m.agente.nombre)}</span>`;ctl=`<label><input type="checkbox" data-pr="${p.id}" data-acc="vincular" data-ag="${esc(m.agente.id)}" checked> Vincular (no se duplica)</label>`}
+    else{tag='<span class="rh-tag warn">Posible duplicado</span>';
+      ctl=`<select data-ps="${p.id}">${m.candidatos.map(a=>`<option value="v:${esc(a.id)}">Es ${esc(a.nombre)}: vincular (recomendado)</option>`).join('')}<option value="n">Es otra persona: crear nueva</option>${m.candidatos.map(a=>`<option value="x:${esc(a.id)}">✕ Es un duplicado: eliminar la línea de ${esc(a.nombre)} y usar este</option>`).join('')}<option value="s">No incorporar por ahora</option></select>`}
+    return `<div class="rhr"><div class="rt"><b>${esc(p.nombre)}</b><span>${esc(p.cargo||'')} · ingreso ${fISO(p.ingreso)} ${tag}</span></div><div>${ctl}</div></div>`}).join('');
+  const r=await dialogo({titulo:`Personal que RRHH cargó en ${esc(t.nombre)}`,ancho:true,
+    cuerpo:`<p class="sub">Revisa cada persona. Si ya la tienes en tu horario, se <b>vincula</b> y no se duplica. Con <b>✕</b> eliminas una línea repetida: no queda como baja.</p>${filas}`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Confirmar',k:'ok',cls:'pri'}],
+    leer:d=>[...d.querySelectorAll('[data-pr],[data-ps]')].map(el=>el.dataset.ps?{id:el.dataset.ps,sel:el.value}:{id:el.dataset.pr,sel:el.checked?(el.dataset.acc==='crear'?'n':'v:'+el.dataset.ag):'s'})});
+  if(r.k!=='ok'||!r.datos)return;
+  const elim=new Set(r.datos.filter(x=>x.sel.startsWith('x:')).map(x=>x.sel.slice(2)));
+  const ocup=new Set(agentes.filter(a=>!elim.has(a.id)).map(a=>a.nombre)),crear=[],vincular=[],eliminar=[],conf=[]; // el nombre de una línea eliminada queda libre
+  r.datos.forEach(({id,sel})=>{const p=PERS.find(x=>x.id===id);if(!p||sel==='s')return;
+    if(sel==='n'){crear.push(RH.agenteDesdePersonal(p,ocup));conf.push(p)}
+    else if(sel.startsWith('v:')){const a=agentes.find(x=>x.id===sel.slice(2));if(a){vincular.push({id:a.id,datos:RH.datosVinculo(p,a)});conf.push(p)}}
+    else if(sel.startsWith('x:')){eliminar.push(sel.slice(2));crear.push(RH.agenteDesdePersonal(p,ocup));conf.push(p)}});
+  if(!conf.length)return;
+  try{
+    await aplicarEnGenerador({crear,vincular,eliminar});
+    for(const p of conf){const d={alta:{...p.alta,confirmada:true,confirmadaPor:REAL.correo,confirmadaPorNombre:REAL.nombre||'',confirmadaFecha:ahoraTS()},actualizado:ahoraTS()};await guardarPers(p.id,d);aplicarLocal(p.id,d)}
+    pintarPersonalTienda();
+    $('genSt').textContent=`Personal confirmado: ${crear.length} incorporados, ${vincular.length} vinculados${eliminar.length?`, ${eliminar.length} línea${eliminar.length>1?'s':''} duplicada${eliminar.length>1?'s':''} eliminada${eliminar.length>1?'s':''}`:''}.`;
+  }catch(err){alert('No se pudo completar: '+(err.message||err.code))}
+}
+async function responderBaja(accion,id){
+  const p=PERS.find(x=>x.id===id);if(!p||!p.baja)return;
+  if(accion==='ok'){
+    try{
+      if(GEN)await aplicarEnGenerador({bajas:[{cedula:p.cedula,fecha:p.baja.fecha}]});
+      const d={baja:{...p.baja,confirmada:true,confirmadaPor:REAL.correo,confirmadaPorNombre:REAL.nombre||'',confirmadaFecha:ahoraTS()},actualizado:ahoraTS()};
+      await guardarPers(id,d);aplicarLocal(id,d);pintarPersonalTienda();
+    }catch(err){alert('No se pudo confirmar: '+(err.message||err.code))}
+    return}
+  const r=await dialogo({titulo:'La baja no es correcta',cuerpo:`<p>Cuéntale a RRHH por qué <b>${esc(p.nombre)}</b> no es una baja (por ejemplo: sigue trabajando, o es un duplicado).</p><textarea id="dlgNotaB" placeholder="Mínimo 5 letras"></textarea>`,botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Enviar a RRHH',k:'ok',cls:'pri',min:5}]});
+  if(r.k!=='ok')return;
+  const d={baja:{...p.baja,disputada:true,nota:r.texto,disputadaPor:REAL.correo},actualizado:ahoraTS()};
+  try{await guardarPers(id,d);aplicarLocal(id,d);pintarPersonalTienda()}catch(err){alert('No se pudo enviar: '+(err.code||err.message))}
+}
+// Lo que la tienda registra en su horario (personas con cédula y bajas) se copia al registro central como "pendiente de confirmar por RRHH".
+let sincTimer=null;
+function sincronizarPersonal(data){clearTimeout(sincTimer);sincTimer=setTimeout(()=>sincPers(data),2500)}
+async function sincPers(data){
+  if(!genTienda||!data||!esEditor()||(REAL&&REAL.rol!=='Editor'))return;
+  if(!PERSOK)await cargarPersonal();if(!PERSOK)return;
+  const mapa=new Map(PERS.map(p=>[p.id,p])),ahora=ahoraTS(),quien={por:REAL.correo,porNombre:REAL.nombre||''},ops=[],cedulasHorario=new Set();
+  for(const a of data.agentes||[]){
+    const ced=RH.normCed(a.cedula);if(!RH.cedulaAceptable(ced))continue;cedulasHorario.add(ced);
+    const id=await RH.idPersonal(ced),ex=mapa.get(id);
+    if(!ex){ops.push({id,d:{cedula:ced,nombre:a.nombreCompleto||a.nombre,cargo:(a.cargos||[])[0]||'Agente SAC',categoria:a.categoria||'',empresa:a.empresa||'',tienda:genTienda,ingreso:a.ingreso||null,estado:'activo',alta:{origen:'tienda',...quien,fecha:ahora,confirmada:false},actualizado:ahora}});continue}
+    if(ex.tienda!==genTienda)continue;
+    if(ex.alta&&ex.alta.origen==='rrhh'&&ex.alta.confirmada===false)ops.push({id,d:{alta:{...ex.alta,confirmada:true,confirmadaPor:REAL.correo,confirmadaPorNombre:REAL.nombre||'',confirmadaFecha:ahora},actualizado:ahora}}); // tenerla en su horario confirma el alta
+    if(a.baja&&a.baja>'2001-01-01'){
+      if(ex.estado==='activo')ops.push({id,d:{estado:'baja',baja:{fecha:a.baja,motivo:'',origen:'tienda',...quien,fechaRegistro:ahora,confirmada:false},actualizado:ahora}});
+      else if(ex.baja&&ex.baja.origen==='rrhh'&&ex.baja.confirmada===false&&ex.baja.fecha===a.baja)ops.push({id,d:{baja:{...ex.baja,confirmada:true,confirmadaPor:REAL.correo,confirmadaPorNombre:REAL.nombre||'',confirmadaFecha:ahora},actualizado:ahora}});
+    }
+  }
+  // Si la tienda eliminó con ✕ la línea de alguien cuya baja ella misma había propuesto y RRHH aún no confirmó, la baja se retira (no queda una baja irreal)
+  for(const p of PERS)if(p.tienda===genTienda&&p.estado==='baja'&&p.baja&&p.baja.origen==='tienda'&&p.baja.confirmada===false&&!cedulasHorario.has(RH.normCed(p.cedula)))ops.push({id:p.id,d:{estado:'activo',baja:DEL,actualizado:ahora}});
+  if(!ops.length)return;
+  try{for(const o of ops.slice(0,40)){await guardarPers(o.id,o.d);const ex=PERS.find(x=>x.id===o.id);if(ex)aplicarLocal(o.id,o.d);else PERS.push({id:o.id,...o.d})}
+    pintarPersonalTienda()}catch(e){/* se reintenta en el próximo guardado */}
+}
+
+// ---------- Reclutamiento: vacantes, tiendas nuevas y puestos nuevos
+// Nueva tienda crea la ficha (con su presupuesto de plazas) y, si se quiere, las vacantes. Nuevo puesto suma una plaza y abre la vacante.
+// Las vacantes se cierran solas cuando RRHH da de alta a alguien en esa tienda con el mismo cargo (ingreso reciente), o a mano.
+const CARGOS_RH=['Agente SAC','Agente SAC MBK','Gerente de tienda','Gerente en entrenamiento','Conserje','Seguridad Interna'];
+let VAC=[],VACOK=false;const DEMOV=new Map();
+const nuevoId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const emailOk=s=>!s||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+async function cargarVacantes(){
+  try{if(!C)VAC=[...DEMOV.entries()].map(([id,v])=>({id,...v}));
+    else{const s=await C.F.getDocs(C.F.collection(C.db,'vacantes'));VAC=s.docs.map(d=>({id:d.id,...d.data()}))}
+    VACOK=true}catch(e){VAC=[];VACOK=false}
+}
+async function guardarVac(id,d){if(!C){DEMOV.set(id,{...(DEMOV.get(id)||{}),...d});return}await C.F.setDoc(C.F.doc(C.db,'vacantes',id),d,{merge:true})}
+async function pintarRec(){
+  if(!VACOK)await cargarVacantes();
+  const ab=VAC.filter(v=>v.estado==='abierta'),k=(b,l,c='')=>`<div class="kpi ${c}"><b>${b}</b><span>${l}</span></div>`;
+  $('rcK').innerHTML=k(ab.length,'Vacantes abiertas','hot')+k(VAC.filter(v=>v.estado==='cubierta').length,'Cubiertas')+k(new Set(ab.map(v=>v.tienda)).size,'Tiendas con vacantes')+k(ab.filter(v=>RH.diasDesde(v.creada?.fecha)>=15).length,'Abiertas 15+ días',ab.some(v=>RH.diasDesde(v.creada?.fecha)>=15)?'hot':'');
+  $('rcNT').hidden=$('rcNP').hidden=!(esSuper()||tiene('aperturas'));
+  const q=RH.normNombre($('rcTxt').value),es=$('rcEst').value,puedeC=esSuper()||tiene('aperturas')||tiene('rrhh_cargar'),puedeX=esSuper()||tiene('aperturas');
+  const L=VAC.filter(v=>(!es||v.estado===es)&&(!q||RH.normNombre(nomTienda(v.tienda)+' '+v.cargo).includes(q))).sort((a,b)=>RH.diasDesde(b.creada?.fecha)-RH.diasDesde(a.creada?.fecha));
+  $('rcTb').innerHTML=L.slice(0,100).map(v=>{const d=RH.diasDesde(v.creada?.fecha);
+    const st=v.estado==='abierta'?`<span class="rh-tag ${d>=15?'bad':'warn'}">Abierta</span>`:v.estado==='cubierta'?`<span class="rh-tag ok">Cubierta${v.cerrada?.automatica?' (alta de RRHH)':''}</span>`:'<span class="rh-tag">Cancelada</span>';
+    const acc=v.estado==='abierta'?`${puedeC?`<button class="btn" data-rcc="${v.id}">✔ Cubierta</button> `:''}${puedeX?`<button class="btn dng" data-rcx="${v.id}" title="Cancelar la vacante">✕</button>`:''}`:'';
+    return `<tr><td>${esc(nomTienda(v.tienda))}</td><td>${esc(v.cargo)}</td><td>${esc(v.motivo||'')}</td><td>${st}</td><td class="mono">${tsTxt(v.creada?.fecha)} · ${d} d</td><td style="white-space:nowrap">${acc}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Sin vacantes con ese filtro.</td></tr>';
+  $('rcPie').textContent=VAC.length?`Mostrando ${Math.min(100,L.length)} de ${L.length}.`:'Aún no hay vacantes. Se crean al abrir una tienda o agregar un puesto.';
+}
+$('rcTxt').oninput=$('rcEst').onchange=pintarRec;
+$('rcTb').onclick=async e=>{
+  const c=e.target.closest('[data-rcc]');
+  if(c){try{const d={estado:'cubierta',cerrada:{por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()}};await guardarVac(c.dataset.rcc,d);const v=VAC.find(x=>x.id===c.dataset.rcc);if(v)Object.assign(v,d);pintarRec()}catch(err){alert('No se pudo cerrar: '+(err.code||err.message))}return}
+  const x=e.target.closest('[data-rcx]');
+  if(x){const r=await dialogo({titulo:'Cancelar la vacante',cuerpo:'<p>La vacante deja de contarse como abierta. Si la plaza ya no se necesita, ajusta también el presupuesto de la tienda.</p>',botones:[{t:'Volver',k:'cancel',cancel:true},{t:'Cancelar vacante',k:'ok',cls:'dng'}]});
+    if(r.k!=='ok')return;try{const d={estado:'cancelada',cerrada:{por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()}};await guardarVac(x.dataset.rcx,d);const v=VAC.find(y=>y.id===x.dataset.rcx);if(v)Object.assign(v,d);pintarRec()}catch(err){alert('No se pudo cancelar: '+(err.code||err.message))}}
+};
+async function escribirLote(ops){ // ops: [{col,id,d,merge}]
+  if(!C){for(const o of ops){if(o.col==='vacantes')await guardarVac(o.id,o.d)}return}
+  const {F,db}=C;let b=F.writeBatch(db),n=0;
+  for(const o of ops){b.set(F.doc(db,o.col,o.id),o.d,{merge:o.merge!==false});if(++n>=400){await b.commit();b=F.writeBatch(db);n=0}}
+  if(n)await b.commit();
+}
+function vacanteDoc(tienda,cargo,motivo,nota=''){return {tienda,cargo,motivo,nota,estado:'abierta',creada:{por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()}}}
+$('rcNT').onclick=async()=>{
+  const base=ALLT.length?ALLT:TIENDAS,zonas=[...new Set(base.map(t=>t.zona).filter(Boolean))],regs=[...new Set(base.map(t=>t.region).filter(Boolean))];
+  const sig=Math.max(0,...base.map(t=>Number(t.numero)||0))+1;
+  const campo=(id,l,v='',tipo='text',ex='')=>`<label class="fl">${l}<input class="in" id="${id}" type="${tipo}" value="${esc(v)}" ${ex} autocomplete="off"></label>`;
+  const r=await dialogo({titulo:'Nueva tienda',ancho:true,
+    cuerpo:`<div class="fgrid">${campo('ntN','Número de tienda',sig,'number','min="1" max="999"')}${campo('ntNom','Nombre de la tienda')}
+      <label class="fl">Zona<input class="in" id="ntZ" list="ntZl" autocomplete="off"><datalist id="ntZl">${zonas.map(z=>`<option value="${esc(z)}">`).join('')}</datalist></label>
+      <label class="fl">Región<input class="in" id="ntR" list="ntRl" autocomplete="off"><datalist id="ntRl">${regs.map(z=>`<option value="${esc(z)}">`).join('')}</datalist></label>
+      ${campo('ntCT','Correo de la tienda (usuario del gerente)','','email')}${campo('ntCG','Correo del GZ','','email')}${campo('ntGN','Nombre del GZ')}${campo('ntP','Plazas de agentes (sin gerente)',9,'number','min="0" max="60"')}</div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="ntV" checked>Crear las vacantes (agentes más el gerente de tienda)</label>
+      <p class="sub">El código será AMPM + el número. Después crea el usuario del gerente en Administración › Usuarios.</p>`,
+    leer:d=>({numero:Number(d.querySelector('#ntN').value),nombre:d.querySelector('#ntNom').value.trim(),zona:d.querySelector('#ntZ').value.trim(),region:d.querySelector('#ntR').value.trim(),
+      correoTienda:correo(d.querySelector('#ntCT').value),correoGZ:correo(d.querySelector('#ntCG').value),gzNombre:d.querySelector('#ntGN').value.trim(),plazas:Number(d.querySelector('#ntP').value),vac:d.querySelector('#ntV').checked}),
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Crear tienda',k:'ok',cls:'pri',valida:d=>{
+      const n=Number(d.querySelector('#ntN').value),p=Number(d.querySelector('#ntP').value);
+      if(!Number.isInteger(n)||n<1||n>999)return 'El número de tienda debe estar entre 1 y 999.';
+      if(base.some(t=>Number(t.numero)===n||t.codigo==='AMPM'+String(n).padStart(2,'0')))return 'Ya existe una tienda con ese número.';
+      if(d.querySelector('#ntNom').value.trim().length<3)return 'Escribe el nombre de la tienda.';
+      if(d.querySelector('#ntZ').value.trim().length<2)return 'Indica la zona.';
+      if(!emailOk(d.querySelector('#ntCT').value.trim())||!emailOk(d.querySelector('#ntCG').value.trim()))return 'Revisa los correos: tienen un formato no válido.';
+      if(!Number.isInteger(p)||p<0||p>60)return 'Las plazas deben ser un número entre 0 y 60.';return null}}]});
+  if(r.k!=='ok'||!r.datos)return;
+  const x=r.datos,cod='AMPM'+String(x.numero).padStart(2,'0');
+  const t={numero:x.numero,nombre:x.nombre,zona:x.zona,region:x.region,correoTienda:x.correoTienda,correoGZ:x.correoGZ,gzNombre:x.gzNombre,auxiliar:'',activa:true,prueba:false,plazas:x.plazas,plazasFecha:ahoraTS(),creadaPor:REAL.correo,creadaFecha:ahoraTS(),origen:'Apertura de tienda'};
+  try{
+    const ops=[{col:'tiendas',id:cod,d:t,merge:false}];
+    if(x.vac){for(let i=0;i<x.plazas;i++)ops.push({col:'vacantes',id:nuevoId('v'),d:vacanteDoc(cod,'Agente SAC','Apertura de tienda')});ops.push({col:'vacantes',id:nuevoId('v'),d:vacanteDoc(cod,'Gerente de tienda','Apertura de tienda')})}
+    if(!C){const loc={codigo:cod,...t,plazasFecha:new Date(),creadaFecha:new Date()};[ALLT,TIENDAS].forEach(L=>{if(!L.some(y=>y.codigo===cod))L.push(loc)});await escribirLote(ops.filter(o=>o.col==='vacantes'))}
+    else{await escribirLote(ops);const loc={codigo:cod,...t};[ALLT,TIENDAS].forEach(L=>{if(!L.some(y=>y.codigo===cod))L.push(loc)})}
+    await cargarVacantes();pintarRec();
+    alert(`Tienda ${cod} creada${x.vac?' con sus vacantes':''}. Falta crear el usuario del gerente en Administración › Usuarios.`);
+  }catch(err){alert('No se pudo crear la tienda: '+(err.code||err.message))}
+};
+$('rcNP').onclick=async()=>{
+  const L=(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba).sort((a,b)=>(a.numero||0)-(b.numero||0));
+  const r=await dialogo({titulo:'Nuevo puesto',ancho:true,
+    cuerpo:`<div class="fgrid"><label class="fl">Tienda<select class="in" id="npT"><option value="">Elegir…</option>${L.map(t=>`<option value="${esc(t.codigo)}">${esc(t.codigo)} · ${esc(t.nombre)}</option>`).join('')}</select></label>
+      <label class="fl">Cargo<select class="in" id="npC">${CARGOS_RH.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
+      <label class="fl">Cantidad<input class="in" id="npQ" type="number" min="1" max="10" value="1"></label>
+      <label class="fl">Motivo<select class="in" id="npM"><option value="Puesto nuevo">Puesto nuevo (suma una plaza al presupuesto)</option><option value="Reemplazo">Reemplazo (no cambia el presupuesto)</option><option value="Refuerzo temporal">Refuerzo temporal (no cambia el presupuesto)</option></select></label></div>
+      <label class="sub" for="npN">Nota (opcional)</label><textarea id="npN"></textarea>`,
+    leer:d=>({tienda:d.querySelector('#npT').value,cargo:d.querySelector('#npC').value,cant:Number(d.querySelector('#npQ').value),motivo:d.querySelector('#npM').value,nota:d.querySelector('#npN').value.trim()}),
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Crear vacante',k:'ok',cls:'pri',valida:d=>{
+      if(!d.querySelector('#npT').value)return 'Elige la tienda.';const q=Number(d.querySelector('#npQ').value);
+      return Number.isInteger(q)&&q>=1&&q<=10?null:'La cantidad debe estar entre 1 y 10.'}}]});
+  if(r.k!=='ok'||!r.datos)return;
+  const x=r.datos,suma=x.motivo==='Puesto nuevo'&&x.cargo!=='Gerente de tienda'; // el presupuesto de plazas no cuenta al gerente de tienda
+  try{
+    const ops=[];for(let i=0;i<x.cant;i++)ops.push({col:'vacantes',id:nuevoId('v'),d:vacanteDoc(x.tienda,x.cargo,x.motivo,x.nota)});
+    if(suma&&C)ops.push({col:'tiendas',id:x.tienda,d:{plazas:C.F.increment(x.cant),plazasFecha:ahoraTS()}});
+    await escribirLote(ops);
+    if(suma)[ALLT,TIENDAS].forEach(L=>{const t=L.find(y=>y.codigo===x.tienda);if(t)t.plazas=(Number(t.plazas)||0)+x.cant});
+    await cargarVacantes();pintarRec();
+  }catch(err){alert('No se pudo crear: '+(err.code||err.message))}
+};
+
+// ---------- Administración: roles, permisos y usuarios (solo superusuario)
+let ROLES_C=[],USERS=[],ROLESOK=false;const DEMOR=new Map(),DEMOU=new Map();
+async function cargarRolesUsuarios(){
+  try{
+    if(!C){ROLES_C=[...DEMOR.entries()].map(([id,r])=>({id,...r}));USERS=[...DEMOU.entries()].map(([id,u])=>({correo:id,...u}))}
+    else{const [a,b]=await Promise.all([C.F.getDocs(C.F.collection(C.db,'roles')),C.F.getDocs(C.F.collection(C.db,'usuarios'))]);
+      ROLES_C=a.docs.map(d=>({id:d.id,...d.data()}));USERS=b.docs.map(d=>({correo:d.id,...d.data()}))}
+    ROLESOK=true;
+  }catch(e){ROLES_C=[];USERS=[];ROLESOK=false}
+}
+const todosRoles=()=>[...Object.entries(RL.PLANTILLAS).map(([n,r])=>({nombre:n,...r})),...ROLES_C.map(r=>({...r,sistema:false}))];
+const rolDef=n=>todosRoles().find(r=>r.nombre===n);
+const modTxt=ps=>(ps||[]).map(p=>RL.MODULOS.find(m=>m.id===p)?.t||p);
+async function pintarRoles(){
+  if(!ROLESOK)await cargarRolesUsuarios();
+  $('rlTb').innerHTML=todosRoles().map(r=>{const n=USERS.filter(u=>u.rol===r.nombre).length;
+    const acc=r.sistema?`<button class="btn" data-rld="${esc(r.nombre)}" title="Crear un rol nuevo a partir de este">Duplicar</button>`
+      :`<button class="btn" data-rle="${esc(r.id)}">Editar</button> <button class="btn" data-rld="${esc(r.nombre)}">Duplicar</button> <button class="btn dng" data-rlx="${esc(r.id)}" ${n?'disabled title="Tiene usuarios asignados"':''}>✕</button>`;
+    return `<tr><td><b>${esc(r.nombre)}</b>${r.sistema?' <span class="rh-tag">RITMO</span>':' <span class="rh-tag ok">Creado aquí</span>'}<div class="sub">${esc(r.desc||'')}</div></td>
+      <td>${modTxt(r.permisos).map(t=>`<span class="rh-tag" style="margin:2px 3px 2px 0">${esc(t)}</span>`).join('')||'<span class="sub">—</span>'}${r.nombre==='Superusuario'?' <span class="rh-tag warn">+ Administración</span>':''}</td><td>${n}</td><td style="white-space:nowrap">${acc}</td></tr>`}).join('');
+}
+function formRol(r,editando){
+  return `<label class="fl">Nombre del rol<input class="in" id="rlN" value="${esc(r.nombre||'')}" ${editando?'disabled':''} maxlength="50" autocomplete="off"></label>
+    <label class="fl">Descripción<input class="in" id="rlD" value="${esc(r.desc||'')}" maxlength="140" autocomplete="off"></label>
+    <label class="fl">Alcance<select class="in" id="rlA"><option value="Todas" ${r.alcance!=='Usuario'?'selected':''}>Todas las tiendas</option><option value="Usuario" ${r.alcance==='Usuario'?'selected':''}>Según cada usuario (su tienda, zona o región)</option></select></label>
+    <div class="sub" style="margin:10px 0 4px">Módulos que verá este rol</div>
+    ${RL.MODULOS.map(m=>`<label class="rhr" style="cursor:pointer;gap:10px"><input type="checkbox" data-mod="${m.id}" ${(r.permisos||[]).includes(m.id)?'checked':''}><span class="rt"><b>${esc(m.t)}</b><span>${esc(m.d)}</span></span></label>`).join('')}`;
+}
+async function dialogoRol(base,editando){
+  const existentes=todosRoles().map(r=>r.nombre).filter(n=>!editando||n!==base.nombre);
+  const leerForm=d=>({nombre:d.querySelector('#rlN').value.trim().replace(/\s+/g,' '),desc:d.querySelector('#rlD').value.trim(),alcance:d.querySelector('#rlA').value,permisos:RL.limpiarPermisos([...d.querySelectorAll('[data-mod]:checked')].map(c=>c.dataset.mod))});
+  return dialogo({titulo:editando?`Editar rol · ${esc(base.nombre)}`:'Nuevo rol',ancho:true,cuerpo:formRol(base,editando),leer:leerForm,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:editando?'Guardar cambios':'Crear rol',k:'ok',cls:'pri',valida:d=>{const x=leerForm(d);return editando?(x.permisos.length?null:'Marca al menos un módulo.'):RL.validarRol(x.nombre,x.permisos,existentes)}}]});
+}
+const slugRol=n=>'r_'+RH.normNombre(n).replace(/\s+/g,'-');
+async function guardarRol(x,id,usuariosAfectados){
+  const d={nombre:x.nombre,desc:x.desc,alcance:x.alcance,permisos:x.permisos,sistema:false,activo:true,actualizado:ahoraTS(),creadaPor:REAL.correo};
+  if(!C){DEMOR.set(id,{...(DEMOR.get(id)||{}),...d})}
+  else{const {F,db}=C;let b=F.writeBatch(db);b.set(F.doc(db,'roles',id),d,{merge:true});
+    usuariosAfectados.forEach(u=>b.set(F.doc(db,'usuarios',u.correo),{permisos:x.permisos},{merge:true}));await b.commit()}
+  usuariosAfectados.forEach(u=>{u.permisos=x.permisos;if(!C)DEMOU.set(u.correo,{...(DEMOU.get(u.correo)||{}),permisos:x.permisos})});
+}
+$('rlNew').onclick=async()=>{const r=await dialogoRol({nombre:'',desc:'',alcance:'Todas',permisos:[]},false);if(r.k!=='ok'||!r.datos)return;
+  try{await guardarRol(r.datos,slugRol(r.datos.nombre),[]);await cargarRolesUsuarios();pintarRoles()}catch(e){alert('No se pudo crear el rol: '+(e.code||e.message))}};
+$('rlTb').onclick=async e=>{
+  const d=e.target.closest('[data-rld]');
+  if(d){const o=rolDef(d.dataset.rld);if(!o)return;const r=await dialogoRol({nombre:o.nombre+' (copia)',desc:o.desc||'',alcance:(o.alcance==='Usuario'||['Editor','Visualizar','Descargar'].includes(o.nombre))?'Usuario':'Todas',permisos:(o.permisos||[]).filter(p=>p!=='administracion')},false);
+    if(r.k!=='ok'||!r.datos)return;try{await guardarRol(r.datos,slugRol(r.datos.nombre),[]);await cargarRolesUsuarios();pintarRoles()}catch(err){alert('No se pudo crear el rol: '+(err.code||err.message))}return}
+  const ed=e.target.closest('[data-rle]');
+  if(ed){const o=ROLES_C.find(x=>x.id===ed.dataset.rle);if(!o)return;const af=USERS.filter(u=>u.rol===o.nombre);const r=await dialogoRol(o,true);
+    if(r.k!=='ok'||!r.datos)return;try{await guardarRol({...r.datos,nombre:o.nombre},o.id,af);await cargarRolesUsuarios();pintarRoles();pintarUsuarios()}catch(err){alert('No se pudo guardar: '+(err.code||err.message))}return}
+  const x=e.target.closest('[data-rlx]');
+  if(x&&!x.disabled){const o=ROLES_C.find(y=>y.id===x.dataset.rlx);if(!o)return;const r=await dialogo({titulo:'Eliminar el rol',cuerpo:`<p>Se elimina el rol <b>${esc(o.nombre)}</b>. Nadie lo tiene asignado.</p>`,botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Eliminar rol',k:'ok',cls:'dng'}]});
+    if(r.k!=='ok')return;try{if(C)await C.F.deleteDoc(C.F.doc(C.db,'roles',o.id));else DEMOR.delete(o.id);await cargarRolesUsuarios();pintarRoles()}catch(err){alert('No se pudo eliminar: '+(err.code||err.message))}}
+};
+function pintarUsuarios(){
+  const q=RH.normNombre($('usTxt').value),L=USERS.filter(u=>!q||RH.normNombre((u.nombre||'')+' '+u.correo).includes(q)).sort((a,b)=>String(a.nombre||a.correo).localeCompare(String(b.nombre||b.correo)));
+  $('usTb').innerHTML=L.slice(0,100).map(u=>`<tr><td>${esc(u.nombre||'')}${u.activo===false?' <span class="rh-tag bad">Inactivo</span>':''}</td><td class="mono">${esc(u.correo)}</td><td>${esc(u.rol||'')}</td><td>${u.accesoCreado?'<span class="rh-tag ok">Con acceso</span>':'<span class="rh-tag warn">Sin acceso</span>'}</td>
+    <td><button class="btn" data-usr="${esc(u.correo)}">Cambiar rol</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Sin resultados.</td></tr>';
+  $('usPie').textContent=USERS.length?`Mostrando ${Math.min(100,L.length)} de ${L.length} usuarios. Para enviar el acceso usa “Crear accesos” (paso 2).`:'No hay usuarios cargados.';
+}
+$('usTxt').oninput=pintarUsuarios;
+const alcanceAuto=n=>{const r=rolDef(n);return !!r&&(['Superusuario','RRHH','Encargado de Reclutamiento','Auxiliar de Reclutamiento'].includes(n)||(!r.sistema&&r.alcance!=='Usuario'))};
+async function asignarRol(u,rolNombre,tienda){
+  const r=rolDef(rolNombre);if(!r)throw new Error('El rol no existe');
+  const d={rol:rolNombre,permisos:r.permisos.filter(p=>p!=='administracion'||rolNombre==='Superusuario')};
+  if(alcanceAuto(rolNombre)){d.alcance='Todas';d.tiendas=[]}
+  else if(tienda){d.alcance='Tienda';d.tiendas=[tienda]}
+  if(!C){DEMOU.set(u.correo,{...(DEMOU.get(u.correo)||{}),...d})}else await C.F.setDoc(C.F.doc(C.db,'usuarios',u.correo),d,{merge:true});
+  Object.assign(u,d);
+}
+const opcionesRol=sel=>todosRoles().map(r=>`<option ${r.nombre===sel?'selected':''}>${esc(r.nombre)}</option>`).join('');
+const opcionesTienda=()=>(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba).sort((a,b)=>(a.numero||0)-(b.numero||0)).map(t=>`<option value="${esc(t.codigo)}">${esc(t.codigo)} · ${esc(t.nombre)}</option>`).join('');
+const necesitaTienda=(rolN,u)=>!alcanceAuto(rolN)&&['Editor'].includes(rolN)&&!(u&&(u.tiendas||[]).length);
+$('usTb').onclick=async e=>{
+  const b=e.target.closest('[data-usr]');if(!b)return;const u=USERS.find(x=>x.correo===b.dataset.usr);if(!u)return;
+  const r=await dialogo({titulo:`Cambiar rol · ${esc(u.nombre||u.correo)}`,cuerpo:`<label class="fl">Rol<select class="in" id="usR">${opcionesRol(u.rol)}</select></label>
+      <label class="fl" id="usTw" hidden>Tienda del gerente<select class="in" id="usT"><option value="">Elegir…</option>${opcionesTienda()}</select></label>
+      <p class="sub">Tendrá los módulos de ese rol la próxima vez que inicie sesión.</p>`,
+    leer:d=>({rol:d.querySelector('#usR').value,tienda:d.querySelector('#usT').value}),
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Guardar',k:'ok',cls:'pri',valida:d=>{const rn=d.querySelector('#usR').value;return necesitaTienda(rn,u)&&!d.querySelector('#usT').value?'Elige la tienda del gerente.':null}}]});
+  if(r.k!=='ok'||!r.datos)return;
+  try{await asignarRol(u,r.datos.rol,r.datos.tienda);pintarUsuarios();pintarRoles()}catch(err){alert('No se pudo cambiar el rol: '+(err.code||err.message))}
+};
+document.addEventListener('change',e=>{if(e.target.id!=='usR')return;const d=e.target.closest('dialog');if(!d)return;const w=d.querySelector('#usTw');if(w)w.hidden=!(e.target.value==='Editor');});
+$('usNew').onclick=async()=>{
+  const r=await dialogo({titulo:'Nuevo usuario',ancho:true,cuerpo:`<div class="fgrid"><label class="fl">Correo (será su usuario)<input class="in" id="nuC" type="email" autocomplete="off"></label><label class="fl">Nombre completo<input class="in" id="nuN" autocomplete="off"></label>
+      <label class="fl">Cargo<input class="in" id="nuG" autocomplete="off"></label><label class="fl">Rol<select class="in" id="nuR">${opcionesRol('Editor')}</select></label>
+      <label class="fl" id="nuTw">Tienda (solo gerentes de tienda)<select class="in" id="nuT"><option value="">Elegir…</option>${opcionesTienda()}</select></label></div>
+      <p class="sub">Se crea la ficha. Para enviarle el acceso usa “Crear accesos” en esta misma pantalla.</p>`,
+    leer:d=>({correo:correo(d.querySelector('#nuC').value),nombre:d.querySelector('#nuN').value.trim(),cargo:d.querySelector('#nuG').value.trim(),rol:d.querySelector('#nuR').value,tienda:d.querySelector('#nuT').value}),
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Crear usuario',k:'ok',cls:'pri',valida:d=>{
+      const c=correo(d.querySelector('#nuC').value),rn=d.querySelector('#nuR').value;
+      if(!c||!emailOk(c))return 'Escribe un correo válido.';if(USERS.some(u=>u.correo===c))return 'Ese correo ya tiene un usuario.';
+      if(d.querySelector('#nuN').value.trim().length<3)return 'Escribe el nombre.';
+      return necesitaTienda(rn,null)&&!d.querySelector('#nuT').value?'Elige la tienda del gerente.':null}}]});
+  if(r.k!=='ok'||!r.datos)return;
+  const x=r.datos,u={correo:x.correo,nombre:x.nombre,cargo:x.cargo,activo:true,accesoCreado:false,reportaA:'',valor:''};
+  try{await asignarRol(u,x.rol,x.tienda);
+    if(!C)DEMOU.set(u.correo,{...(DEMOU.get(u.correo)||{}),nombre:u.nombre,cargo:u.cargo,activo:true,accesoCreado:false});
+    else await C.F.setDoc(C.F.doc(C.db,'usuarios',u.correo),{nombre:u.nombre,cargo:u.cargo,activo:true,accesoCreado:false,reportaA:'',valor:''},{merge:true});
+    await cargarRolesUsuarios();pintarUsuarios();pintarRoles()}catch(err){alert('No se pudo crear el usuario: '+(err.code||err.message))}
+};
+
+// ---------- Aprobación de horas extra por el GZ, bloqueo de la planilla y reapertura
+// Ciclo: el gerente publica → el GZ aprueba las horas extra (queda bloqueada) → el gerente solicita reapertura con motivo →
+// el GZ aprueba o rechaza. Lo publicado tras una reapertura aprobada cuenta siempre a tiempo. Las reglas de Firestore lo imponen.
+const puedeGZ=t=>REAL?.rol==='Superusuario'||ME.rol==='Superusuario'||(ME.rol==='Visualizar'&&correo(t.correoGZ||'')===correo(ME.correo||''));
+// Cierre de la quincena para una tienda: 'bloqueada' (el GZ aprobó las horas extra), 'cerrada' (pasó la fecha de entrega de
+// planilla) o null (abierta). Una reapertura aprobada o una apertura directa del GZ posteriores a la fecha de pago la reabren.
+// Debe coincidir con las funciones cerrada/pagoPasado de firestore.rules, que es lo que de verdad lo impone.
+let APER={},CIERRES=[];const DEMOAP=new Map();
+const finPagoQ=(cal=CAL)=>cal?.fechaPlanilla?new Date(cal.fechaPlanilla+'T23:59:59'):null;
+function cierreDe(e,cod,cal=CAL,ap=APER[cod]){
+  if(e&&e.bloqueada)return 'bloqueada';
+  const fp=finPagoQ(cal);if(!fp||Date.now()<=fp.getTime())return null;
+  const abierta=ap&&toD(ap.fecha)>fp,reab=e&&e.reapertura&&e.reapertura.estado==='aprobada'&&toD(e.reapertura.resueltaFecha)>fp;
+  return abierta||reab?null:'cerrada';
+}
+const bloqueada=(e,c)=>!!cierreDe(e,c||e?.tienda);
+function insigniaHE(e,cod){
+  const cz=cierreDe(e,cod);let h='';
+  if(cz==='bloqueada')h+=` <span class="st ok" title="Horas extra aprobadas${e.heAprobada?.porNombre?' por '+esc(e.heAprobada.porNombre):''}. La planilla está bloqueada.">🔒 HE aprobadas</span>`;
+  else if(cz==='cerrada')h+=' <span class="st late" title="Pasó la fecha de entrega de planilla. Solo el GZ puede reabrirla.">🔒 Cerrada por fecha</span>';
+  if(e&&e.reapertura?.estado==='solicitada')h+=` <span class="st late" title="${esc(e.reapertura.motivo||'')}">↩ Reapertura solicitada</span>`;
+  return h;
+}
+function accionesGZ(t,e){
+  if(!puedeGZ(t))return '';let h='';const cz=cierreDe(e,t.codigo);
+  if(e&&!cz)h+=` <button class="btn" data-he="${esc(t.codigo)}" title="Aprobar las horas extra de esta quincena y bloquear la planilla">✔ Aprobar HE</button>`;
+  if(e&&cz&&e.reapertura?.estado==='solicitada')h+=` <button class="btn pri" data-reab="${esc(t.codigo)}" title="Responder la solicitud de reapertura">↩ Responder solicitud</button>`;
+  if(cz)h+=` <button class="btn" data-ab="${esc(t.codigo)}" title="Abrir esta quincena sin esperar una solicitud">🔓 Abrir quincena</button>`;
+  return h;
+}
+// Quincenas cerradas de MI tienda (las 6 del selector): el Generador las usa para cerrar en pantalla la planilla y los horarios.
+const rangoQ=q=>{const [y,m,k]=q.split('-');return {ini:`${y}-${m}-${k==='Q1'?'01':'16'}`,fin:k==='Q1'?`${y}-${m}-15`:iso(new Date(+y,+m,0))}};
+async function cargarCierres(){
+  const t=TIENDAS[0];CIERRES=[];if(!t)return;
+  for(const q of [...$('qSel').options].map(o=>o.value)){
+    let cal=null,ent=null,ap=null;
+    if(C){const [a,b,c]=await Promise.all([['calendario',q],['entregas',`${t.codigo}_${q}`],['aperturas',`${t.codigo}_${q}`]].map(([col,id])=>C.F.getDoc(C.F.doc(C.db,col,id)).catch(()=>null)));
+      cal=a&&a.exists()?a.data():null;ent=b&&b.exists()?b.data():null;ap=c&&c.exists()?c.data():null}
+    else{cal=DEMO_CAL[q]||null;ent=q===Q?ENT[t.codigo]:null;ap=q===Q?APER[t.codigo]:null}
+    if(!cierreDe(ent,t.codigo,cal,ap))continue;
+    const fp=finPagoQ(cal);
+    CIERRES.push({q,...rangoQ(q),pago:!!fp&&Date.now()>fp.getTime()}); // pago: ya pasó la fecha de entrega de planilla → también se cierran los horarios
+  }
+}
+// El GZ abre la quincena directamente. Con entrega: se desbloquea y queda como reapertura aprobada. Sin entrega: se registra una apertura.
+async function abrirQuincena(cod){
+  const t=TIENDAS.find(x=>x.codigo===cod);if(!t)return;const e=ENT[cod];
+  const r=await dialogo({titulo:'Abrir quincena',cuerpo:`<p>Vas a abrir la quincena de <b>${esc(t.nombre)}</b> · ${esc(quincenaTexto(Q))}. La tienda podrá cambiar y publicar la planilla; lo que publique cuenta <b>a tiempo</b>.</p>
+    <label class="sub" for="dlgNotaA">Motivo (opcional)</label><textarea id="dlgNotaA"></textarea><p class="sub">Después deberás aprobar de nuevo las horas extra para volver a cerrarla.</p>`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'🔓 Abrir quincena',k:'ok',cls:'pri'}]});
+  if(r.k!=='ok')return;
+  const quien={por:REAL.correo,porNombre:REAL.nombre||''},ts=C?C.F.serverTimestamp():new Date();
+  try{
+    if(e){const rea={...(e.reapertura||{}),estado:'aprobada',resueltaPor:quien.por,resueltaPorNombre:quien.porNombre,resueltaFecha:ts,nota:r.texto||'Apertura directa del GZ'};
+      await actualizarEntrega(cod,{bloqueada:false,heAprobada:C?C.F.deleteField():null,reapertura:rea},x=>{x.bloqueada=false;delete x.heAprobada;x.reapertura=rea})}
+    else{const a={tienda:cod,quincena:Q,...quien,fecha:ts,motivo:r.texto||''};
+      if(C){await C.F.setDoc(C.F.doc(C.db,'aperturas',`${cod}_${Q}`),a);await cargarEntregas()}else DEMOAP.set(`${cod}_${Q}`,a)}
+    if(!C)APER[cod]=DEMOAP.get(`${cod}_${Q}`)||APER[cod];
+    pintar();
+  }catch(err){alert('No se pudo abrir la quincena: '+(err.code||err.message))}
+}
+// leer(d): opcional, devuelve los datos del formulario al aceptar. ancho: diálogo ancho para tablas.
+function dialogo({titulo,cuerpo,botones,leer,ancho}){
+  return new Promise(res=>{
+    const d=document.createElement('dialog');d.className='dlg'+(ancho?' ancho':'');
+    d.innerHTML=`<form method="dialog"><h3>${titulo}</h3><div class="dlgb">${cuerpo}</div><div class="dlgerr" role="alert" style="color:var(--bad);font-size:13px;min-height:0"></div><div class="dlga">${botones.map((b,i)=>`<button class="btn ${b.cls||''}" value="${i}"${b.cancel?' formnovalidate':''}>${b.t}</button>`).join('')}</div></form>`;
+    document.body.appendChild(d);
+    let fin=false;
+    const cerrar=(k,texto)=>{if(fin)return;fin=true;let datos=null;if(leer&&k!=='cancel'){try{datos=leer(d)}catch(e){datos=null}}
+      try{d.close()}catch(e){/* ya cerrado */}d.remove();res({k,texto,datos})};
+    // Cada botón resuelve el diálogo directamente; Esc o cerrar equivalen a cancelar.
+    d.addEventListener('click',ev=>{const b=ev.target.closest('button[value]');if(!b)return;const bt=botones[Number(b.value)];if(!bt)return;
+      ev.preventDefault();
+      if(bt.valida){const m=bt.valida(d);if(m){d.querySelector('.dlgerr').textContent=m;return}} // valida(d): texto de error → el diálogo sigue abierto
+      const texto=d.querySelector('textarea')?.value.trim()||'';
+      if(bt.min&&texto.length<bt.min){d.querySelector('.dlgerr').textContent=`Escribe al menos ${bt.min} letras para que tu GZ entienda qué corregir.`;d.querySelector('textarea')?.focus();return}
+      cerrar(bt.k,texto)});
+    d.addEventListener('cancel',()=>cerrar('cancel',''));
+    d.addEventListener('close',()=>cerrar('cancel',''));
+    d.showModal();d.querySelector('textarea')?.focus();
+  });
+}
+async function actualizarEntrega(cod,cambios,enDemo){
+  if(!C){enDemo(ENT[cod]);return}
+  await C.F.updateDoc(C.F.doc(C.db,'entregas',`${cod}_${Q}`),cambios);
+  await cargarEntregas();
+}
+async function aprobarHE(cod){
+  const t=TIENDAS.find(x=>x.codigo===cod),e=ENT[cod];if(!t||!e)return;
+  const r=await dialogo({titulo:'Aprobar horas extra',cuerpo:`<p>Vas a aprobar las horas extra de <b>${esc(t.nombre)}</b> · ${esc(quincenaTexto(Q))}.</p><p>La planilla de esa quincena quedará <b>bloqueada</b>. Si la tienda necesita cambiarla, tendrá que pedirte la reapertura.</p>`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'✔ Aprobar y bloquear',k:'ok',cls:'pri'}]});
+  if(r.k!=='ok')return;
+  const por={por:REAL.correo,porNombre:REAL.nombre||'',fecha:C?C.F.serverTimestamp():new Date()};
+  try{await actualizarEntrega(cod,{bloqueada:true,heAprobada:por},x=>{x.bloqueada=true;x.heAprobada=por});pintar()}
+  catch(err){alert('No se pudo aprobar: '+(err.code||err.message))}
+}
+async function responderReapertura(cod){
+  const t=TIENDAS.find(x=>x.codigo===cod),s=ENT[cod]?.reapertura;if(!t||!s||s.estado!=='solicitada')return;
+  const r=await dialogo({titulo:'Solicitud de reapertura',cuerpo:`<p><b>${esc(t.nombre)}</b> · ${esc(quincenaTexto(Q))}</p>
+    <p class="sub">Solicitada por ${esc(s.solicitadaPorNombre||s.solicitadaPor||'')}${s.solicitadaFecha?' · '+esc(fmt(s.solicitadaFecha)):''}</p>
+    <blockquote class="mot">${esc(s.motivo||'')}</blockquote>
+    <label class="sub" for="dlgNota">Nota para la tienda (opcional)</label><textarea id="dlgNota" placeholder="Ej.: aprobado, corrige y vuelve a publicar"></textarea>
+    <p class="sub">Al aprobar, la planilla se desbloquea y lo que publique la tienda cuenta <b>a tiempo</b>. Después deberás aprobar de nuevo las horas extra.</p>`,
+    botones:[{t:'Cerrar',k:'cancel',cancel:true},{t:'Rechazar',k:'no',cancel:true},{t:'Aprobar reapertura',k:'ok',cls:'pri'}]});
+  if(r.k==='cancel')return;
+  const base={...s,estado:r.k==='ok'?'aprobada':'rechazada',resueltaPor:REAL.correo,resueltaPorNombre:REAL.nombre||'',resueltaFecha:C?C.F.serverTimestamp():new Date(),nota:r.texto};
+  try{
+    if(r.k==='ok')await actualizarEntrega(cod,{bloqueada:false,heAprobada:C?C.F.deleteField():null,reapertura:base},x=>{x.bloqueada=false;delete x.heAprobada;x.reapertura=base});
+    else await actualizarEntrega(cod,{reapertura:base},x=>{x.reapertura=base});
+    pintar();
+  }catch(err){alert('No se pudo responder: '+(err.code||err.message))}
+}
+async function solicitarReapertura(){
+  const t=TIENDAS[0],e=t&&ENT[t.codigo];if(!e||!cierreDe(e,t.codigo))return;
+  const r=await dialogo({titulo:'Solicitar reapertura de la planilla',cuerpo:`<p>La quincena ${esc(quincenaTexto(Q))} está cerrada. Cuéntale a tu GZ qué necesitas corregir.</p>
+    <label class="sub" for="dlgMot">Motivo</label><textarea id="dlgMot" placeholder="Mínimo 10 letras"></textarea>`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Enviar solicitud',k:'ok',cls:'pri',min:10}]});
+  if(r.k!=='ok')return;
+  const rea={estado:'solicitada',motivo:r.texto,solicitadaPor:REAL.correo,solicitadaPorNombre:REAL.nombre||'',solicitadaFecha:C?C.F.serverTimestamp():new Date()};
+  try{await actualizarEntrega(t.codigo,{reapertura:rea},x=>{x.reapertura=rea});pintar();msg('miaMsg','Solicitud enviada a tu GZ.','ok')}
+  catch(err){msg('miaMsg','No se pudo enviar la solicitud: '+(err.code||err.message),'bad')}
+}
+function pintarBloqueo(){
+  const L=$('miaLock');if(!L)return;
+  const t=TIENDAS[0],e=t&&ENT[t.codigo],cz=t?cierreDe(e,t.codigo):null;
+  if(!esEditor()||!t||(!e&&!cz)){L.innerHTML='';listo();return}
+  const r=e?.reapertura;let h='';
+  if(cz){
+    if(cz==='bloqueada'){
+      const quien=e.heAprobada?.porNombre||e.heAprobada?.por||'Tu GZ',cuando=e.heAprobada?.fecha?fmt(e.heAprobada.fecha):'';
+      h=`<div class="msg on warn">🔒 <b>Planilla bloqueada.</b> ${esc(quien)} aprobó las horas extra${cuando?' el '+esc(cuando):''}${cuando.endsWith('.')?'':'.'} Para cambiar algo, solicita la reapertura.</div>`;
+    }else{
+      const fp=finPagoQ();
+      h=`<div class="msg on warn">🔒 <b>Quincena cerrada.</b> Ya pasó la fecha de entrega de planilla${fp?' ('+esc(fp.toLocaleDateString('es-NI',{day:'numeric',month:'long'}))+')':''}: la planilla y los horarios de esta quincena están cerrados. Solo tu GZ puede reabrirlos.${e?'':' Pídele que abra la quincena.'}</div>`;
+    }
+    if(!e){L.innerHTML=h;listo();return}
+    if(r?.estado==='solicitada'){const f=r.solicitadaFecha?fmt(r.solicitadaFecha):'';h+=`<div class="msg on warn" style="margin-top:8px">⏳ Solicitud enviada${f?' el '+esc(f):''}${f.endsWith('.')?'':'.'} Esperando la respuesta de tu GZ.</div>`}
+    else{
+      if(r?.estado==='rechazada')h+=`<div class="msg on bad" style="margin-top:8px">Tu última solicitud fue rechazada${r.nota?': '+esc(r.nota):'.'}</div>`;
+      h+=`<div class="bar" style="margin-top:8px"><button class="btn pri" id="reabS" type="button">↩ Solicitar reapertura</button></div>`;
+    }
+  }else if(r?.estado==='aprobada'&&e)h=`<div class="msg on ok">✔ <b>Reapertura aprobada.</b> Ya puedes publicar de nuevo; contará a tiempo.${r.nota?' Nota de tu GZ: '+esc(r.nota):''}</div>`;
+  L.innerHTML=h;const b=$('reabS');if(b)b.onclick=solicitarReapertura;
+  listo();
 }
 const toD=f=>f?.toDate?f.toDate():(f?new Date(f):null);
 function estado(e){const L=toD(CAL?.limite);
-  if(e){const d=toD(e.fecha);return L&&d&&d>L?`<span class="st late"><i></i>${CAL?.sinHETarde!==false?'Tarde · sin pago de HE':'Entregada tarde'}</span>`:'<span class="st ok"><i></i>Entregada</span>'}
+  // Una reapertura aprobada por el GZ siempre cuenta a tiempo
+  if(e){const d=toD(e.fecha);return L&&d&&d>L&&!(e.reapertura&&e.reapertura.estado==='aprobada')?`<span class="st late"><i></i>${CAL?.sinHETarde!==false?'Tarde · sin pago de HE':'Entregada tarde'}</span>`:'<span class="st ok"><i></i>Entregada</span>'}
   return L&&Date.now()>L?'<span class="st bad"><i></i>Vencida</span>':'<span class="st no"><i></i>Pendiente</span>'}
 const fmt=f=>{const d=f?.toDate?f.toDate():new Date(f);return isNaN(d)?'':d.toLocaleDateString('es-NI',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})};
 
 // ---------- Descargar respaldo (Descargar / Superusuario)
-$('tb').onclick=async e=>{const bs=e.target.closest('[data-sv]');if(bs){const cod=bs.dataset.sv;bs.disabled=true;
+$('tb').onclick=async e=>{
+  const bh=e.target.closest('[data-he]');if(bh){aprobarHE(bh.dataset.he);return}
+  const br=e.target.closest('[data-reab]');if(br){responderReapertura(br.dataset.reab);return}
+  const bo=e.target.closest('[data-ab]');if(bo){abrirQuincena(bo.dataset.ab);return}
+  const bs=e.target.closest('[data-sv]');if(bs){const cod=bs.dataset.sv;bs.disabled=true;
     try{let r=await leerDato(cod,'respaldo');if(!r)throw new Error('sin respaldo');
       const x=await excelPlanilla(JSON.parse(r.contenido));
       await LOC.guardar({tipo:'planilla',tienda:cod,quincena:Q,archivo:x.fn,contenido:await aDataURL(x.blob),dueño:REAL.correo});
@@ -454,7 +1391,9 @@ const reqA=()=>CAL?CAL.reqAsistencia!==false:false, reqV=()=>CAL?CAL.reqValidar!
 function listo(){
   $('wA').hidden=!reqA();$('wV').hidden=!reqV();
   $('s1').classList.toggle('ok',!!PEND.resp);$('s2').classList.toggle('ok',!!PEND.asis);
-  $('env').disabled=!(PEND.resp&&(!reqA()||PEND.asis)&&(!reqV()||$('val').checked));
+  const bl=esEditor()&&!!TIENDAS[0]&&bloqueada(ENT[TIENDAS[0].codigo],TIENDAS[0].codigo); // planilla bloqueada o cerrada
+  $('useGen').disabled=bl;
+  $('env').disabled=bl||!(PEND.resp&&(!reqA()||PEND.asis)&&(!reqV()||$('val').checked));
 }
 async function tomarResp(f){
   if(f.size>900000)return msg('miaMsg','El archivo es demasiado grande. Usa el respaldo del Generador.','bad');
@@ -478,6 +1417,7 @@ async function tomarAsis(f){
 }
 $('env').onclick=async()=>{
   const t=TIENDAS[0];if(!t)return msg('miaMsg','Tu usuario no tiene tienda asignada.','bad');
+  if(bloqueada(ENT[t.codigo],t.codigo))return msg('miaMsg','La quincena está cerrada. Solo tu GZ puede reabrirla: solicita la reapertura.','bad');
   if(!C){ENT[t.codigo]={por:ME.correo,porNombre:ME.nombre,fecha:new Date(),asistencia:!!PEND.asis};pintar();PEND={};$('f1').textContent=$('f2').textContent='';$('val').checked=false;listo();return msg('miaMsg','Vista previa: entregado (no se guardó).','ok')}
   $('env').disabled=true;msg('miaMsg','Enviando…','warn');
   try{const {F,db}=C,id=`${t.codigo}_${Q}`;
@@ -485,7 +1425,7 @@ $('env').onclick=async()=>{
     if(PEND.asis)await F.setDoc(F.doc(db,'entregas',id,'datos','asistencia'),{contenido:PEND.asis.url,archivo:PEND.asis.name,tienda:t.codigo});
     let hh='';try{hh=huella(JSON.parse(PEND.resp.txt))}catch(e){}
     await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:PEND.resp.name,bytes:PEND.resp.size,hash:hh,asistencia:!!PEND.asis,
-      validado:reqV()?$('val').checked:null,estado:'Entregada',por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()});
+      validado:reqV()?$('val').checked:null,estado:'Entregada',por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()},{merge:true}); // merge: conserva los campos de aprobación y reapertura del GZ
     if($('keep')?.checked&&LOC.disponible()){try{const x=await excelPlanilla(JSON.parse(PEND.resp.txt));
       await LOC.guardar({tipo:'planilla',tienda:t.codigo,quincena:Q,archivo:x.fn,contenido:await aDataURL(x.blob),dueño:REAL.correo});
       if(PEND.asis)await LOC.guardar({tipo:'asistencia',tienda:t.codigo,quincena:Q,archivo:PEND.asis.name,contenido:PEND.asis.url,dueño:REAL.correo})}catch(e){}}
@@ -496,6 +1436,7 @@ $('env').onclick=async()=>{
 
 // ---------- Administración: importar roles
 $('fileX').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  if(!ROLESOK)await cargarRolesUsuarios(); // los roles creados en la app también son válidos en el archivo
   try{
     const wb=XLSX.read(await f.arrayBuffer());
     const rows=n=>{const ws=wb.Sheets[n];if(!ws)throw new Error(`Falta la hoja "${n}"`);return XLSX.utils.sheet_to_json(ws,{defval:''})};
@@ -512,10 +1453,11 @@ $('fileX').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
         alcance:String(r['Alcance']).trim(),valor:String(r['Valor de alcance']).trim(),reportaA:correo(r['Reporta a (correo)']),activo:String(r['Activo']).trim()!=='No'};
       u.tiendas=u.alcance==='Todas'?[]:act.filter(t=>u.alcance==='Tienda'?t.codigo===u.valor:t.prueba?false:u.alcance==='GZ'?t.correoGZ===u.correo:
         u.alcance==='Región'?t.region===u.valor:u.alcance==='Asignadas'?t.auxiliar===u.cargo:false).map(t=>t.codigo);
+      u.permisos=(rolDef(u.rol)?.permisos||[]).filter(p=>p!=='administracion'||u.rol==='Superusuario'); // copia de los permisos del rol (la usan las reglas)
       return u});
     const sinCorreo=U.filter(r=>!r['Correo (usuario)']).length;
     const dup=usuarios.map(u=>u.correo).filter((c,i,a)=>a.indexOf(c)!==i);
-    const roles=['Superusuario','Editor','Visualizar','Descargar'],malRol=usuarios.filter(u=>!roles.includes(u.rol));
+    const roles=todosRoles().map(r=>r.nombre),malRol=usuarios.filter(u=>!roles.includes(u.rol));
     IMP={tiendas,usuarios};
     $('xSum').hidden=false;
     $('xSum').innerHTML=[[tiendas.length,'Tiendas'],[usuarios.length,'Usuarios con correo'],[sinCorreo,'Sin correo (se omiten)'],[dup.length,'Correos repetidos']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
@@ -528,11 +1470,58 @@ $('pub').onclick=async()=>{if(!IMP)return;
   $('pub').disabled=true;msg('xMsg','Publicando…','warn');
   try{const {F,db}=C;let b=F.writeBatch(db),n=0;
     const flush=async()=>{await b.commit();b=F.writeBatch(db);n=0};
-    for(const t of IMP.tiendas){const {codigo,...d}=t;b.set(F.doc(db,'tiendas',codigo),d);if(++n>=400)await flush()}
+    for(const t of IMP.tiendas){const {codigo,...d}=t;b.set(F.doc(db,'tiendas',codigo),d,{merge:true}) /* merge: conserva plazas y datos de aperturas */;if(++n>=400)await flush()}
     for(const u of IMP.usuarios){const {correo:c,...d}=u;b.set(F.doc(db,'usuarios',c),{...d,actualizado:F.serverTimestamp()},{merge:true});if(++n>=400)await flush()}
-    await flush();await cargarTiendas();ALLT=TIENDAS.slice();armar();await cargarEntregas();
+    await flush();
+    await F.setDoc(F.doc(db,'sistema','roles'),{fecha:F.serverTimestamp(),tiendas:IMP.tiendas.length,usuarios:IMP.usuarios.length,por:REAL.correo,porNombre:REAL.nombre||''});
+    await cargarTiendas();ALLT=TIENDAS.slice();armar();await cargarEntregas();
     msg('xMsg',`Publicado: ${IMP.tiendas.length} tiendas y ${IMP.usuarios.length} usuarios. Sigue con "Crear accesos".`,'ok');
   }catch(e){msg('xMsg','Error al publicar: '+(e.code||e.message),'bad')}finally{$('pub').disabled=false}
+};
+
+// ---------- Administración: presupuesto de plazas por tienda
+let PRESUP=null;
+const normP=s=>String(s??'').replace(/ /g,' ').trim();
+$('fileP').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const wb=XLSX.read(await f.arrayBuffer());
+    const filas=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+    const hi=filas.findIndex(r=>r.some(c=>/^tienda$/i.test(normP(c)))&&r.some(c=>/^presupuesto/i.test(normP(c))));
+    if(hi<0)throw new Error('No encuentro las columnas "Tienda" y "Presupuesto"');
+    const ct=filas[hi].findIndex(c=>/^tienda$/i.test(normP(c))),cp=filas[hi].findIndex(c=>/^presupuesto/i.test(normP(c)));
+    const base=ALLT.length?ALLT:TIENDAS,porNum=new Map(base.filter(t=>!t.prueba).map(t=>[Number(t.numero),t]));
+    const ok=[],sinTienda=[],malos=[],vistos=new Set();
+    for(const r of filas.slice(hi+1)){
+      const nom=normP(r[ct]);if(!nom)continue;
+      const m=/^AMPM\s*0*(\d+)/i.exec(nom),p=Number(normP(r[cp]));
+      if(!m||!Number.isFinite(p)||p<0||!Number.isInteger(p)){malos.push(nom);continue}
+      const t=porNum.get(Number(m[1]));
+      if(!t){sinTienda.push(nom);continue}
+      if(vistos.has(t.codigo)){malos.push(nom+' (repetida)');continue}
+      vistos.add(t.codigo);ok.push({codigo:t.codigo,nombre:t.nombre,plazas:p});
+    }
+    const sinPres=[...porNum.values()].filter(t=>!vistos.has(t.codigo));
+    PRESUP=ok;
+    const total=ok.reduce((s,x)=>s+x.plazas,0);
+    $('pSum').hidden=false;
+    $('pSum').innerHTML=[[ok.length,'Tiendas con presupuesto'],[total,'Plazas en total'],[sinTienda.length,'No encontradas en RITMO'],[sinPres.length,'Tiendas sin presupuesto']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
+    const avisos=[malos.length?`Filas con error: ${malos.slice(0,5).join(', ')}${malos.length>5?'…':''}.`:'',sinTienda.length?`No están en RITMO: ${sinTienda.slice(0,5).join(', ')}${sinTienda.length>5?'…':''}.`:'',sinPres.length?`Sin presupuesto: ${sinPres.slice(0,5).map(t=>t.codigo).join(', ')}${sinPres.length>5?'…':''}.`:''].filter(Boolean).join(' ');
+    if(!ok.length){msg('pMsg','No se pudo emparejar ninguna tienda. Publica antes el archivo de roles (paso 1).','bad');$('pubP').disabled=true}
+    else{msg('pMsg','Archivo leído. Revisa los totales y publica. '+avisos,malos.length||sinTienda.length?'warn':'ok');$('pubP').disabled=false}
+  }catch(err){PRESUP=null;$('pubP').disabled=true;msg('pMsg','No se pudo leer el archivo: '+err.message,'bad')}
+};
+$('pubP').onclick=async()=>{if(!PRESUP||!PRESUP.length)return;
+  const total=PRESUP.reduce((s,x)=>s+x.plazas,0);
+  const aplicar=()=>{const m=new Map(PRESUP.map(x=>[x.codigo,x.plazas]));[ALLT,TIENDAS].forEach(L=>L.forEach(t=>{if(m.has(t.codigo))t.plazas=m.get(t.codigo)}))};
+  if(!C){aplicar();pintar();return msg('pMsg','Vista previa: en producción aquí se guarda el presupuesto de cada tienda.','warn')}
+  $('pubP').disabled=true;msg('pMsg','Publicando…','warn');
+  try{const {F,db}=C;let b=F.writeBatch(db),n=0;
+    for(const x of PRESUP){b.set(F.doc(db,'tiendas',x.codigo),{plazas:x.plazas,plazasFecha:F.serverTimestamp()},{merge:true});if(++n>=400){await b.commit();b=F.writeBatch(db);n=0}}
+    b.set(F.doc(db,'sistema','plazas'),{fecha:F.serverTimestamp(),tiendas:PRESUP.length,total,por:REAL.correo,porNombre:REAL.nombre||''});
+    await b.commit();
+    aplicar();estadoAdm();pintar();
+    msg('pMsg',`Publicado: ${PRESUP.length} tiendas y ${total} plazas presupuestadas.`,'ok');
+  }catch(e){msg('pMsg','Error al publicar: '+(e.code||e.message),'bad');$('pubP').disabled=false}
 };
 
 // ---------- Administración: crear accesos
@@ -560,6 +1549,8 @@ $('acc').onclick=async()=>{
       await new Promise(r=>setTimeout(r,350));
     }
     w(`\nCuentas nuevas: ${nuevos} · Enlaces enviados: ${env} · Errores: ${err}`);
+    await F.setDoc(F.doc(db,'sistema','accesos'),{fecha:F.serverTimestamp(),nuevos,enviados:env,errores:err,modo,por:REAL.correo,porNombre:REAL.nombre||''});
+    estadoAdm();
   }catch(e){w('Error: '+(e.code||e.message))}finally{$('acc').disabled=false}
 };
 
@@ -575,6 +1566,11 @@ function falta(L){const ms=L-Date.now(),a=Math.abs(ms),d=Math.floor(a/864e5),h=M
 const fLarga=d=>d.toLocaleDateString('es-NI',{weekday:'short',day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('es-NI',{hour:'numeric',minute:'2-digit'});
 function pintarCal(){
   const A=$('alerta');const L=toD(CAL?.limite);
+  // La alerta es solo para quien tiene entregas pendientes y se apaga al llegar la fecha de planilla.
+  const pend=TIENDAS.filter(t=>!ENT[t.codigo]).length;
+  const fpl=CAL?.fechaPlanilla?new Date(CAL.fechaPlanilla+'T23:59:59'):null;
+  const cerrada=!!CAL&&((fpl&&Date.now()>fpl)||(TIENDAS.length&&!pend));
+  A.style.display=cerrada?'none':'';
   if(!CAL){A.className='alerta none';A.innerHTML=`<span class="ic">🗓</span><div><b>Planilla aún no publica el calendario de esta quincena.</b>Cuando lo haga verás aquí las semanas de horas extra a pagar y la fecha límite.</div>`}
   else{const ms=L?L-Date.now():1e12;const k=ms<0?'venc':ms<864e5?'prox':'info';
     A.className='alerta '+k;
@@ -587,6 +1583,7 @@ function pintarCal(){
       ${CAL.sinHETarde!==false?'<div class="regla">⚠ Si envías después de la fecha límite, no se tomará en cuenta el pago de horas extra.</div>':''}
       ${CAL.nota?`<div style="margin-top:6px">${esc(CAL.nota)}</div>`:''}
       ${CAL.porNombre?`<div class="sub" style="margin-top:6px">Publicado por ${esc(CAL.porNombre)}${CAL.cargo?' · '+esc(CAL.cargo):''}</div>`:''}</div>${L?`<div class="cd">${falta(L)}</div>`:''}`}
+  ajustarGen();
   // formulario
   if(!$('calW'))return;
   $('calQ').textContent=quincenaTexto(Q);
@@ -636,7 +1633,7 @@ function armarVC(){
   const O=[['real','Superusuario (yo)']];
   const real=ALLT.filter(t=>!t.prueba)[0];if(real)O.push(['ed:'+real.codigo,`Gerente de tienda · ${real.codigo} (ejemplo)`]);
   gz.forEach(([c,n])=>O.push(['gz:'+c,`Gerente de zona · ${n}`]));
-  O.push(['rg:FOR','Gerente de distrito · Región FOR'],['rg:MGA','Gerente de distrito · Región MGA'],['ops','Gerente de operaciones · Todas'],['pl','Planilla · Encargado (todas)']);
+  O.push(['rg:FOR','Gerente de distrito · Región FOR'],['rg:MGA','Gerente de distrito · Región MGA'],['ops','Gerente de operaciones · Todas'],['pl','Planilla · Encargado (todas)'],['rh','Recursos Humanos · RRHH (todas)'],['rcE','Reclutamiento · Encargado (todas)'],['rcA','Reclutamiento · Auxiliar (todas)']);
   const B=ALLT.some(t=>t.prueba)?[['b:Editor','Gerente de tienda Beta'],['b:GZ','Gerente de zona Beta'],['b:Distrito','Gerente de distrito Beta'],['b:Operaciones','Gerente de operaciones Beta'],['b:Planilla','Planilla Beta']]:[];
   const op=([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`;
   $('vcSel').innerHTML=O.slice(0,1).map(op).join('')+(B.length?`<optgroup label="Pruebas · AMPM Beta">${B.map(op).join('')}</optgroup>`:'')+`<optgroup label="Producción">${O.slice(1).map(op).join('')}</optgroup>`;
@@ -653,8 +1650,11 @@ $('vcSel').onchange=async()=>{
     else if(v.startsWith('gz:')){rol='Visualizar';alcance='GZ';tiendas=base.filter(t=>t.correoGZ===v.slice(3)).map(t=>t.codigo);nombre=base.find(t=>t.correoGZ===v.slice(3))?.gzNombre||'GZ'}
     else if(v.startsWith('rg:')){rol='Visualizar';alcance='Región';tiendas=base.filter(t=>t.region===v.slice(3)).map(t=>t.codigo);nombre='Gerente de distrito'}
     else if(v==='ops'){rol='Visualizar';tiendas=base.map(t=>t.codigo);nombre='Gerente de operaciones'}
+    else if(v==='rh'){rol='RRHH';tiendas=base.map(t=>t.codigo);nombre='Recursos Humanos'}
+    else if(v==='rcE'){rol='Encargado de Reclutamiento';tiendas=base.map(t=>t.codigo);nombre='Encargado de Reclutamiento'}
+    else if(v==='rcA'){rol='Auxiliar de Reclutamiento';tiendas=base.map(t=>t.codigo);nombre='Auxiliar de Reclutamiento'}
     else {rol='Descargar';tiendas=base.map(t=>t.codigo);nombre='Encargado de planilla'}
-    ME={...REAL,rol,alcance,tiendas,nombre};
+    ME={...REAL,rol,alcance,tiendas,nombre,permisos:null};
     TIENDAS=ALLT.filter(t=>tiendas.includes(t.codigo));
   }
   genCargado=false;
@@ -753,9 +1753,9 @@ $('betaX').onclick=async()=>{const t=ALLT.find(x=>x.prueba);if(!t||!C)return;if(
 // ---------- Mi horario: Generador dentro de RITMO
 function huella(d){const t=JSON.stringify({cfg:d?.cfg||{},agentes:d?.agentes||[],semanas:d?.semanas||{}});let h=2166136261;
   for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+'.'+t.length}
-function estadoPub(){const e=ENT[genTienda];const ok=!!(e&&e.hash&&GEN&&e.hash===huella(GEN));
-  $('genF').contentWindow?.postMessage({tipo:'ritmo-estado',publicado:ok,fecha:ok?fmt(e.fecha):''},location.origin);
-  $('genEnt').textContent=ok?'✓ Quincena publicada':'Entregar quincena';$('genEnt').className=ok?'btn':'btn pri'}
+function estadoPub(){const e=ENT[genTienda];const ok=!!(e&&e.hash&&GEN&&e.hash===huella(GEN)),bl=bloqueada(e,genTienda);
+  $('genF').contentWindow?.postMessage({tipo:'ritmo-estado',publicado:ok,fecha:ok?fmt(e.fecha):'',bloqueada:bl,cierre:cierreDe(e,genTienda),q:Q,cierres:CIERRES},location.origin);
+  $('genEnt').textContent=bl?'🔒 Quincena cerrada':ok?'✓ Quincena publicada':'Entregar quincena';$('genEnt').className=ok||bl?'btn':'btn pri'}
 let GEN=null,genCargado=false,genTienda=null,genT=null;
 const genRef=()=>C.F.doc(C.db,'trabajo',genTienda);
 async function leerTrabajo(cod){
@@ -769,11 +1769,12 @@ async function abrirGen(){
   if(!GEN){$('genIni').hidden=false;$('genSt').textContent='Aún no hay horario en RITMO para esta tienda.';$('genEnt').disabled=true;return}
   montarGen();
 }
-function montarGen(){$('genIni').hidden=true;$('genF').hidden=false;$('genEnt').disabled=false;$('genSt').textContent='Se guarda solo en RITMO mientras trabajas.';
-  $('genF').src='generador.html?ritmo=1&t='+encodeURIComponent(genTienda)}
+function montarGen(){GENLISTO=false;$('genIni').hidden=true;$('genF').hidden=false;$('genEnt').disabled=false;$('genSt').textContent='Se guarda solo en RITMO mientras trabajas.';
+  $('genF').src='generador.html?ritmo=1&t='+encodeURIComponent(genTienda);ajustarGen()}
 addEventListener('message',async ev=>{
   if(ev.origin!==location.origin||ev.source!==$('genF').contentWindow)return;const d=ev.data||{};
-  if(d.tipo==='ritmo-listo'){$('genF').contentWindow.postMessage({tipo:'ritmo-datos',data:GEN||{},meta:{tienda:genTienda,q:Q,nombre:(TIENDAS[0]?.nombre||genTienda).toUpperCase()}},location.origin);setTimeout(estadoPub,300)}
+  if(d.tipo==='ritmo-listo'){$('genF').contentWindow.postMessage({tipo:'ritmo-datos',data:GEN||{},meta:{tienda:genTienda,q:Q,nombre:(TIENDAS[0]?.nombre||genTienda).toUpperCase(),plazas:TIENDAS[0]?.plazas??null}},location.origin);setTimeout(()=>{GENLISTO=true;estadoPub()},300)}
+  else if(d.tipo==='ritmo-personal-ok'){if(esperaPers){const f=esperaPers;esperaPers=null;f(d)}}
   else if(d.tipo==='ritmo-publicar'){GEN=d.data;await publicarGen()}
   else if(d.tipo==='ritmo-guardar'){
     GEN=d.data;const txt=JSON.stringify(GEN);
@@ -781,7 +1782,7 @@ addEventListener('message',async ev=>{
     try{
       if(C)await C.F.setDoc(genRef(),{contenido:txt,tienda:genTienda,bytes:txt.length,por:REAL.correo,actualizado:C.F.serverTimestamp()});
       else localStorage.setItem('ritmo-demo-trabajo-'+genTienda,txt);
-      $('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:true},location.origin);
+      $('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:true},location.origin);guardarResumen(GEN);sincronizarPersonal(GEN);
       $('genSt').textContent='Guardado en RITMO · '+new Date().toLocaleTimeString('es-NI',{hour:'numeric',minute:'2-digit'});estadoPub();
     }catch(e){$('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:false,error:e.code||e.message},location.origin);$('genSt').textContent='⚠ No se guardó: revisa tu conexión.'}
   }
@@ -789,7 +1790,7 @@ addEventListener('message',async ev=>{
 async function iniciarCon(data){GEN=data;
   try{const txt=JSON.stringify(data);
     if(C)await C.F.setDoc(genRef(),{contenido:txt,tienda:genTienda,bytes:txt.length,por:REAL.correo,actualizado:C.F.serverTimestamp()});
-    else localStorage.setItem('ritmo-demo-trabajo-'+genTienda,txt);montarGen()}
+    else localStorage.setItem('ritmo-demo-trabajo-'+genTienda,txt);guardarResumen(data);montarGen()}
   catch(e){msg('genMsg','No se pudo guardar en RITMO: '+(e.code||e.message),'bad')}}
 $('fileG').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   try{const j=JSON.parse(await f.text());if(!(j.app==="Generador de Horarios AMPM"||j.semanas||j.agentes))throw 0;await iniciarCon(j)}
@@ -807,6 +1808,7 @@ async function publicarGen(){const t=TIENDAS[0];if(!t)return;
   const w=$('genF').contentWindow,fin=(ok,err)=>{w.postMessage({tipo:'ritmo-guardado',ok,error:err},location.origin);estadoPub()};
   if(!(GEN&&GEN.semanas&&Object.keys(GEN.semanas).length))return fin(false,'aún no hay semanas');
   const e=ENT[t.codigo];
+  if(bloqueada(e,t.codigo))return fin(false,'quincena cerrada: solicita la reapertura a tu GZ');
   if(reqA()&&!(e&&e.asistencia)&&!PEND.asis){fin(false,'falta la hoja de asistencia');
     [...$('tabs').children].forEach(x=>x.setAttribute('aria-selected',x.dataset.k==='mia'));ver('mia');usarGen();
     return msg('miaMsg','Planilla pide la hoja de asistencia: súbela aquí y toca Entregar quincena.','warn')}
@@ -818,25 +1820,53 @@ async function publicarGen(){const t=TIENDAS[0];if(!t)return;
     if(PEND.asis)await F.setDoc(F.doc(db,'entregas',id,'datos','asistencia'),{contenido:PEND.asis.url,archivo:PEND.asis.name,tienda:t.codigo});
     await F.setDoc(F.doc(db,'entregas',id),{tienda:t.codigo,quincena:Q,archivo:`MiHorario_${t.codigo}_${Q}.json`,bytes:txt.length,hash:h,
       asistencia:!!(PEND.asis||(e&&e.asistencia)),validado:reqV()?true:null,estado:'Entregada',origen:'Mi horario',
-      por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()});
+      por:ME.correo,porNombre:ME.nombre||'',fecha:F.serverTimestamp()},{merge:true}); // merge: conserva los campos de aprobación y reapertura del GZ
     PEND.asis=null;await cargarEntregas();fin(true);$('genSt').textContent='Planilla publicada · '+quincenaTexto(Q);
   }catch(err){fin(false,err.code||err.message)}}
 
 // ---------- Vista previa sin Firebase
-function demo(){
+async function demo(){
   $('demo').hidden=false;
   const zonas=['Zona Norte','Zona Sur','Zona Centro'];
   TIENDAS=Array.from({length:12},(_,i)=>({codigo:'DEMO'+String(i+1).padStart(2,'0'),numero:i+1,nombre:'Sucursal de ejemplo '+(i+1),zona:zonas[i%3],gzNombre:['GZ Ejemplo A','GZ Ejemplo B','GZ Ejemplo C'][i%3]}));
   Object.assign(TIENDAS[11],{codigo:'AMPMBETA',nombre:'AMPM Beta - Tienda de pruebas',zona:'Pruebas',prueba:true});
+  // Presupuesto y personal activo de ejemplo (faltan, completo y sobran)
+  // Personal de ejemplo en RRHH (cédulas inventadas): una persona nueva, una que ya está en el horario y una posible duplicada
+  // Vacantes, usuarios y roles de ejemplo
+  if(!DEMOV.size){
+    const v=(t,c,m,d,est='abierta')=>({tienda:t,cargo:c,motivo:m,nota:'',estado:est,creada:{por:'rec@ejemplo.com',porNombre:'Reclutamiento Ejemplo',fecha:new Date(Date.now()-d*864e5)}});
+    [['DEMO01','Agente SAC','Puesto nuevo',3],['DEMO02','Gerente de tienda','Reemplazo',20],['DEMO04','Agente SAC','Apertura de tienda',16],['DEMO05','Conserje','Refuerzo temporal',1]].forEach(([t,c,m,d],i)=>DEMOV.set('vd'+i,v(t,c,m,d)));
+    DEMOV.set('vd9',{...v('DEMO03','Agente SAC','Reemplazo',30,'cubierta'),cerrada:{por:'rec@ejemplo.com',porNombre:'Reclutamiento Ejemplo',fecha:new Date(Date.now()-5*864e5),automatica:true}});
+  }
+  if(!DEMOU.size)[['gerente@ejemplo.com','Gerente Ejemplo','Editor',['DEMO01']],['gz@ejemplo.com','GZ Ejemplo','Visualizar',[]],['rrhh@ejemplo.com','RRHH Ejemplo','RRHH',[]]]
+    .forEach(([c,n,r,t])=>DEMOU.set(c,{nombre:n,cargo:r,rol:r,permisos:RL.permisosDe(r,null),alcance:t.length?'Tienda':'Todas',tiendas:t,activo:true,accesoCreado:true}));
+  if(!DEMOP.size){
+    const alta=(o,dias=0)=>({origen:o,por:o==='rrhh'?'rrhh@ejemplo.com':'jefe.tienda@ejemplo.com',porNombre:o==='rrhh'?'RRHH Ejemplo':'Gerente de ejemplo',fecha:new Date(Date.now()-dias*864e5),confirmada:false});
+    for(const [c,n,cg,d] of [['000-010190-0001A','Karla Beatriz Mora Díaz','Agente SAC',2],['000-020291-0002B','Luis Alberto Soto Ruiz','Agente SAC',5],['000-030392-0003C','Rosa Elena Pineda Gómez','Conserje',1],['000-040493-0004D','Marlon José Vega Lara','Agente SAC',0]]){
+      const nc=RH.normCed(c);DEMOP.set(await RH.idPersonal(nc),{cedula:nc,nombre:n,cargo:cg,categoria:'Agente Sac Nivel 1',empresa:'AMPM',tienda:'DEMO01',ingreso:'2026-10-0'+(1+d%5),estado:'activo',alta:alta('rrhh',d)})}
+    DEMOP.set(await RH.idPersonal('000050594005E'),{cedula:'000050594005E',nombre:'Gloria Inés Salas Mena',cargo:'Agente SAC',tienda:'DEMO02',ingreso:'2026-09-10',estado:'baja',alta:{...alta('rrhh',20),confirmada:true},baja:{fecha:'2026-10-14',motivo:'',origen:'tienda',por:'jefe.tienda@ejemplo.com',porNombre:'Gerente de ejemplo',fechaRegistro:new Date(Date.now()-4*864e5),confirmada:false}});
+  }
+  TIENDAS.forEach((t,i)=>{t.correoGZ='usuario@ejemplo.com';t.plazas=9+i%3;if(i%5!==4)RES[t.codigo]={activos:t.plazas+[-2,-1,0,1,0][i%5],porIngresar:0}});
   const r=new URLSearchParams(location.search).get('rol')||'Superusuario';
   ME={correo:'usuario@ejemplo.com',nombre:'Usuario de ejemplo',rol:r,alcance:'Todas'};
   if(r==='Editor')TIENDAS=TIENDAS.slice(0,1);
   {const f=new Date();f.setDate(f.getDate()+2);f.setHours(17,0,0,0);const m=lunes(new Date());const a=new Date(m);a.setDate(a.getDate()-14);const b=new Date(m);b.setDate(b.getDate()-7);
-   DEMO_CAL[Q]={quincena:Q,semanas:[iso(a),iso(b)],limite:f,fechaPlanilla:iso(new Date(f.getTime()+2*864e5)),reqAsistencia:true,reqValidar:true,sinHETarde:true,cargo:'Auxiliar de planilla',nota:'Ejemplo: incluir subsidios del período.',porNombre:'Encargado de planilla (ejemplo)',fecha:new Date()};CAL=DEMO_CAL[Q]}
-  REAL={...ME};ALLT=TIENDAS.slice();armar();demoEntregas();pintar();pintarCal();$('gate').hidden=true;
+   DEMO_CAL[Q]={quincena:Q,semanas:[iso(a),iso(b)],limite:f,fechaPlanilla:iso(new Date(f.getTime()+2*864e5)),reqAsistencia:true,reqValidar:true,sinHETarde:true,cargo:'Auxiliar de planilla',nota:'Ejemplo: incluir subsidios del período.',porNombre:'Encargado de planilla (ejemplo)',fecha:new Date()};CAL=DEMO_CAL[Q];
+    // ?vencida=1: la fecha límite de ejemplo ya pasó hace 5 h (sirve para ver las alertas al jefe)
+    if(new URLSearchParams(location.search).has('vencida'))CAL.limite=new Date(Date.now()-5*36e5);
+    // ?cerrada=1: la fecha de entrega de planilla ya pasó (ayer): la quincena queda cerrada y solo el GZ la reabre
+    if(new URLSearchParams(location.search).has('cerrada')){CAL.limite=new Date(Date.now()-3*864e5);CAL.fechaPlanilla=iso(new Date(Date.now()-864e5))}}
+  REAL={...ME};ALLT=TIENDAS.slice();armar();demoEntregas();if(esEditor())await cargarCierres();pintar();pintarCal();$('gate').hidden=true;
   $('out').onclick=()=>location.href='index.html';
 }
-function demoEntregas(){if(C)return;TIENDAS.forEach((t,i)=>{if(i%3!==2)ENT[t.codigo]={por:'jefe.tienda@ejemplo.com',porNombre:'Gerente de ejemplo',fecha:new Date(Date.now()-i*36e5)}})}
+function demoEntregas(){if(C)return;
+  const bloqueoDemo=new URLSearchParams(location.search).has('bloqueo'); // ?bloqueo=1: la entrega de la tienda de ejemplo ya está bloqueada
+  TIENDAS.forEach((t,i)=>{if(i%3!==2){
+    ENT[t.codigo]={por:'jefe.tienda@ejemplo.com',porNombre:'Gerente de ejemplo',fecha:new Date(Date.now()-i*36e5)};
+    const ap={por:'gz@ejemplo.com',porNombre:'GZ Ejemplo A',fecha:new Date(Date.now()-i*3e5)};
+    if(i===1||(bloqueoDemo&&i===0)){ENT[t.codigo].bloqueada=true;ENT[t.codigo].heAprobada=ap}
+    if(i===3){ENT[t.codigo].bloqueada=true;ENT[t.codigo].heAprobada=ap;ENT[t.codigo].reapertura={estado:'solicitada',motivo:'Falta registrar dos días de subsidio de una colaboradora.',solicitadaPor:'jefe.tienda@ejemplo.com',solicitadaPorNombre:'Gerente de ejemplo',solicitadaFecha:new Date()}}
+  }})}
 inicio();
 </script>
 </body>
