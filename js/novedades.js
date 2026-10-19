@@ -1,11 +1,31 @@
 // RITMO · Versión publicada. Subir este número en CADA publicación: las sesiones abiertas lo comparan con el que está en el
 // sitio y avisan al usuario que hay una versión nueva (se aplica al cerrar sesión y volver a entrar).
-export const VERSION = "3.3";
+export const VERSION = "3.4";
 
 // RITMO · Novedades del desarrollador
 // Agregar cada mejora ARRIBA (la más reciente primero). id único y creciente.
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
+  {
+    id: 45, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "Todos",
+    titulo: "Bandeja de avisos",
+    detalle: "La campanita de arriba reúne lo que te falta por hacer según tu rol: entregas pendientes, aprobaciones, altas y bajas por confirmar, vacantes y más. Los avisos se calculan solos, se marcan como leídos y cada uno trae un botón para ir a resolverlo. Todo lo que ya existía se conserva."
+  },
+  {
+    id: 44, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "GZ, GD, GO y planilla",
+    titulo: "Seguimiento: horas extra, semáforo, recordatorio y Excel",
+    detalle: "Cada tienda muestra sus horas extra y feriadas de las semanas marcadas para pago, y un semáforo de planilla, horas extra, MBK y plazas. Arriba hay una tarjeta con el total. El botón Recordatorio arma un mensaje de WhatsApp con las tiendas a las que les falta algo, y Excel descarga lo que ves. Las tarjetas ahora dicen de qué quincena son."
+  },
+  {
+    id: 43, fecha: "2026-10-19", version: "3.4", tipo: "Mejora", para: "GZ, GD y GO",
+    titulo: "Planilla MBK: varias semanas y filtros compartidos",
+    detalle: "Puedes elegir varias semanas a la vez; el GZ aprueba su selección completa. Los filtros de Seguimiento ahora también filtran la tabla de MBK, y hay una alerta cuando una tienda entregó planilla y no solicitó MBK. GD y GO solo consultan. Ver como ahora incluye a cada auxiliar de planilla."
+  },
+  {
+    id: 42, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "RRHH y Superusuario",
+    titulo: "Rotación, Excel de personal y registro de auditoría",
+    detalle: "RRHH ve las bajas de los últimos 6 meses por mes y por zona, con rotación y antigüedad al salir, y puede descargar el personal en Excel (sin cédulas). El superusuario tiene un registro de auditoría con quién aprobó horas extra y MBK, y quién abrió o reabrió quincenas."
+  },
   {
     id: 40, fecha: "2026-10-18", version: "3.3", tipo: "Nuevo", para: "GZ, GD y GO",
     titulo: "Planilla MBK: resumen a solicitar",

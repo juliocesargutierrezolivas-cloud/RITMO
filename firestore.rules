@@ -214,6 +214,17 @@ service cloud.firestore {
       allow delete: if isSuper();
     }
 
+    // Registro de auditoría: cualquier usuario activo escribe su propio movimiento (aprobó, abrió, reabrió); solo el superusuario lo lee.
+    // Nadie lo edita ni lo borra.
+    match /auditoria/{a} {
+      allow create: if (isSuper() || active())
+        && request.resource.data.por == email()
+        && request.resource.data.keys().hasOnly(['tipo', 'tienda', 'detalle', 'por', 'porNombre', 'fecha'])
+        && request.resource.data.fecha == request.time;
+      allow read: if isSuper();
+      allow update, delete: if false;
+    }
+
     // Resumen de personal de cada tienda (solo cifras: activos sin gerente de tienda). Sin nombres, cédulas ni salarios.
     // Lo escribe el gerente de la tienda al guardar Mi horario; lo ven GZ, distrito, operaciones y planilla dentro de su alcance.
     match /resumen/{t} {
