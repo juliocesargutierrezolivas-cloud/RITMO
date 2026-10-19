@@ -189,6 +189,17 @@ button.drop{width:100%;background:#fff;font:inherit}
 @keyframes barras{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
 #gate .pulse i{transform-origin:bottom}
 @media (prefers-reduced-motion:reduce){#gate .pulse i{animation:none}}
+#bellP{position:fixed;right:16px;top:64px;z-index:30;width:380px;max-width:calc(100vw - 32px);max-height:70vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px rgba(4,0,63,.22)}
+#bellP[hidden]{display:none}
+#bellP .bp-h{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line-2);position:sticky;top:0;background:var(--card)}
+#bellP .bp-f{padding:10px 14px;border-top:1px solid var(--line-2)}
+.av{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-2);align-items:flex-start}
+.av.nl{background:var(--bg-tint,rgba(255,131,0,.07))}.av .ic{font-size:18px;line-height:1.2}.av .tx{flex:1;min-width:0}
+.av .tx b{display:block;font-size:13.5px}.av .tx span{font-size:12.5px;color:var(--muted)}.av.nl .tx b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange);margin-right:6px}
+.av.urg .ic{filter:none}.av .go{flex:none}
+.mbk-sd{position:relative}.mbk-sd summary::-webkit-details-marker{display:none}
+.mbk-pop{position:absolute;z-index:8;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:8px;min-width:210px;box-shadow:0 10px 24px rgba(4,0,63,.18)}
+.mbk-pop label{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:13px}
 .manual-t{font:600 12.5px "IBM Plex Sans",sans-serif;background:none;border:0;color:var(--blue);cursor:pointer;text-decoration:underline}
 @media (max-width:860px){.form{grid-template-columns:1fr}.nv{grid-template-columns:1fr;gap:4px}.cd{margin-left:0;text-align:left}.kpis{grid-template-columns:repeat(2,1fr)}.mine{grid-template-columns:1fr}.grid2{grid-template-columns:repeat(2,1fr)}.hin{padding:10px 16px}main{padding:16px}.who span{display:none}}
 </style>
@@ -202,6 +213,7 @@ button.drop{width:100%;background:#fff;font:inherit}
   <div class="sp"></div>
   <span class="net" id="net" role="status" title="Conexión segura (HTTPS)"><i></i><span id="netT">En línea</span></span>
   <div class="who"><div><b id="uName">—</b><span id="uMail"></span></div><span class="badge" id="uRol"></span></div>
+  <button class="btn" id="bellB" title="Bandeja de avisos" aria-label="Bandeja de avisos" aria-haspopup="true" aria-expanded="false" style="position:relative">🔔<span id="bellN" hidden style="position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:#e5484d;color:#fff;font:700 11px/18px 'IBM Plex Sans',sans-serif;text-align:center;padding:0 4px"></span></button>
   <button class="btn" id="tutB" title="Ayuda y tutoriales" aria-label="Ayuda y tutoriales">❓</button>
   <button class="btn" id="pwB" title="Cambiar contraseña">🔑</button>
   <button class="btn" id="out">Salir</button>
@@ -226,22 +238,25 @@ button.drop{width:100%;background:#fff;font:inherit}
   <section id="v-seg" hidden>
     <div id="alJ" style="margin-bottom:16px"></div>
     <div class="kpis">
-      <div class="kpi"><b id="kT">0</b><span>Tiendas a cargo</span></div>
-      <div class="kpi"><b id="kE">0</b><span>Entregadas</span></div>
-      <div class="kpi hot"><b id="kP">0</b><span>Pendientes</span></div>
-      <div class="kpi"><b id="kC">0%</b><span>Cumplimiento</span><div class="meter"><i id="kM" style="width:0"></i></div></div>
+      <div class="kpi" title="Tiendas que están dentro de tu alcance"><b id="kT">0</b><span>Tiendas a cargo</span></div>
+      <div class="kpi" title="Tiendas que ya subieron su horario y planilla de esta quincena"><b id="kE">0</b><span id="kET">Entregaron su planilla</span></div>
+      <div class="kpi hot" title="Tiendas que todavía no suben su horario y planilla de esta quincena"><b id="kP">0</b><span id="kPT">Sin entregar su planilla</span></div>
+      <div class="kpi" title="Tiendas que entregaron entre las tiendas a cargo"><b id="kC">0%</b><span id="kCT">Cumplimiento de entrega</span><div class="meter"><i id="kM" style="width:0"></i></div></div>
+      <div class="kpi" title="Horas extra y horas feriadas de las semanas marcadas para pago en esta quincena, sumadas de las tiendas que ya guardaron su horario"><b id="kHE">—</b><span id="kHET">Horas extra a pagar</span><div class="sub" id="kHES" style="font-size:12px;margin-top:4px"></div></div>
       <div class="kpi" title="Personal activo frente a las plazas presupuestadas, sin contar gerente de tienda"><b id="kPl">—</b><span id="kPlT">Plazas cubiertas</span><div class="meter"><i id="kPlM" style="width:0"></i></div></div>
     </div>
     <div class="card" style="margin-top:16px">
       <div class="ch"><h3>Detalle por tienda</h3>
         <div class="bar"><input class="in" id="fTxt" placeholder="Buscar tienda o GZ"><select class="in" id="fZona"><option value="">Todas las zonas</option></select>
-        <select class="in" id="fEst"><option value="">Todos los estados</option><option value="ok">Entregadas</option><option value="no">Pendientes</option></select></div></div>
-      <div class="scroll"><table><thead><tr><th>Código</th><th>Tienda</th><th>Zona</th><th>GZ</th><th title="Personal activo / plazas presupuestadas, sin gerente de tienda">Personal</th><th>Estado</th><th>Entregó</th><th>Fecha</th><th id="thAcc">Acción</th></tr></thead><tbody id="tb"></tbody></table></div>
+        <select class="in" id="fEst"><option value="">Todos los estados</option><option value="ok">Entregadas</option><option value="no">Pendientes</option></select>
+        <button class="btn" id="recBtn" title="Mensaje listo para WhatsApp con las tiendas que les falta algo">📋 Recordatorio</button>
+        <button class="btn" id="xlsBtn" title="Descargar en Excel lo que se ve en pantalla">⬇ Excel</button></div></div>
+      <div class="scroll"><table><thead><tr><th>Código</th><th>Tienda</th><th>Zona</th><th>GZ</th><th title="Personal activo / plazas presupuestadas, sin gerente de tienda">Personal</th><th title="Horas extra y horas feriadas de las semanas marcadas para pago en esta quincena">HE / Feriadas</th><th title="Planilla · Horas extra · MBK · Plazas">Semáforo</th><th>Estado</th><th>Entregó</th><th>Fecha</th><th id="thAcc">Acción</th></tr></thead><tbody id="tb"></tbody></table></div>
     </div>
-    <div class="card" id="mbkC" hidden><div class="ch"><h3>Planilla MBK · resumen a solicitar</h3><span class="sub">Lo que pide cada tienda por semana. El GZ aprueba; GD y GO consultan.</span>
-        <div class="bar"><select class="in" id="mbkS" aria-label="Semana"></select><button class="btn" id="mbkR" title="Volver a leer">↻</button><button class="btn" id="mbkI">🖼 Descargar imagen</button></div></div>
+    <div class="card" id="mbkC" hidden><div class="ch"><h3>Planilla MBK · resumen a solicitar</h3><span class="sub">Lo que pide cada tienda por semana. Respeta los filtros de arriba. El gerente alimenta, el GZ aprueba; GD y GO solo consultan.</span>
+        <div class="bar"><select class="in" id="mbkE" aria-label="Estado de la solicitud"><option value="">Todas las solicitudes</option><option value="sol">Solicitan MBK</option><option value="sin">Sin MBK publicado</option><option value="falta">Entregó planilla y no pidió MBK</option><option value="apr">Aprobadas</option><option value="pend">Sin aprobar</option></select><details class="mbk-sd" id="mbkSD"></details><button class="btn pri" id="mbkAp" hidden>Aprobar mi selección</button><button class="btn" id="mbkR" title="Volver a leer">↻</button><button class="btn" id="mbkI">🖼 Descargar imagen</button></div></div>
       <div class="pad" id="mbkAl" style="padding-bottom:0"></div>
-      <div class="scroll" style="max-height:420px;overflow-y:auto"><table><thead><tr><th>Tienda</th><th>Zona</th><th>Semana que solicita</th><th>Presupuesto</th><th>Días con salida</th><th>Monto a solicitar</th><th>Observación</th><th>Aprobado</th></tr></thead><tbody id="mbkT"></tbody></table></div>
+      <div class="scroll" style="max-height:420px;overflow-y:auto"><table><thead><tr><th>Tienda</th><th>Zona</th><th>Semanas que solicita</th><th>Días con salida</th><th>Monto a solicitar</th><th>Observación</th><th>Aprobado por el GZ</th></tr></thead><tbody id="mbkT"></tbody></table></div>
       <div class="pad sub" id="mbkPie"></div></div>
   </section>
 
@@ -331,10 +346,12 @@ button.drop{width:100%;background:#fff;font:inherit}
       <select class="in" id="rhFR" aria-label="Región"><option value="">Todas las regiones</option></select>
       <select class="in" id="rhFZ" aria-label="Zona"><option value="">Todas las zonas</option></select>
       <select class="in" id="rhFT" aria-label="Tienda"><option value="">Todas las tiendas</option></select>
-      <button class="lnk" id="rhFL" hidden>Quitar filtros</button></div>
+      <button class="lnk" id="rhFL" hidden>Quitar filtros</button><span class="sp" style="flex:1"></span><button class="btn" id="rhXls" title="Descargar en Excel el personal y las tiendas que se ven (sin cédulas)">⬇ Excel</button></div>
     <div class="kpis" id="rhK"></div>
     <div class="card"><div class="ch"><h3>Estado por tienda</h3><span class="sub">Personal activo frente al presupuesto y días sin completar. Toca una tienda para filtrar.</span></div>
       <div class="scroll" style="max-height:360px;overflow-y:auto"><table><thead><tr><th>Tienda</th><th>Zona</th><th>Activos / plazas</th><th>Faltan</th><th>Por confirmar</th><th>Días sin completar</th></tr></thead><tbody id="rhTT"></tbody></table></div></div>
+    <div class="card"><div class="ch"><h3>Rotación y bajas</h3><span class="sub">Últimos 6 meses, según los filtros de arriba. Rotación = bajas ÷ (activos + bajas).</span></div>
+      <div class="pad" id="rhRotB"></div></div>
     <div class="card" id="rhCarga"><div class="ch"><h3>1 · Cargar altas</h3><span class="sub">Carga inicial y de emergencia (solo Superusuario). El día a día se registra tienda por tienda.</span></div>
       <div class="pad">
         <label class="drop" id="dropH"><b>Elegir archivo de altas</b>Se lee en tu navegador; el Excel no se sube. Solo se guardan nombre, cédula, cargo, categoría, empresa, tienda e ingreso.<input type="file" id="fileH" accept=".xlsx" hidden></label>
@@ -437,6 +454,9 @@ button.drop{width:100%;background:#fff;font:inherit}
         <div class="msg" id="pMsg" style="margin-top:12px"></div>
         <div class="bar" style="margin-top:12px"><button class="btn nav" id="pubP" disabled>Publicar presupuesto</button></div>
       </div></div>
+    <div class="card"><div class="ch"><h3>Registro de auditoría</h3><span class="sub">Quién aprobó horas extra y MBK, y quién abrió o reabrió quincenas</span>
+        <div class="bar"><select class="in" id="audF" aria-label="Tipo"><option value="">Todo</option><option value="he">Horas extra aprobadas</option><option value="mbk">MBK</option><option value="apertura">Aperturas</option><option value="reapertura">Reaperturas</option><option value="reinicio">Reinicios</option></select><input class="in" id="audQ" placeholder="Buscar tienda o persona" autocomplete="off"><button class="btn" id="audR" title="Volver a leer">↻</button></div></div>
+      <div class="scroll" style="max-height:340px;overflow-y:auto"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Tienda</th><th>Quién</th><th>Detalle</th></tr></thead><tbody id="audTb"></tbody></table></div></div>
     <div class="card"><div class="ch"><h3>4 · Respaldo y reinicio</h3><span class="sub">Solo para una caída o un mal manejo: vuelve a empezar con los Excel</span></div>
       <div class="pad">
         <div class="sub" style="margin-bottom:10px">El <b>respaldo</b> descarga un archivo con el personal, las vacantes y las plazas actuales. El <b>reinicio</b> borra lo que marques (siempre descarga antes el respaldo) y después se vuelve a cargar con los pasos 1 y 3 y el archivo de altas. No toca usuarios, roles, entregas ni horarios.</div>
@@ -451,6 +471,11 @@ button.drop{width:100%;background:#fff;font:inherit}
   </section>
 </main>
 
+<div id="bellP" role="dialog" aria-label="Bandeja de avisos" hidden>
+  <div class="bp-h"><b>Avisos</b><button class="lnk" id="bellAll">Marcar todo como leído</button></div>
+  <div id="bellL"></div>
+  <div class="bp-f sub">Son avisos automáticos de RITMO. Se actualizan solos con lo que falta por hacer.</div>
+</div>
 <div class="modal" id="pwM" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="pwT">
   <h3 id="pwT">Cambia tu contraseña</h3><p id="pwP">Por seguridad, RITMO pide una contraseña nueva cada 60 días.</p>
   <form id="pwF" autocomplete="off">
@@ -521,13 +546,13 @@ async function cargarTiendas(){
 // Personal activo sin contar al gerente de tienda: solo cifras, para comparar con las plazas presupuestadas.
 function resumenPersonal(d){
   const h=new Date(),hoy=`${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`;
-  let activos=0,porIngresar=0;
+  let activos=0,porIngresar=0,mbk=0;
   for(const a of (d&&d.agentes)||[]){
     if((a.cargos||[])[0]==='Gerente de tienda')continue;
     if(a.ingreso&&a.ingreso>hoy){porIngresar++;continue}
     if(a.baja&&a.baja<hoy)continue;
-    activos++}
-  return {activos,porIngresar};
+    activos++;if((a.cargos||[])[0]==='Agente SAC MBK')mbk++}
+  return {activos,porIngresar,mbk};
 }
 let ultimoRes='';
 async function guardarResumen(data){
@@ -535,9 +560,19 @@ async function guardarResumen(data){
   const r=resumenPersonal(data);
   if(!r.activos&&!r.porIngresar&&(RES[genTienda]?.activos||0)>0)return; // horario aún sin precargar: no borres la cifra que dejó la carga de altas
   const k=genTienda+JSON.stringify(r);if(k===ultimoRes)return;ultimoRes=k;
-  RES[genTienda]={...r};
+  RES[genTienda]={...(RES[genTienda]||{}),...r};
   if(!C)return;
-  try{await C.F.setDoc(C.F.doc(C.db,'resumen',genTienda),{...r,tienda:genTienda,por:REAL.correo,actualizado:C.F.serverTimestamp()})}catch(e){ultimoRes=''}
+  try{await C.F.setDoc(C.F.doc(C.db,'resumen',genTienda),{...r,tienda:genTienda,por:REAL.correo,actualizado:C.F.serverTimestamp()},{merge:true})}catch(e){ultimoRes=''}
+}
+// Horas extra y feriadas de la quincena (las semanas marcadas para pago), publicadas por el Generador. Se guardan por quincena en el resumen de la tienda.
+let heGuardado='';
+async function guardarHE(h){
+  if(!genTienda||!h||!h.q)return;
+  const k=genTienda+JSON.stringify(h);if(k===heGuardado)return;heGuardado=k;
+  const dato={he:Number(h.he)||0,fer:Number(h.fer)||0,faltan:Number(h.faltan)||0,semanas:Array.isArray(h.semanas)?h.semanas.join(','):''};
+  RES[genTienda]={...(RES[genTienda]||{}),heQ:{...(RES[genTienda]?.heQ||{}),[h.q]:{...dato,fecha:new Date()}}};
+  if(!C){pintar();return}
+  try{await C.F.setDoc(C.F.doc(C.db,'resumen',genTienda),{tienda:genTienda,heQ:{[h.q]:{...dato,fecha:C.F.serverTimestamp()}}},{merge:true});pintar()}catch(e){heGuardado=''}
 }
 // Estado del personal de una tienda frente a su presupuesto (columna de Seguimiento)
 function personal(t){
@@ -561,7 +596,7 @@ async function cargarEntregas(){
   if(C)await Promise.all(TIENDAS.map(async t=>{const s=await C.F.getDoc(C.F.doc(C.db,'aperturas',`${t.codigo}_${Q}`)).catch(()=>null);if(s&&s.exists())APER[t.codigo]=s.data()}));
   else TIENDAS.forEach(t=>{const a=DEMOAP.get(`${t.codigo}_${Q}`);if(a)APER[t.codigo]=a});
   if(esEditor())await cargarCierres();
-  pintar();pintarCal();listo();if(genTienda&&$('genF').src){$('genF').contentWindow?.postMessage({tipo:'ritmo-quincena',q:Q},location.origin);estadoPub()}
+  pintar();pintarCal();listo();if(genTienda&&$('genF').src){$('genF').contentWindow?.postMessage({tipo:'ritmo-quincena',q:Q,semanasHE:Array.isArray(CAL?.semanas)?CAL.semanas:undefined},location.origin);estadoPub()}
 }
 
 // ---------- Interfaz según rol
@@ -693,33 +728,93 @@ function ofertaTour(){
   if(REAL&&REAL.rol!==ME.rol)return; // no se ofrece mientras el superusuario usa "Ver como"
   ofrecerRecorrido({correo:correoTour(),id:'panel',titulo:'¿Un recorrido de 1 minuto?',texto:'Te muestro lo esencial de RITMO, paso a paso, con voz si quieres.',onEmpezar:()=>lanzarLeccion('panel')});
 }
-function ver(k){if(k==='loc')pintarLoc();if(k==='adm'){estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
+function ver(k){if(k==='loc')pintarLoc();if(k==='adm'){pintarAuditoria();estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
   $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];
   // La quincena y la alerta de planilla solo importan donde se trabaja con quincenas; RRHH y Reclutamiento no las necesitan
   $('qSel').closest('label').style.display=['seg','mia','cal','gen'].includes(k)?'':'none';$('alerta').style.display=['rrh','rec'].includes(k)?'none':'';
   ajustarGen();}
 
+// Los filtros de Seguimiento (buscar, zona, estado de entrega) gobiernan las dos tablas: Detalle por tienda y Planilla MBK
+function filtradas(){
+  const tx=$('fTxt').value.toLowerCase(),z=$('fZona').value,es=$('fEst').value;
+  return TIENDAS.filter(t=>(!z||t.zona===z)&&(!es||(es==='ok')===!!ENT[t.codigo])&&(!tx||[t.codigo,t.nombre,t.gzNombre].join(' ').toLowerCase().includes(tx)));
+}
+// Horas extra y feriadas de una tienda en la quincena elegida (publicadas por el Generador)
+const heDe=t=>RES[t.codigo]?.heQ?.[Q];
+const nHE=n=>Number(n).toLocaleString('es-NI',{maximumFractionDigits:1});
+function heCelda(t){const h=heDe(t);if(!h)return '<span class="sub" title="La tienda aún no ha guardado su horario con esta quincena">—</span>';
+  return `${nHE(h.he)} h${h.fer?` <span class="rh-tag warn" title="Horas feriadas de esta nómina">+ ${nHE(h.fer)} fer.</span>`:''}${h.faltan?` <span class="rh-tag" title="Días de la quincena sin horario guardado">${h.faltan} d sin horario</span>`:''}`}
+// Semáforo por tienda: planilla, horas extra, MBK y plazas en una sola fila (verde bien, ámbar por revisar, rojo urgente, gris sin dato)
+function semaforoDe(t){
+  const e=ENT[t.codigo],h=heDe(t),r=RES[t.codigo],pasado=CAL?.limite&&(CAL.limite.toDate?CAL.limite.toDate():new Date(CAL.limite))<new Date();
+  const mb=(()=>{if(!(r?.mbk>0))return ['gris','Sin agentes MBK'];if(!MBKOK||!MBKSEL.length)return ['gris','MBK sin cargar'];
+    const x=mbkResumen(t,MBKSEL);return x.sol.length?(x.cambio?['rojo','MBK cambió tras solicitar']:['verde','Solicitó MBK']):x.sinMarca.length?['ambar','MBK sin marcar como solicitado']:e?['rojo','Entregó planilla y no solicitó MBK']:['gris','MBK sin publicar']})();
+  const faltan=t.plazas!=null&&r?Math.max(0,t.plazas-(r.activos||0)):null;
+  return [['Planilla',e?['verde','Entregó su planilla']:pasado?['rojo','No entregó y ya pasó la fecha límite']:['ambar','Aún no entrega']],
+    ['Horas extra',h?(h.faltan?['ambar',`${h.faltan} días sin horario guardado`]:['verde','Horas extra al día']):['gris','Sin horario guardado en esta quincena']],
+    ['MBK',mb],['Plazas',faltan==null?['gris','Sin presupuesto']:faltan===0?['verde','Plazas completas']:faltan>=2?['rojo',`Faltan ${faltan}`]:['ambar','Falta 1']]];
+}
+const SEM_COL={verde:'#1d7f48',ambar:'#e5a100',rojo:'#b42318',gris:'#b8c1d3'};
+function semaforo(t){return semaforoDe(t).map(([n,[c,tx]])=>`<span title="${esc(n)}: ${esc(tx)}" aria-label="${esc(n)}: ${esc(tx)}" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${SEM_COL[c]};margin-right:4px;vertical-align:middle"></span>`).join('')}
+// Recordatorio con un clic: mensaje listo para WhatsApp con las tiendas (según los filtros) a las que les falta algo
+$('recBtn').onclick=async()=>{
+  const L=filtradas().filter(t=>!t.prueba),sinE=L.filter(t=>!ENT[t.codigo]),sinM=L.filter(t=>ENT[t.codigo]&&semaforoDe(t)[2][1][1]==='Entregó planilla y no solicitó MBK'),sinH=L.filter(t=>ENT[t.codigo]&&!heDe(t));
+  const lim=CAL?.limite?fmt(CAL.limite):'',lista=a=>a.map(t=>`• ${t.codigo} ${t.nombre||''}`).join('\n');
+  const msg=()=>{const p=[`Hola, te escribo de la Gerencia de Zona. Un recordatorio rápido de RITMO · ${quincenaTexto(Q)}:`];
+    if($('rcA1').checked&&sinE.length)p.push(`\n*Falta entregar la planilla${lim?' (límite '+lim+')':''}:*\n${lista(sinE)}`);
+    if($('rcA2').checked&&sinM.length)p.push(`\n*Entregaron planilla pero no solicitaron MBK:*\n${lista(sinM)}`);
+    if($('rcA3').checked&&sinH.length)p.push(`\n*Sin horas extra publicadas:*\n${lista(sinH)}`);
+    p.push('\nGracias por ponerte al día. 🙌');return p.join('\n')};
+  const copiar=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
+  return dialogo({titulo:'Recordatorio con un clic',ancho:true,
+    init:d=>{const ta=d.querySelector('#rcMsg'),act=()=>{ta.value=msg()};d.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=act);act()},
+    cuerpo:`<p class="sub">Según los filtros de arriba (${L.length} tienda${L.length===1?'':'s'}). Marca qué incluir y edita el texto si quieres.</p>
+      <label class="chk"><input type="checkbox" id="rcA1" ${sinE.length?'checked':''}>Sin entregar planilla (${sinE.length})</label>
+      <label class="chk"><input type="checkbox" id="rcA2" ${sinM.length?'checked':''}>Entregó y no solicitó MBK (${sinM.length})</label>
+      <label class="chk"><input type="checkbox" id="rcA3">Sin horas extra publicadas (${sinH.length})</label>
+      <textarea id="rcMsg" rows="11" style="width:100%;margin-top:8px;font:inherit"></textarea>`,
+    botones:[{t:'Cerrar',k:'cancel',cancel:true},
+      {t:'WhatsApp',k:'wa',accion:d=>window.open('https://wa.me/?text='+encodeURIComponent(d.querySelector('#rcMsg').value),'_blank','noopener')},
+      {t:'Copiar mensaje',k:'cp',cls:'pri',accion:async d=>{const ok=await copiar(d.querySelector('#rcMsg').value);d.querySelector('.dlgerr').style.color=ok?'var(--ok)':'var(--bad)';d.querySelector('.dlgerr').textContent=ok?'Mensaje copiado. Pégalo en WhatsApp.':'No se pudo copiar: selecciona el texto y cópialo.'}}]});
+};
+// Excel con lo que se ve en pantalla (respeta los filtros): tiendas con horas extra y plazas, y el MBK de las semanas elegidas
+function exportarSeguimiento(){
+  if(typeof XLSX==='undefined')return alert('No se pudo cargar la librería de Excel. Revisa tu conexión.');
+  const L=filtradas().filter(t=>!t.prueba),wb=XLSX.utils.book_new();
+  const filas=L.map(t=>{const r=RES[t.codigo]||{},h=heDe(t),e=ENT[t.codigo],f=t.plazas!=null?Math.max(0,t.plazas-(r.activos||0)):'';
+    return {'Código':t.codigo,'Tienda':t.nombre||'','Zona':t.zona||'','Región':t.region||'','GZ':t.gzNombre||'','Presupuesto de plazas':t.plazas??'','Activos':r.activos??'','Faltan':f,'Entregó planilla':e?'Sí':'No','Fecha de entrega':e?.fecha?fmt(e.fecha):'','Horas extra':h?h.he:'','Horas feriadas':h?h.fer:'','Días sin horario':h?h.faltan:''}});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(filas),'Tiendas');
+  if(MBKOK&&MBKSEL.length){const m=L.map(t=>mbkResumen(t,MBKSEL)).filter(r=>r.sol.length).map(r=>({'Código':r.t.codigo,'Tienda':r.t.nombre||'','Zona':r.t.zona||'','Semanas':r.sol.map(x=>semTxt(x.w)).join(' + '),'Días con salida':r.dias,'Monto solicitado':Math.round(r.monto*100)/100,'Aprobado por el GZ':r.apr?'Sí':'No'}));
+    if(m.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(m),'MBK')}
+  XLSX.writeFile(wb,`RITMO_seguimiento_${Q}.xlsx`);
+}
+$('xlsBtn').onclick=()=>exportarSeguimiento();
 function pintar(){
   $('qTxt').textContent=quincenaTexto(Q);
   const ok=TIENDAS.filter(t=>ENT[t.codigo]).length, n=TIENDAS.length, pct=n?Math.round(ok/n*100):0;
   $('kT').textContent=n;$('kE').textContent=ok;$('kP').textContent=n-ok;$('kC').textContent=pct+'%';$('kM').style.width=pct+'%';
+  {const qt=quincenaTexto(Q);$('kET').textContent='Entregaron su planilla · '+qt;$('kPT').textContent='Sin entregar su planilla · '+qt;$('kCT').textContent='Cumplimiento de entrega · '+qt}
   {const pl=TIENDAS.filter(t=>t.plazas!=null&&RES[t.codigo]&&!t.prueba),sp=pl.reduce((s,t)=>s+t.plazas,0),sa=pl.reduce((s,t)=>s+Math.min(RES[t.codigo].activos,t.plazas),0),pc=sp?Math.round(sa/sp*100):0;
     pintarAlertasJefe();
     $('kPl').textContent=sp?pc+'%':'—';$('kPlM').style.width=pc+'%';$('kPlT').textContent=sp?`Plazas cubiertas · ${sa} de ${sp}`:'Plazas cubiertas · sin datos'}
-  const tx=$('fTxt').value.toLowerCase(), z=$('fZona').value, es=$('fEst').value;
-  const rows=TIENDAS.filter(t=>(!z||t.zona===z)&&(!es||(es==='ok')===!!ENT[t.codigo])&&(!tx||[t.codigo,t.nombre,t.gzNombre].join(' ').toLowerCase().includes(tx)));
+  {const rep=TIENDAS.filter(t=>!t.prueba&&heDe(t)),he=rep.reduce((s,t)=>s+heDe(t).he,0),fer=rep.reduce((s,t)=>s+heDe(t).fer,0),tt=TIENDAS.filter(t=>!t.prueba).length;
+    $('kHE').textContent=rep.length?nHE(he)+' h':'—';$('kHET').textContent='Horas extra a pagar · '+quincenaTexto(Q);
+    $('kHES').textContent=rep.length?`${nHE(fer)} h feriadas · ${rep.length} de ${tt} tiendas reportaron`:'Aún ninguna tienda ha guardado su horario'}
+  const rows=filtradas();
   const canDl=ME.rol==='Descargar'||esSuper()||tiene('descargas');
   const como=REAL&&REAL.rol!==ME.rol?`&como=${encodeURIComponent(ME.rol)}`:'';
   const ver=c=>`<a class="btn" href="visor.html?t=${encodeURIComponent(c)}&q=${encodeURIComponent(Q)}${como}" title="Ver horario, planilla y MBK (solo lectura)">👁 Ver</a>`;
   $('tb').innerHTML=rows.length?rows.map(t=>{const e=ENT[t.codigo];return `<tr>
     <td class="mono">${esc(t.codigo)}</td><td>${esc(t.nombre)}</td><td>${esc(t.zona)}</td><td>${esc(t.gzNombre||'')}</td><td style="white-space:nowrap">${personal(t)}</td>
+    <td class="mono" style="white-space:nowrap">${heCelda(t)}</td>
+    <td style="white-space:nowrap">${semaforo(t)}</td>
     <td>${estado(e)}${insigniaHE(e,t.codigo)}</td>
     <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
     ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-xl="${esc(t.codigo)}" title="Descargar la planilla en Excel">⬇ Planilla Excel</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar la planilla Excel en este navegador">💾</button>`:''}${accionesGZ(t,e)}</td>`:`<td>${e?ver(t.codigo):''}${accionesGZ(t,e)}</td>`}</tr>`}).join('')
-    :`<tr><td colspan="9" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
+    :`<tr><td colspan="11" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(esEditor()){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
     $('miaSt').innerHTML=estado(e)+insigniaHE(e,TIENDAS[0]?.codigo)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}${REAL&&REAL.rol!==ME.rol?'&como=Editor':''}">👁 Ver mi entrega</a>`:'');}
-  pintarBloqueo();pintarMBK();
+  pintarBloqueo();pintarMBK();pintarBandeja();
 }
 
 // ---------- Alertas de incumplimiento al jefe inmediato (fase 1: dentro del panel)
@@ -827,7 +922,25 @@ async function pintarRRH(){
   const act=L.filter(p=>p.estado==='activo').length,k=(b,l,key,c='')=>`<button type="button" class="kpi ${c}" data-rhk="${key}" style="text-align:left;cursor:pointer;font:inherit" title="Toca para filtrar la lista"><b>${b}</b><span>${l}</span></button>`;
   const RT=rhTiendas(L,pend),inc=RT.filter(r=>r.faltan>0).length,falta=RT.reduce((s,r)=>s+r.faltan,0);
   $('rhK').innerHTML=k(L.length,'Registrados','')+k(act,'Activos','activo')+k(pend.filter(x=>x.tipo==='alta').length,'Altas por confirmar','altp','hot')+k(pend.filter(x=>x.tipo==='baja').length,'Bajas por confirmar','bajp','hot')+k(atr,`Atrasados (${RH.DIAS_ALERTA}+ días)`,'atr',atr?'hot':'')+k(falta,`Personas que faltan (en ${inc} tiendas)`,'tt',falta?'hot':'');
-  pintarRhTT(L,pend);pintarRhPend();pintarRhTb();pintarRhBaja();
+  pintarRhTT(L,pend);pintarRot(L);pintarRhPend();pintarRhTb();pintarRhBaja();pintarBandeja();
+}
+// Rotación: bajas por mes y por zona, antigüedad al salir y cuántas tienen motivo de la tienda y de RRHH
+function pintarRot(L){
+  const B=$('rhRotB'),hoy=new Date(),meses=[];
+  for(let i=5;i>=0;i--){const d=new Date(hoy.getFullYear(),hoy.getMonth()-i,1);meses.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`)}
+  const NM=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],desde=meses[0]+'-01',bajas=L.filter(p=>p.estado==='baja'&&p.baja?.fecha&&p.baja.fecha>=desde);
+  if(!L.length){B.innerHTML='<div class="sub">Aún no hay personal registrado.</div>';return}
+  const porMes=meses.map(m=>bajas.filter(p=>p.baja.fecha.startsWith(m)).length),mx=Math.max(1,...porMes);
+  const meseAnt=p=>p.ingreso?Math.max(0,(new Date(p.baja.fecha+'T00:00')-new Date(p.ingreso+'T00:00'))/864e5/30.4):null;
+  const Z=new Map();
+  for(const p of L){const z=RHM.get(p.tienda)?.zona||'Sin zona',o=Z.get(z)||{z,act:0,b:0,ant:[]};if(p.estado==='activo')o.act++;Z.set(z,o)}
+  for(const p of bajas){const z=RHM.get(p.tienda)?.zona||'Sin zona',o=Z.get(z)||{z,act:0,b:0,ant:[]};o.b++;const a=meseAnt(p);if(a!=null)o.ant.push(a);Z.set(z,o)}
+  const prom=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null,fm=n=>n==null?'—':(n>=12?`${(n/12).toFixed(1)} años`:`${n.toFixed(1)} meses`);
+  const mT=bajas.filter(p=>(p.baja.origen==='rrhh'?p.baja.motivoTienda:p.baja.motivo)).length,mR=bajas.filter(p=>(p.baja.origen==='rrhh'?p.baja.motivo:p.baja.motivoRRHH)).length,sin=bajas.filter(p=>!(p.baja.motivo||p.baja.motivoTienda||p.baja.motivoRRHH)).length;
+  const act=L.filter(p=>p.estado==='activo').length,rot=act+bajas.length?bajas.length/(act+bajas.length)*100:0,antT=prom(bajas.map(meseAnt).filter(x=>x!=null));
+  B.innerHTML=`<div class="grid2" style="margin-bottom:14px"><div class="mini"><b>${bajas.length}</b><span>Bajas en 6 meses</span></div><div class="mini"><b>${rot.toFixed(1)}%</b><span>Rotación del periodo</span></div><div class="mini"><b>${fm(antT)}</b><span>Antigüedad promedio al salir</span></div><div class="mini"><b>${mT} / ${mR}</b><span>Con motivo de tienda / de RRHH${sin?` · ${sin} sin motivo`:''}</span></div></div>
+    <div style="display:flex;gap:10px;align-items:flex-end;height:110px;margin-bottom:6px">${porMes.map((n,i)=>`<div style="flex:1;text-align:center"><div style="font-size:12px;font-weight:600">${n}</div><div style="background:var(--orange);height:${Math.round(n/mx*70)+3}px;border-radius:4px 4px 0 0" title="${n} bajas"></div><div class="sub" style="font-size:11px">${NM[+meses[i].slice(5)-1]}</div></div>`).join('')}</div>
+    <div class="scroll"><table><thead><tr><th>Zona</th><th>Activos</th><th>Bajas (6 meses)</th><th>Rotación</th><th>Antigüedad al salir</th></tr></thead><tbody>${[...Z.values()].sort((a,b)=>b.b-a.b).map(o=>{const r=o.act+o.b?o.b/(o.act+o.b)*100:0;return `<tr><td>${esc(o.z)}</td><td>${o.act}</td><td>${o.b}</td><td><span class="rh-tag ${r>=15?'bad':r>=8?'warn':'ok'}">${r.toFixed(1)}%</span></td><td>${fm(prom(o.ant))}</td></tr>`}).join('')}</tbody></table></div>`;
 }
 // Tablero: filtros por región, zona y tienda; tarjetas que filtran; estado por tienda y ficha de la persona
 let RHM=new Map();const RHF={r:'',z:'',t:''},rhTs=()=>(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba);
@@ -889,6 +1002,13 @@ async function rhMotivo(id,actual){
   const campo=p.baja.origen==='rrhh'?'motivo':'motivoRRHH',d={baja:{...p.baja,[campo]:(r.texto||'').trim()},actualizado:ahoraTS()};
   try{await guardarPers(id,d);aplicarLocal(id,d);pintarRRH()}catch(e){alert('No se pudo guardar: '+(e.code||e.message))}
 }
+$('rhXls').onclick=()=>{
+  if(typeof XLSX==='undefined')return alert('No se pudo cargar la librería de Excel. Revisa tu conexión.');
+  const L=PERS.filter(enAlcance),pend=RH.pendientes(L),wb=XLSX.utils.book_new();
+  const P=L.map(p=>{const t=RHM.get(p.tienda);return {'Nombre':p.nombre,'Tienda':p.tienda,'Nombre de tienda':t?.nombre||'','Zona':t?.zona||'','Región':t?.region||'','Cargo':p.cargo||'','Categoría':p.categoria||'','Empresa':p.empresa||'','Ingreso':p.ingreso||'','Estado':p.estado==='baja'?'Baja':'Activo','Fecha de baja':p.baja?.fecha||'','Motivo (tienda)':p.baja?(p.baja.origen==='rrhh'?p.baja.motivoTienda:p.baja.motivo)||'':'','Motivo (RRHH)':p.baja?(p.baja.origen==='rrhh'?p.baja.motivo:p.baja.motivoRRHH)||'':'','Por confirmar':pend.some(x=>x.p.id===p.id)?'Sí':''}});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(P),'Personal');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rhTiendas(L,pend).map(r=>({'Código':r.t.codigo,'Tienda':r.t.nombre||'','Zona':r.t.zona||'','Activos':r.act,'Presupuesto':r.plazas??'','Faltan':r.faltan,'Altas por confirmar':r.pend,'Días sin completar':r.dias}))),'Tiendas');
+  XLSX.writeFile(wb,`RITMO_personal_${RH.hoyISO()}.xlsx`)};
 $('rhFR').onchange=e=>{RHF.r=e.target.value;RHF.z='';RHF.t='';pintarRRH()};
 $('rhFZ').onchange=e=>{RHF.z=e.target.value;RHF.t='';pintarRRH()};
 $('rhFT').onchange=e=>{RHF.t=e.target.value;pintarRRH()};
@@ -1029,14 +1149,14 @@ async function publicarResumenAltas(){
   if(!esSuper()||!PERSOK)return;
   const h=new Date(),hoy=`${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}-${String(h.getDate()).padStart(2,'0')}`,por={};
   for(const p of PERS){if(p.estado!=='activo'||p.cargo==='Gerente de tienda'||!p.tienda)continue;
-    const r=por[p.tienda]||(por[p.tienda]={activos:0,porIngresar:0});
-    if(p.ingreso&&p.ingreso>hoy)r.porIngresar++;else r.activos++}
+    const r=por[p.tienda]||(por[p.tienda]={activos:0,porIngresar:0,mbk:0});
+    if(p.ingreso&&p.ingreso>hoy)r.porIngresar++;else{r.activos++;if(p.cargo==='Agente SAC MBK')r.mbk++}}
   const tiendas=(ALLT.length?ALLT:TIENDAS).filter(t=>!t.prueba);
-  const lista=tiendas.map(t=>[t.codigo,por[t.codigo]||{activos:0,porIngresar:0}]);
-  lista.forEach(([c,r])=>{RES[c]={...r}});
+  const lista=tiendas.map(t=>[t.codigo,por[t.codigo]||{activos:0,porIngresar:0,mbk:0}]);
+  lista.forEach(([c,r])=>{RES[c]={...(RES[c]||{}),...r}});
   if(!C)return;
   try{const {F,db}=C;let b=F.writeBatch(db),n=0;
-    for(const [c,r] of lista){b.set(F.doc(db,'resumen',c),{...r,tienda:c,por:REAL.correo,actualizado:F.serverTimestamp()});if(++n>=400){await b.commit();b=F.writeBatch(db);n=0}}
+    for(const [c,r] of lista){b.set(F.doc(db,'resumen',c),{...r,tienda:c,por:REAL.correo,actualizado:F.serverTimestamp()},{merge:true});if(++n>=400){await b.commit();b=F.writeBatch(db);n=0}}
     b.set(F.doc(db,'sistema','altas'),{fecha:F.serverTimestamp(),personas:PERS.length,activos:PERS.filter(p=>p.estado==='activo').length,por:REAL.correo,porNombre:REAL.nombre||''});
     await b.commit();estadoAdm()}catch(e){}
 }
@@ -1161,7 +1281,7 @@ async function pintarRec(){
     const st=v.estado==='abierta'?`<span class="rh-tag ${d>=15?'bad':'warn'}">Abierta</span>`:v.estado==='cubierta'?`<span class="rh-tag ok">Cubierta${v.cerrada?.automatica?' (alta de RRHH)':''}</span>`:'<span class="rh-tag">Cancelada</span>';
     const acc=v.estado==='abierta'?`${puedeC?`<button class="btn" data-rcc="${v.id}">✔ Cubierta</button> `:''}${puedeX?`<button class="btn dng" data-rcx="${v.id}" title="Cancelar la vacante">✕</button>`:''}`:'';
     return `<tr><td>${esc(nomTienda(v.tienda))}</td><td>${esc(v.cargo)}</td><td>${esc(v.motivo||'')}</td><td>${st}</td><td class="mono">${tsTxt(v.creada?.fecha)} · ${d} d</td><td style="white-space:nowrap">${acc}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Sin vacantes con ese filtro.</td></tr>';
-  await pintarFoco();pintarProspectos();
+  await pintarFoco();pintarProspectos();pintarBandeja();
   $('rcPie').textContent=VAC.length?`Mostrando ${Math.min(100,L.length)} de ${L.length}.`:'Aún no hay vacantes. Se crean al abrir una tienda o agregar un puesto.';
 }
 $('rcTxt').oninput=$('rcEst').onchange=pintarRec;
@@ -1515,11 +1635,12 @@ async function abrirQuincena(cod){
     else{const a={tienda:cod,quincena:Q,...quien,fecha:ts,motivo:r.texto||''};
       if(C){await C.F.setDoc(C.F.doc(C.db,'aperturas',`${cod}_${Q}`),a);await cargarEntregas()}else DEMOAP.set(`${cod}_${Q}`,a)}
     if(!C)APER[cod]=DEMOAP.get(`${cod}_${Q}`)||APER[cod];
+    audita('apertura',cod,`Abrió la quincena ${quincenaTexto(Q)}${r.texto?': '+r.texto:''}`);
     pintar();
   }catch(err){alert('No se pudo abrir la quincena: '+(err.code||err.message))}
 }
 // leer(d): opcional, devuelve los datos del formulario al aceptar. ancho: diálogo ancho para tablas.
-function dialogo({titulo,cuerpo,botones,leer,ancho}){
+function dialogo({titulo,cuerpo,botones,leer,ancho,init}){ // init(d): se llama al abrir; botón con accion(d): corre sin cerrar el diálogo
   return new Promise(res=>{
     const d=document.createElement('dialog');d.className='dlg'+(ancho?' ancho':'');
     d.innerHTML=`<form method="dialog"><h3>${titulo}</h3><div class="dlgb">${cuerpo}</div><div class="dlgerr" role="alert" style="color:var(--bad);font-size:13px;min-height:0"></div><div class="dlga">${botones.map((b,i)=>`<button class="btn ${b.cls||''}" value="${i}"${b.cancel?' formnovalidate':''}>${b.t}</button>`).join('')}</div></form>`;
@@ -1531,13 +1652,86 @@ function dialogo({titulo,cuerpo,botones,leer,ancho}){
     d.addEventListener('click',ev=>{const b=ev.target.closest('button[value]');if(!b)return;const bt=botones[Number(b.value)];if(!bt)return;
       ev.preventDefault();
       if(bt.valida){const m=bt.valida(d);if(m){d.querySelector('.dlgerr').textContent=m;return}} // valida(d): texto de error → el diálogo sigue abierto
+      if(bt.accion){bt.accion(d);return}
       const texto=d.querySelector('textarea')?.value.trim()||'';
       if(bt.min&&texto.length<bt.min){d.querySelector('.dlgerr').textContent=`Escribe al menos ${bt.min} letras para que tu GZ entienda qué corregir.`;d.querySelector('textarea')?.focus();return}
       cerrar(bt.k,texto)});
     d.addEventListener('cancel',()=>cerrar('cancel',''));
     d.addEventListener('close',()=>cerrar('cancel',''));
-    d.showModal();d.querySelector('textarea')?.focus();
+    d.showModal();if(init){try{init(d)}catch(e){/* sin inicio */}}d.querySelector('textarea')?.focus();
   });
+}
+// ---------- Bandeja de avisos: solo avisos automáticos del sistema, calculados con lo que ya está cargado (sin escribir en la nube).
+// Cada aviso lleva un id que cambia cuando cambia lo avisado, así vuelve a salir como no leído si hay novedad.
+let BLEIDOS=null,BAV=[],BCARGA={};
+const bKey=()=>'ritmo-bandeja-leidos:'+(REAL?.correo||'');
+function bLeidos(){if(!BLEIDOS){try{BLEIDOS=new Set(JSON.parse(localStorage.getItem(bKey())||'[]'))}catch(e){BLEIDOS=new Set()}}return BLEIDOS}
+function bGuardar(){try{localStorage.setItem(bKey(),JSON.stringify([...bLeidos()].slice(-300)))}catch(e){}}
+function irA(k){const t=[...$('tabs').children];if(!t.some(x=>x.dataset.k===k))return;t.forEach(x=>x.setAttribute('aria-selected',String(x.dataset.k===k)));ver(k)}
+function avisosDe(){
+  const A=[],ahora=new Date(),lim=CAL?.limite?(CAL.limite.toDate?CAL.limite.toDate():new Date(CAL.limite)):null,pasado=!!lim&&lim<ahora,qt=quincenaTexto(Q);
+  const add=(id,ic,titulo,detalle,ir,urg)=>A.push({id,ic,titulo,detalle,ir,urg:!!urg}),pl=(n,s,p)=>n===1?s:p;
+  if(esEditor()&&TIENDAS[0]){const t=TIENDAS[0],e=ENT[t.codigo];
+    if(PERSOK){const p=RH.pendientes(PERS),aR=p.filter(x=>x.tipo==='alta'&&x.origen==='rrhh'),bR=p.filter(x=>x.tipo==='baja'&&x.origen==='rrhh'&&!x.disputada);
+      if(aR.length)add('alta:'+aR.length,'👥',`RRHH cargó ${aR.length} ${pl(aR.length,'colaborador','colaboradores')} en tu tienda`,'Revísalos y confírmalos en Mi horario.','gen',aR.some(x=>x.atrasado));
+      if(bR.length)add('baja:'+bR.length,'🚪',`${bR.length} ${pl(bR.length,'baja','bajas')} por confirmar`,'RRHH la registró; confírmala o disputa si fue un error.','gen',bR.some(x=>x.atrasado))}
+    if(!e&&lim){if(pasado)add('lim:'+Q+':p','⏰','La fecha límite de la planilla ya pasó',`Entrega ${qt} lo antes posible.`,'mia',true);
+      else if(lim-ahora<48*36e5)add('lim:'+Q,'⏰',`La planilla vence ${fmt(lim)}`,`Entrega ${qt} antes de esa hora.`,'mia')}
+    if(e?.bloqueada)add('he:'+Q,'🔒','Horas extra aprobadas',`Tu GZ aprobó ${qt}; la planilla quedó bloqueada.`,'mia');
+    const r=e?.reapertura;if(r&&['aprobada','rechazada'].includes(r.estado)&&r.resueltaFecha)add('reap:'+(r.resueltaFecha.seconds||String(r.resueltaFecha)),'↩',`Reapertura ${r.estado}`,r.nota||'Tu GZ respondió tu solicitud.','mia')}
+  else if(TIENDAS.length&&(esSuper()||['Visualizar','Descargar'].includes(ME.rol)||tiene('seguimiento'))){
+    const T=TIENDAS.filter(t=>!t.prueba),sin=T.filter(t=>!ENT[t.codigo]);
+    if(sin.length)add('sin:'+Q+':'+sin.length,pasado?'⚠️':'📥',`${sin.length} ${pl(sin.length,'tienda sin entregar su planilla','tiendas sin entregar su planilla')}`,pasado?'Ya pasó la fecha límite.':`Aún faltan por entregar ${qt}.`,'seg',pasado);
+    const reab=T.filter(t=>ENT[t.codigo]?.reapertura?.estado==='solicitada'&&puedeGZ(t));
+    if(reab.length)add('reab:'+reab.map(t=>t.codigo).join(','),'↩',`${reab.length} ${pl(reab.length,'solicitud de reapertura','solicitudes de reapertura')}`,'Las tiendas esperan tu respuesta.','seg',true);
+    const heP=T.filter(t=>ENT[t.codigo]&&!cierreDe(ENT[t.codigo],t.codigo)&&puedeGZ(t));
+    if(heP.length)add('hep:'+Q+':'+heP.length,'✔',`${heP.length} ${pl(heP.length,'entrega espera','entregas esperan')} tu aprobación de horas extra`,'Apruébalas para bloquear la planilla.','seg');
+    if(MBKOK&&MBKSEL.length){const pend=T.filter(t=>{const r=mbkResumen(t,MBKSEL);return r.sol.length&&!r.apr&&puedeAprobarMBK(t)}).length;
+      if(pend)add('mbk:'+MBKSEL.join(',')+':'+pend,'🚌',`${pend} ${pl(pend,'tienda con MBK por aprobar','tiendas con MBK por aprobar')}`,'Revisa y aprueba tu selección en Planilla MBK.','seg')}
+    const falta=T.reduce((s,t)=>s+(t.plazas!=null&&RES[t.codigo]?Math.max(0,t.plazas-(RES[t.codigo].activos||0)):0),0);
+    if(falta)add('plz:'+falta,'🧩',`${falta} ${pl(falta,'plaza por cubrir','plazas por cubrir')}`,'Según el presupuesto y el personal activo.','seg')}
+  if(PERSOK&&(esSuper()||tiene('rrhh_ver'))&&!esEditor()){const p=RH.pendientes(PERS),atr=p.filter(x=>x.atrasado);
+    if(atr.length)add('rhatr:'+atr.length,'⚠️',`${atr.length} ${pl(atr.length,'movimiento de personal atrasado','movimientos de personal atrasados')}`,`Llevan ${RH.DIAS_ALERTA}+ días sin confirmar.`,'rrh',true);
+    else if(p.length)add('rhp:'+p.length,'🧾',`${p.length} ${pl(p.length,'movimiento por confirmar','movimientos por confirmar')}`,'Altas y bajas esperando confirmación.','rrh')}
+  if(VACOK&&(esSuper()||tiene('reclutamiento'))){const v=VAC.filter(x=>x.estado==='abierta'&&RH.diasDesde(x.creada?.fecha)>=15).length;
+    if(v)add('vac:'+v,'📣',`${v} ${pl(v,'vacante abierta','vacantes abiertas')} hace 15 días o más`,'Conviene priorizarlas.','rec',true)}
+  if(PROSOK&&(esSuper()||tiene('rrhh_cargar'))){const a=PROS.filter(x=>x.etapa==='aceptado').length;
+    if(a)add('pros:'+a,'✅',`${a} ${pl(a,'prospecto aceptado','prospectos aceptados')} por contratar`,'Ya los aceptó la tienda: falta contratarlos.','rec')}
+  return A;
+}
+async function pintarBandeja(){
+  if(!REAL||!ME)return;
+  if(!BCARGA.p&&!PERSOK&&(esEditor()||(!esSuper()&&tiene('rrhh_ver')))){BCARGA.p=1;await cargarPersonal()}
+  if(!BCARGA.v&&!VACOK&&!esSuper()&&tiene('reclutamiento')){BCARGA.v=1;await cargarVacantes()}
+  if(!BCARGA.c&&!PROSOK&&!esSuper()&&tiene('rrhh_cargar')){BCARGA.c=1;await cargarProspectos()}
+  BAV=avisosDe();const L=bLeidos(),n=BAV.filter(a=>!L.has(a.id)).length;
+  $('bellN').hidden=!n;$('bellN').textContent=n>9?'9+':n;$('bellB').setAttribute('aria-label',n?`Bandeja de avisos, ${n} sin leer`:'Bandeja de avisos');
+  if(!$('bellP').hidden)pintarBandejaLista();
+}
+function pintarBandejaLista(){
+  const L=bLeidos();
+  $('bellL').innerHTML=BAV.length?BAV.map((a,i)=>`<div class="av${L.has(a.id)?'':' nl'}${a.urg?' urg':''}"><span class="ic" aria-hidden="true">${a.ic}</span><div class="tx"><b>${esc(a.titulo)}</b><span>${esc(a.detalle)}</span></div>${a.ir?`<button class="btn go" data-av="${i}">Ir</button>`:''}</div>`).join('')
+    :'<div class="pad sub" style="padding:18px 14px">✔ Estás al día: no hay avisos pendientes.</div>';
+}
+$('bellB').onclick=e=>{e.stopPropagation();const P=$('bellP'),abrir=P.hidden;P.hidden=!abrir;$('bellB').setAttribute('aria-expanded',String(abrir));if(abrir)pintarBandeja().then(pintarBandejaLista)};
+$('bellAll').onclick=()=>{const L=bLeidos();BAV.forEach(a=>L.add(a.id));bGuardar();pintarBandeja();pintarBandejaLista()};
+$('bellL').onclick=e=>{const b=e.target.closest('[data-av]');if(!b)return;const a=BAV[+b.dataset.av];if(!a)return;bLeidos().add(a.id);bGuardar();$('bellP').hidden=true;$('bellB').setAttribute('aria-expanded','false');irA(a.ir);pintarBandeja()};
+document.addEventListener('click',e=>{if(!$('bellP').hidden&&!e.target.closest('#bellP')&&!e.target.closest('#bellB')){$('bellP').hidden=true;$('bellB').setAttribute('aria-expanded','false')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('bellP').hidden){$('bellP').hidden=true;$('bellB').setAttribute('aria-expanded','false');$('bellB').focus()}});
+$('audF').onchange=$('audR').onclick=()=>pintarAuditoria();$('audQ').oninput=()=>pintarAuditoria();
+// Registro de auditoría: quién aprobó o abrió qué, y cuándo. Solo se escribe; lo lee el superusuario (Administración).
+const DEMOAUD=[];
+async function audita(tipo,tienda,detalle){
+  const d={tipo,tienda:tienda||'',detalle:String(detalle||'').slice(0,300),por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()};
+  try{if(!C){DEMOAUD.unshift({...d,id:nuevoId('a'),fecha:new Date()});return}await C.F.addDoc(C.F.collection(C.db,'auditoria'),d)}catch(e){/* la auditoría nunca bloquea la acción */}
+}
+const AUD_TXT={he:'Horas extra aprobadas',mbk:'MBK',apertura:'Apertura de quincena',reapertura:'Reapertura',reinicio:'Reinicio de datos'};
+async function pintarAuditoria(){
+  const B=$('audTb');if(!B)return;let L=[];
+  try{if(!C)L=DEMOAUD.slice();else{const {F,db}=C,s=await F.getDocs(F.query(F.collection(db,'auditoria'),F.orderBy('fecha','desc'),F.limit(150)));L=s.docs.map(d=>({id:d.id,...d.data()}))}}catch(e){B.innerHTML=`<tr><td colspan="5" class="empty">No se pudo leer: ${esc(e.code||e.message)}</td></tr>`;return}
+  const f=$('audF').value,q=RH.normNombre($('audQ').value);
+  L=L.filter(x=>(!f||x.tipo===f)&&(!q||RH.normNombre((x.tienda||'')+' '+(x.porNombre||'')+' '+(x.por||'')+' '+(x.detalle||'')).includes(q)));
+  B.innerHTML=L.map(x=>`<tr><td class="mono">${esc(tsTxt(x.fecha))}</td><td><span class="rh-tag">${esc(AUD_TXT[x.tipo]||x.tipo)}</span></td><td class="mono">${esc(x.tienda||'')}</td><td>${esc(x.porNombre||x.por||'')}</td><td>${esc(x.detalle||'')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">Aún no hay movimientos registrados.</td></tr>';
 }
 async function actualizarEntrega(cod,cambios,enDemo){
   if(!C){enDemo(ENT[cod]);return}
@@ -1550,7 +1744,7 @@ async function aprobarHE(cod){
     botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'✔ Aprobar y bloquear',k:'ok',cls:'pri'}]});
   if(r.k!=='ok')return;
   const por={por:REAL.correo,porNombre:REAL.nombre||'',fecha:C?C.F.serverTimestamp():new Date()};
-  try{await actualizarEntrega(cod,{bloqueada:true,heAprobada:por},x=>{x.bloqueada=true;x.heAprobada=por});pintar()}
+  try{await actualizarEntrega(cod,{bloqueada:true,heAprobada:por},x=>{x.bloqueada=true;x.heAprobada=por});audita('he',cod,`Aprobó las horas extra de ${quincenaTexto(Q)} y bloqueó la planilla`);pintar()}
   catch(err){alert('No se pudo aprobar: '+(err.code||err.message))}
 }
 async function responderReapertura(cod){
@@ -1566,6 +1760,7 @@ async function responderReapertura(cod){
   try{
     if(r.k==='ok')await actualizarEntrega(cod,{bloqueada:false,heAprobada:C?C.F.deleteField():null,reapertura:base},x=>{x.bloqueada=false;delete x.heAprobada;x.reapertura=base});
     else await actualizarEntrega(cod,{reapertura:base},x=>{x.reapertura=base});
+    audita('reapertura',cod,`${r.k==='ok'?'Aprobó':'Rechazó'} la reapertura de ${quincenaTexto(Q)}${r.texto?': '+r.texto:''}`);
     pintar();
   }catch(err){alert('No se pudo responder: '+(err.code||err.message))}
 }
@@ -1814,65 +2009,105 @@ async function cargarMBK(){
   else await Promise.all(T.flatMap(t=>W.map(async w=>{const s=await C.F.getDoc(C.F.doc(C.db,'mbk',t.codigo+'_'+w)).catch(()=>null);if(s&&s.exists())MBKD.set(t.codigo+'|'+w,s.data())})));
   MBKOK=true;
 }
+
+
+// Aprobación del GZ: solo el GZ de la tienda (o el superusuario). GD y GO consultan. Respeta "Ver como".
+const puedeAprobarMBK=t=>ME.rol==='Superusuario'||(ME.rol==='Visualizar'&&ME.alcance==='GZ'&&(correo(t.correoGZ||'')===correo(ME.correo||'')||REAL?.rol==='Superusuario'));
+let MBKSEL=[];
+function mbkResumen(t,sel){
+  const ws=sel.map(w=>({w,d:MBKD.get(t.codigo+'|'+w)})).filter(x=>x.d),sol=ws.filter(x=>x.d.solicitado),sinMarca=ws.filter(x=>!x.d.solicitado&&x.d.total>0);
+  const val=x=>x.d.montoSol!=null?x.d.montoSol:x.d.total,monto=sol.reduce((s,x)=>s+val(x),0),dias=sol.reduce((s,x)=>s+(x.d.diasUsados||0),0);
+  const apr=sol.length>0&&sol.every(x=>x.d.aprobado),parcial=!apr&&sol.some(x=>x.d.aprobado);
+  const cambio=sol.some(x=>(x.d.montoSol!=null&&Math.abs(x.d.montoSol-x.d.total)>0.009)||(x.d.aprobado&&x.d.aprobadoMonto!=null&&Math.abs(x.d.aprobadoMonto-val(x))>0.009));
+  return {t,ws,sol,sinMarca,monto,dias,apr,parcial,cambio,val};
+}
 async function pintarMBK(forzar){
   const B=$('mbkC');if(!B)return;
   B.hidden=esEditor()||!TIENDAS.length||!(esSuper()||['Visualizar','Descargar'].includes(ME.rol)||tiene('seguimiento')||tiene('descargas'));if(B.hidden)return;
-  if(forzar||!MBKOK){$('mbkT').innerHTML='<tr><td colspan="8" class="empty">Leyendo solicitudes…</td></tr>';await cargarMBK()}
-  const W=mbkSemanas(),S=$('mbkS'),prev=S.value;
-  S.innerHTML=W.map(w=>`<option value="${w}">Semana ${semTxt(w)}</option>`).join('');
-  const cuenta=x=>[...MBKD.keys()].filter(k=>k.endsWith('|'+x)).length;
-  if(W.includes(prev))S.value=prev;
-  else{const c0=CAL?.semanas?.[0]&&W.includes(CAL.semanas[0])?CAL.semanas[0]:W[0];S.value=cuenta(c0)?c0:W.slice().sort((a,b)=>cuenta(b)-cuenta(a)||b.localeCompare(a))[0]} // la semana de la quincena; si nadie publicó esa, la que más solicitudes tiene
-  const w=S.value,T=TIENDAS.filter(t=>!t.prueba);
-  const otras=t=>W.filter(x=>x!==w&&MBKD.get(t.codigo+'|'+x)?.solicitado);
-  MBKFILAS=T.map(t=>{const d=MBKD.get(t.codigo+'|'+w),o=otras(t);let obs='',cls='';
-    if(d?.solicitado){obs='Solicita esta semana';cls='ok';if(d.montoSol!=null&&Math.abs(d.montoSol-d.total)>0.009){obs+=' · ⚠ el monto cambió tras solicitar';cls='bad'}}
-    else if(o.length){obs=`Solicita ${o.map(semTxt).join(', ')}`;cls='warn'}
-    else if(d&&d.total>0)obs='Tiene salidas MBK; aún no marcó solicitado';
-    else obs='Sin MBK publicado';
-    return {t,d,obs,cls,total:d?.total??null}}).sort((a,b)=>(b.cls==='bad')-(a.cls==='bad')||(b.cls==='warn')-(a.cls==='warn')||(a.t.numero||0)-(b.t.numero||0));
-  const sol=MBKFILAS.filter(r=>r.d?.solicitado),otra=MBKFILAS.filter(r=>r.cls==='warn'),cambio=MBKFILAS.filter(r=>r.cls==='bad'),total=sol.reduce((s,r)=>s+(r.d.montoSol??r.d.total),0);
+  if(forzar||!MBKOK){$('mbkT').innerHTML='<tr><td colspan="7" class="empty">Leyendo solicitudes…</td></tr>';await cargarMBK()}
+  const W=mbkSemanas(),cuentaSem=x=>[...MBKD.keys()].filter(k=>k.endsWith('|'+x)).length;
+  MBKSEL=MBKSEL.filter(w=>W.includes(w));
+  if(!MBKSEL.length){const c=(CAL?.semanas||[]).filter(w=>W.includes(w)&&cuentaSem(w));MBKSEL=c.length?c:[W.slice().sort((a,b)=>cuentaSem(b)-cuentaSem(a)||b.localeCompare(a))[0]]}
+  const sel=W.filter(w=>MBKSEL.includes(w)).sort();
+  $('mbkSD').innerHTML=`<summary class="in" style="cursor:pointer;list-style:none;white-space:nowrap">Semanas: ${sel.length===1?semTxt(sel[0]):sel.length+' elegidas'} ▾</summary><div class="mbk-pop">${W.map(w=>`<label><input type="checkbox" data-mbkw="${w}"${sel.includes(w)?' checked':''}> Semana ${semTxt(w)}${cuentaSem(w)?'':' <span class="sub">(sin datos)</span>'}</label>`).join('')}</div>`;
+  const T=filtradas().filter(t=>!t.prueba),rs=T.map(t=>mbkResumen(t,sel));
+  const firma=r=>r.sol.map(x=>x.w).sort().join(','),cuenta=new Map();
+  rs.forEach(r=>{if(r.sol.length)cuenta.set(firma(r),(cuenta.get(firma(r))||0)+1)});
+  const comun=[...cuenta.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0],semTx=r=>r.sol.map(x=>semTxt(x.w)).join(' + ');
+  rs.forEach(r=>{const t=r.t;r.cls='';r.obs='';
+    if(r.sol.length){r.obs='Solicita '+semTx(r);r.cls='ok';
+      if(cuenta.size>1&&firma(r)!==comun){r.obs+=' · distinta a la mayoría';r.cls='warn'}
+      if(r.sinMarca.length){r.obs+=` · falta marcar ${r.sinMarca.map(x=>semTxt(x.w)).join(', ')}`;r.cls='warn'}
+      if(r.cambio){r.obs+=' · ⚠ el monto cambió tras solicitar o aprobar';r.cls='bad'}}
+    else if(r.sinMarca.length){r.obs='Tiene salidas MBK; aún no marcó solicitado';r.cls='warn'}
+    else if(ENT[t.codigo]&&(RES[t.codigo]?.mbk||0)>0){r.obs='Entregó planilla y no solicitó MBK';r.cls='bad';r.falta=true}
+    else r.obs='Sin MBK publicado'});
+  const fe=$('mbkE').value,V=rs.filter(r=>!fe||(fe==='sol'&&r.sol.length)||(fe==='sin'&&!r.sol.length&&!r.sinMarca.length)||(fe==='falta'&&r.falta)||(fe==='apr'&&r.apr)||(fe==='pend'&&r.sol.length&&!r.apr))
+    .sort((a,b)=>(b.cls==='bad')-(a.cls==='bad')||(b.cls==='warn')-(a.cls==='warn')||(a.t.numero||0)-(b.t.numero||0));
+  MBKFILAS=V;
+  const sol=rs.filter(r=>r.sol.length),falta=rs.filter(r=>r.falta),cambio=rs.filter(r=>r.cambio),total=sol.reduce((s,r)=>s+r.monto,0),aprob=sol.filter(r=>r.apr),totalApr=aprob.reduce((s,r)=>s+r.monto,0);
   const al=[];
-  if(otra.length&&sol.length)al.push(`⚠ <b>${sol.length}</b> tienda${sol.length>1?'s':''} solicita${sol.length>1?'n':''} la semana ${semTxt(w)} y <b>${otra.length}</b> solicita${otra.length>1?'n':''} otra semana: ${otra.slice(0,6).map(r=>esc(r.t.codigo)).join(', ')}${otra.length>6?'…':''}. Revisa que ninguna semana se quede fuera.`);
-  else if(otra.length)al.push(`⚠ Ninguna tienda solicita la semana ${semTxt(w)}; ${otra.length} piden otra semana.`);
-  if(cambio.length)al.push(`⚠ ${cambio.length} tienda${cambio.length>1?'s':''} ${cambio.length>1?'cambiaron':'cambió'} el horario después de solicitar: ${cambio.slice(0,6).map(r=>esc(r.t.codigo)).join(', ')}.`);
+  if(cuenta.size>1)al.push(`⚠ Las tiendas no piden las mismas semanas: ${[...cuenta.entries()].map(([f,n])=>`<b>${n}</b> ${n>1?'piden':'pide'} ${f.split(',').map(semTxt).join(' + ')}`).join('; ')}. Revisa que ninguna semana se quede fuera.`);
+  if(falta.length)al.push(`⚠ <b>${falta.length}</b> tienda${falta.length>1?'s':''} entregó planilla y no solicitó MBK: ${falta.slice(0,6).map(r=>esc(r.t.codigo)).join(', ')}${falta.length>6?'…':''}.`);
+  if(cambio.length)al.push(`⚠ ${cambio.length} tienda${cambio.length>1?'s cambiaron':' cambió'} el horario después de solicitar o aprobar: ${cambio.slice(0,6).map(r=>esc(r.t.codigo)).join(', ')}.`);
   $('mbkAl').innerHTML=al.map(x=>`<div class="msg on warn" style="margin-bottom:8px">${x}</div>`).join('');
-  $('mbkT').innerHTML=MBKFILAS.map(r=>{const d=r.d,gz=puedeGZ(r.t)&&d&&d.total>0,ap=d?.aprobado;
-    return `<tr><td><b>${esc(r.t.codigo)}</b> ${esc(r.t.nombre||'')}</td><td>${esc(r.t.zona||'')}</td><td>${d?semTxt(w):'—'}</td><td class="mono">${d?mbkMonto(d.presupuesto):'—'}</td><td class="mono">${d?d.diasUsados:'—'}/7</td>
-      <td class="mono"><b>${d?mbkMonto(d.solicitado&&d.montoSol!=null?d.montoSol:d.total):'—'}</b></td><td><span class="rh-tag ${r.cls}">${esc(r.obs)}</span></td>
-      <td>${gz?`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-mbka="${esc(r.t.codigo)}"${ap?' checked':''}>${ap?'Aprobado':'Aprobar'}</label>`:ap?`<span class="rh-tag ok">✔ ${esc(d.aprobadoPorNombre||'GZ')}</span>`:'<span class="sub">Pendiente</span>'}</td></tr>`}).join('')||'<tr><td colspan="8" class="empty">Sin tiendas.</td></tr>';
-  $('mbkPie').textContent=`Semana ${semTxt(w)} · ${sol.length} de ${T.length} tiendas solicitan · total a solicitar ${mbkMonto(total)} · aprobadas ${MBKFILAS.filter(r=>r.d?.aprobado).length}.`;
+  const aprobables=V.filter(r=>r.sol.length&&!r.apr&&puedeAprobarMBK(r.t));
+  $('mbkAp').hidden=!aprobables.length;$('mbkAp').textContent=`✔ Aprobar mi selección (${aprobables.length} tienda${aprobables.length>1?'s':''})`;
+  $('mbkT').innerHTML=V.map(r=>{const puede=r.sol.length&&puedeAprobarMBK(r.t);
+    return `<tr><td><b>${esc(r.t.codigo)}</b> ${esc(r.t.nombre||'')}</td><td>${esc(r.t.zona||'')}</td><td>${r.sol.length?esc(semTx(r)):'—'}</td><td class="mono">${r.sol.length?r.dias+' días':'—'}</td>
+      <td class="mono"><b>${r.sol.length?mbkMonto(r.monto):'—'}</b></td><td><span class="rh-tag ${r.cls}">${esc(r.obs)}</span></td>
+      <td>${puede?`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-mbka="${esc(r.t.codigo)}"${r.apr?' checked':''}>${r.apr?'Aprobado':r.parcial?'Parcial':'Aprobar'}</label>`:r.apr?`<span class="rh-tag ok">✔ Aprobado</span>`:r.sol.length?'<span class="sub">Pendiente del GZ</span>':''}</td></tr>`}).join('')||'<tr><td colspan="7" class="empty">Sin tiendas con ese filtro.</td></tr>';
+  $('mbkPie').textContent=`${sel.length} semana${sel.length>1?'s':''} elegida${sel.length>1?'s':''} · ${sol.length} de ${rs.length} tiendas solicitan · total solicitado ${mbkMonto(total)} · aprobado ${mbkMonto(totalApr)} (${aprob.length} tienda${aprob.length===1?'':'s'}).`;
 }
-$('mbkS').onchange=()=>pintarMBK();$('mbkR').onclick=()=>pintarMBK(true);
+$('mbkR').onclick=()=>pintarMBK(true);$('mbkE').onchange=()=>pintarMBK();
+$('mbkSD').addEventListener('change',e=>{const c=e.target.closest('[data-mbkw]');if(!c)return;
+  const s=new Set(MBKSEL);c.checked?s.add(c.dataset.mbkw):s.delete(c.dataset.mbkw);if(!s.size){c.checked=true;return}MBKSEL=[...s];pintarMBK()});
+// Aprueba (o retira la aprobación de) todas las semanas solicitadas de la selección de cada tienda. Se escribe por tandas de tiendas.
+async function aprobarMBK(filas,aprobar){
+  const sel=[...MBKSEL];
+  const ops=filas.flatMap(r=>r.sol.map(x=>({cod:r.t.codigo,w:x.w,d:x.d,monto:r.val(x)})));
+  const dat=o=>aprobar?{aprobado:true,aprobadoPor:REAL.correo,aprobadoPorNombre:REAL.nombre||'GZ',aprobadoFecha:ahoraTS(),aprobadoMonto:o.monto,aprobadoSemanas:sel.join(',')}:{aprobado:false,aprobadoPor:REAL.correo,aprobadoPorNombre:'',aprobadoFecha:ahoraTS(),aprobadoMonto:null,aprobadoSemanas:''};
+  try{
+    if(!C)ops.forEach(o=>DEMOMBK.set(o.cod+'_'+o.w,{...DEMOMBK.get(o.cod+'_'+o.w),...dat(o)}));
+    else{const {F,db}=C;const tiendas=[...new Set(ops.map(o=>o.cod))];
+      for(let i=0;i<tiendas.length;i+=12){const g=new Set(tiendas.slice(i,i+12)),b=F.writeBatch(db);
+        ops.filter(o=>g.has(o.cod)).forEach(o=>b.set(F.doc(db,'mbk',o.cod+'_'+o.w),dat(o),{merge:true}));await b.commit()}}
+    ops.forEach(o=>MBKD.set(o.cod+'|'+o.w,{...o.d,...dat(o),aprobado:aprobar,aprobadoFecha:new Date()}));
+    filas.forEach(r=>audita('mbk',r.t.codigo,`${aprobar?'Aprobó':'Retiró la aprobación de'} MBK ${r.sol.map(x=>semTxt(x.w)).join(' + ')} por ${mbkMonto(r.monto)}`));
+    pintarMBK();
+  }catch(e){alert('No se pudo guardar la aprobación: '+(e.code||e.message));pintarMBK(true)}
+}
 $('mbkT').onchange=async e=>{const c=e.target.closest('[data-mbka]');if(!c)return;
-  const cod=c.dataset.mbka,w=$('mbkS').value,d=MBKD.get(cod+'|'+w);if(!d)return;
-  const nuevo=c.checked,dat=nuevo?{aprobado:true,aprobadoPor:REAL.correo,aprobadoPorNombre:REAL.nombre||'GZ',aprobadoFecha:ahoraTS(),aprobadoMonto:d.solicitado&&d.montoSol!=null?d.montoSol:d.total}:{aprobado:false,aprobadoPor:REAL.correo,aprobadoPorNombre:'',aprobadoFecha:ahoraTS(),aprobadoMonto:null};
-  try{const id=cod+'_'+w;if(!C)DEMOMBK.set(id,{...DEMOMBK.get(id),...dat});else await C.F.setDoc(C.F.doc(C.db,'mbk',id),dat,{merge:true});
-    MBKD.set(cod+'|'+w,{...d,...dat,aprobado:nuevo});pintarMBK()}catch(err){c.checked=!nuevo;alert('No se pudo guardar la aprobación: '+(err.code||err.message))}};
+  const r=MBKFILAS.find(x=>x.t.codigo===c.dataset.mbka);if(!r)return;await aprobarMBK([r],c.checked)};
+$('mbkAp').onclick=async()=>{
+  const L=MBKFILAS.filter(r=>r.sol.length&&!r.apr&&puedeAprobarMBK(r.t));if(!L.length)return;
+  const tot=L.reduce((s,r)=>s+r.monto,0),sem=MBKSEL.slice().sort().map(semTxt).join(' + ');
+  const r=await dialogo({titulo:'Aprobar mi selección',cuerpo:`<p>Vas a aprobar el MBK de <b>${L.length}</b> tienda${L.length>1?'s':''} para las semanas <b>${esc(sem)}</b>.</p><p>Total: <b>${mbkMonto(tot)}</b>.</p><p class="sub">Solo se aprueban las semanas que cada tienda marcó como solicitadas dentro de tu selección.</p>`,botones:[{t:'Volver',k:'cancel',cancel:true},{t:'Aprobar',k:'ok',cls:'pri'}]});
+  if(r.k==='ok')await aprobarMBK(L,true)};
 // Imagen para solicitar a planilla, con la identidad de marca (azul marino, naranja, IBM Plex Sans y logos AMPM / MBK)
 const cargaImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
 $('mbkI').onclick=async()=>{
   // Con tiendas aprobadas, la imagen solo trae las aprobadas y su total (lo que el GZ lleva a planilla); sin aprobaciones sale como borrador
-  const hay=MBKFILAS.some(r=>r.d?.aprobado),R=MBKFILAS.filter(r=>r.d&&(hay?r.d.aprobado:(r.d.total>0||r.d.solicitado))),w=$('mbkS').value;
-  if(!R.length)return alert('No hay tiendas con solicitud de MBK en esta semana.');
+  const hay=MBKFILAS.some(r=>r.apr),R=MBKFILAS.filter(r=>r.sol.length&&(hay?r.apr:true)),sel=MBKSEL.slice().sort();
+  if(!R.length)return alert('No hay tiendas con solicitud de MBK en las semanas elegidas.');
   const [lA,lM]=await Promise.all([cargaImg('assets/logo-ampm.png'),cargaImg('assets/logo-mbk.png')]);
   try{await document.fonts.load('500 16px "IBM Plex Sans"');await document.fonts.load('700 16px "IBM Plex Sans"')}catch(e){}
-  const F='"IBM Plex Sans","Segoe UI",Arial,sans-serif',P=32,H=40,cols=[['Tienda',330],['Zona',150],['Monto',170],['Estado',230]],Wd=P*2+cols.reduce((s,c)=>s+c[1],0),top=118,Ht=top+(R.length+2)*H+P+34;
+  const F='"IBM Plex Sans","Segoe UI",Arial,sans-serif',P=32,H=40,cols=[['Tienda',300],['Zona',140],['Semanas',250],['Monto',150],['Estado',150]],Wd=P*2+cols.reduce((s,c)=>s+c[1],0),top=118,Ht=top+(R.length+2)*H+P+34;
   const cv=document.createElement('canvas');cv.width=Wd;cv.height=Ht;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,Wd,Ht);
-  const logo=(img,x,h)=>{if(!img)return 0;const wd=h*img.naturalWidth/img.naturalHeight;g.drawImage(img,x,P-4,wd,h);return wd};
-  logo(lA,P,40);if(lM){const h=36,wd=h*lM.naturalWidth/lM.naturalHeight;g.drawImage(lM,Wd-P-wd,P-2,wd,h)}
+  if(lA){const h=40;g.drawImage(lA,P,P-4,h*lA.naturalWidth/lA.naturalHeight,h)}
+  if(lM){const h=36,wd=h*lM.naturalWidth/lM.naturalHeight;g.drawImage(lM,Wd-P-wd,P-2,wd,h)}
   g.fillStyle='#ff8300';g.fillRect(0,P+46,Wd,5);
   g.fillStyle='#04003f';g.font='700 24px '+F;g.fillText('Planilla MBK · '+(hay?'aprobado para pago':'borrador sin aprobar'),P,P+86);
-  g.fillStyle='#56678a';g.font='400 14px '+F;g.fillText('Semana '+semTxt(w)+' · generado en RITMO · '+new Date().toLocaleDateString('es-NI',{day:'numeric',month:'long',year:'numeric'}),P,P+108);
-  let y=top+34,x=P;g.fillStyle='#04003f';g.fillRect(P,y,Wd-P*2,H);g.fillStyle='#fff';g.font='700 14px '+F;cols.forEach(([t,wc],j)=>{g.textAlign=j===2?'right':'left';g.fillText(t,j===2?x+wc-12:x+12,y+25);x+=wc});g.textAlign='left';y+=H;
-  const monto=r=>r.d.aprobado&&r.d.aprobadoMonto!=null?r.d.aprobadoMonto:(r.d.solicitado&&r.d.montoSol!=null?r.d.montoSol:r.d.total),tot=R.filter(r=>hay?r.d.aprobado:r.d.solicitado).reduce((s,r)=>s+monto(r),0);
-  R.forEach((r,i)=>{x=P;g.fillStyle=i%2?'#eef2f8':'#fff';g.fillRect(P,y,Wd-P*2,H);g.font='500 14px '+F;
-    const cel=[r.t.codigo+' · '+(r.t.nombre||''),r.t.zona||'',mbkMonto(monto(r)),r.d.aprobado?'Aprobado'+(r.d.aprobadoPorNombre?' · '+r.d.aprobadoPorNombre:''):'Pendiente de aprobar'];
-    cel.forEach((t,j)=>{let s=String(t);const mx=cols[j][1]-24;while(g.measureText(s).width>mx&&s.length>4)s=s.slice(0,-2);if(s!==String(t))s+='…';
-      g.fillStyle=j===3?(r.d.aprobado?'#0055ba':'#8a5200'):'#0f1e36';g.font=(j===2?'700':'500')+' 14px '+F;g.textAlign=j===2?'right':'left';g.fillText(s,j===2?x+cols[j][1]-12:x+12,y+25);x+=cols[j][1]});g.textAlign='left';y+=H});
-  g.fillStyle='#ff8300';g.fillRect(P,y,Wd-P*2,H+2);g.fillStyle='#04003f';g.font='700 17px '+F;g.fillText((hay?'Total aprobado':'Total solicitado'),P+12,y+27);g.textAlign='right';g.fillText(mbkMonto(tot),P+cols[0][1]+cols[1][1]+cols[2][1]-12,y+27);g.textAlign='left';
+  g.fillStyle='#56678a';g.font='400 14px '+F;g.fillText('Semanas '+sel.map(semTxt).join(' + ')+' · generado en RITMO · '+new Date().toLocaleDateString('es-NI',{day:'numeric',month:'long',year:'numeric'}),P,P+108);
+  let y=top+34,x=P;g.fillStyle='#04003f';g.fillRect(P,y,Wd-P*2,H);g.fillStyle='#fff';g.font='700 14px '+F;cols.forEach(([t,wc],j)=>{g.textAlign=j===3?'right':'left';g.fillText(t,j===3?x+wc-12:x+12,y+25);x+=wc});g.textAlign='left';y+=H;
+  const tot=R.reduce((s,r)=>s+r.monto,0);
+  R.forEach((r,i)=>{x=P;g.fillStyle=i%2?'#eef2f8':'#fff';g.fillRect(P,y,Wd-P*2,H);
+    const cel=[r.t.codigo+' · '+(r.t.nombre||''),r.t.zona||'',r.sol.map(q=>semTxt(q.w)).join(' + '),mbkMonto(r.monto),r.apr?'Aprobado':'Sin aprobar'];
+    cel.forEach((t,j)=>{let s=String(t);const mx=cols[j][1]-24;g.font=(j===3?'700':'500')+' 14px '+F;while(g.measureText(s).width>mx&&s.length>4)s=s.slice(0,-2);if(s!==String(t))s+='…';
+      g.fillStyle=j===4?(r.apr?'#0055ba':'#8a5200'):'#0f1e36';g.textAlign=j===3?'right':'left';g.fillText(s,j===3?x+cols[j][1]-12:x+12,y+25);x+=cols[j][1]});g.textAlign='left';y+=H});
+  g.fillStyle='#ff8300';g.fillRect(P,y,Wd-P*2,H+2);g.fillStyle='#04003f';g.font='700 17px '+F;g.fillText(hay?'Total aprobado':'Total solicitado',P+12,y+27);g.textAlign='right';g.fillText(mbkMonto(tot),P+cols[0][1]+cols[1][1]+cols[2][1]+cols[3][1]-12,y+27);g.textAlign='left';
   g.fillStyle='#56678a';g.font='400 12px '+F;g.fillText('RITMO · Tu tienda, a su ritmo',P,Ht-14);
-  cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`MBK_${hay?'aprobado':'borrador'}_${w}.png`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},'image/png')};
+  cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`MBK_${hay?'aprobado':'borrador'}_${sel[0]}${sel.length>1?'_x'+sel.length:''}.png`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},'image/png')};
 
 // ---------- Administración: respaldo y reinicio (solo Superusuario)
 const jsonSeguro=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&typeof v.toDate==='function'?v.toDate().toISOString():v,1);
@@ -1908,6 +2143,7 @@ $('rstGo').onclick=async()=>{
         if(k)await b.commit();await F.deleteDoc(F.doc(db,'sistema','plazas')).catch(()=>{});[ALLT,TIENDAS].forEach(L=>L.forEach(t=>{delete t.plazas}));RES={}}
       if(sel.includes('personal'))await F.deleteDoc(F.doc(db,'sistema','altas')).catch(()=>{});
       await F.setDoc(F.doc(db,'sistema','reinicio'),{fecha:F.serverTimestamp(),alcance:sel.join(', '),por:REAL.correo,porNombre:REAL.nombre||''})}
+    audita('reinicio','',`Reinició: ${sel.join(', ')}`);
     PERS=[];PERSOK=false;VAC=[];VACOK=false;estadoAdm();pintar();
     msg('rstMsg','Listo: la información marcada quedó vacía. Vuelve a cargar los Excel (roles ya publicados; presupuesto y altas según lo que reiniciaste).','ok');
   }catch(e){msg('rstMsg','No se pudo reiniciar: '+(e.code||e.message),'bad')}
@@ -2022,7 +2258,7 @@ function armarVC(){
   const O=[['real','Superusuario (yo)']];
   const real=ALLT.filter(t=>!t.prueba)[0];if(real)O.push(['ed:'+real.codigo,`Gerente de tienda · ${real.codigo} (ejemplo)`]);
   gz.forEach(([c,n])=>O.push(['gz:'+c,`Gerente de zona · ${n}`]));
-  O.push(['rg:FOR','Gerente de distrito · Región FOR'],['rg:MGA','Gerente de distrito · Región MGA'],['ops','Gerente de operaciones · Todas'],['pl','Planilla · Encargado (todas)'],['rh','Recursos Humanos · RRHH (todas)'],['rcE','Reclutamiento · Encargado (todas)'],['rcA','Reclutamiento · Auxiliar (todas)']);
+  O.push(['rg:FOR','Gerente de distrito · Región FOR'],['rg:MGA','Gerente de distrito · Región MGA'],['ops','Gerente de operaciones · Todas'],['pl','Planilla · Encargado (todas)'],...[...new Set(ALLT.filter(t=>!t.prueba&&t.auxiliar).map(t=>t.auxiliar))].sort().map(a=>['au:'+a,`Planilla · Auxiliar · ${a}`]),['rh','Recursos Humanos · RRHH (todas)'],['rcE','Reclutamiento · Encargado (todas)'],['rcA','Reclutamiento · Auxiliar (todas)']);
   const B=ALLT.some(t=>t.prueba)?[['b:Editor','Gerente de tienda Beta'],['b:GZ','Gerente de zona Beta'],['b:Distrito','Gerente de distrito Beta'],['b:Operaciones','Gerente de operaciones Beta'],['b:Planilla','Planilla Beta']]:[];
   const op=([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`;
   $('vcSel').innerHTML=O.slice(0,1).map(op).join('')+(B.length?`<optgroup label="Pruebas · AMPM Beta">${B.map(op).join('')}</optgroup>`:'')+`<optgroup label="Producción">${O.slice(1).map(op).join('')}</optgroup>`;
@@ -2039,6 +2275,7 @@ $('vcSel').onchange=async()=>{
     else if(v.startsWith('gz:')){rol='Visualizar';alcance='GZ';tiendas=base.filter(t=>t.correoGZ===v.slice(3)).map(t=>t.codigo);nombre=base.find(t=>t.correoGZ===v.slice(3))?.gzNombre||'GZ'}
     else if(v.startsWith('rg:')){rol='Visualizar';alcance='Región';tiendas=base.filter(t=>t.region===v.slice(3)).map(t=>t.codigo);nombre='Gerente de distrito'}
     else if(v==='ops'){rol='Visualizar';tiendas=base.map(t=>t.codigo);nombre='Gerente de operaciones'}
+    else if(v.startsWith('au:')){rol='Descargar';alcance='Asignadas';tiendas=base.filter(t=>t.auxiliar===v.slice(3)).map(t=>t.codigo);nombre=v.slice(3)}
     else if(v==='rh'){rol='RRHH';tiendas=base.map(t=>t.codigo);nombre='Recursos Humanos'}
     else if(v==='rcE'){rol='Encargado de Reclutamiento';tiendas=base.map(t=>t.codigo);nombre='Encargado de Reclutamiento'}
     else if(v==='rcA'){rol='Auxiliar de Reclutamiento';tiendas=base.map(t=>t.codigo);nombre='Auxiliar de Reclutamiento'}
@@ -2162,11 +2399,11 @@ function montarGen(){GENLISTO=false;$('genIni').hidden=true;$('genF').hidden=fal
   $('genF').src='generador.html?ritmo=1&t='+encodeURIComponent(genTienda);ajustarGen()}
 addEventListener('message',async ev=>{
   if(ev.origin!==location.origin||ev.source!==$('genF').contentWindow)return;const d=ev.data||{};
-  if(d.tipo==='ritmo-listo'){$('genF').contentWindow.postMessage({tipo:'ritmo-datos',data:GEN||{},meta:{tienda:genTienda,q:Q,nombre:(TIENDAS[0]?.nombre||genTienda).toUpperCase(),plazas:TIENDAS[0]?.plazas??null}},location.origin);setTimeout(()=>{GENLISTO=true;estadoPub()},300)}
+  if(d.tipo==='ritmo-listo'){$('genF').contentWindow.postMessage({tipo:'ritmo-datos',data:GEN||{},meta:{tienda:genTienda,q:Q,semanasHE:Array.isArray(CAL?.semanas)?CAL.semanas:undefined,nombre:(TIENDAS[0]?.nombre||genTienda).toUpperCase(),plazas:TIENDAS[0]?.plazas??null}},location.origin);setTimeout(()=>{GENLISTO=true;estadoPub()},300)}
   else if(d.tipo==='ritmo-personal-ok'){if(esperaPers){const f=esperaPers;esperaPers=null;f(d)}}
-  else if(d.tipo==='ritmo-publicar'){GEN=d.data;guardarMBK(d.mbk);await publicarGen()}
+  else if(d.tipo==='ritmo-publicar'){GEN=d.data;guardarMBK(d.mbk);guardarHE(d.he);await publicarGen()}
   else if(d.tipo==='ritmo-guardar'){
-    GEN=d.data;guardarMBK(d.mbk);const txt=JSON.stringify(GEN);
+    GEN=d.data;guardarMBK(d.mbk);guardarHE(d.he);const txt=JSON.stringify(GEN);
     if(txt.length>950000){$('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:false,error:'el horario es muy grande'},location.origin);return}
     try{
       if(C)await C.F.setDoc(genRef(),{contenido:txt,tienda:genTienda,bytes:txt.length,por:REAL.correo,actualizado:C.F.serverTimestamp()});
@@ -2235,7 +2472,8 @@ async function demo(){
       const nc=RH.normCed(c);DEMOP.set(await RH.idPersonal(nc),{cedula:nc,nombre:n,cargo:cg,categoria:'Agente Sac Nivel 1',empresa:'AMPM',tienda:'DEMO01',ingreso:'2026-10-0'+(1+d%5),estado:'activo',alta:alta('rrhh',d)})}
     DEMOP.set(await RH.idPersonal('000050594005E'),{cedula:'000050594005E',nombre:'Gloria Inés Salas Mena',cargo:'Agente SAC',tienda:'DEMO02',ingreso:'2026-09-10',estado:'baja',alta:{...alta('rrhh',20),confirmada:true},baja:{fecha:'2026-10-14',motivo:'',origen:'tienda',por:'jefe.tienda@ejemplo.com',porNombre:'Gerente de ejemplo',fechaRegistro:new Date(Date.now()-4*864e5),confirmada:false}});
   }
-  TIENDAS.forEach((t,i)=>{t.correoGZ='usuario@ejemplo.com';t.plazas=9+i%3;if(i%5!==4)RES[t.codigo]={activos:t.plazas+[-2,-1,0,1,0][i%5],porIngresar:0}});
+  TIENDAS.forEach((t,i)=>{t.correoGZ='usuario@ejemplo.com';t.plazas=9+i%3;if(i%5!==4)RES[t.codigo]={activos:t.plazas+[-2,-1,0,1,0][i%5],porIngresar:0,mbk:i%3?2:0};
+    if(i%2===0)RES[t.codigo]={...(RES[t.codigo]||{}),heQ:{[Q]:{he:[12,8.5,20,0,6][i%5],fer:i%4===0?8:0,faltan:i%6===0?3:0,semanas:''}}}}); // datos de ejemplo de la vista previa
   const r=new URLSearchParams(location.search).get('rol')||'Superusuario';
   ME={correo:'usuario@ejemplo.com',nombre:'Usuario de ejemplo',rol:r,alcance:'Todas'};
   if(r==='Editor')TIENDAS=TIENDAS.slice(0,1);
