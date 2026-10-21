@@ -294,10 +294,10 @@ const L_EDITOR_IMPORTAR = {
 
 const L_EDITOR_MBK = {
   id: "mbk", icono: "🚌", titulo: "Planilla MBK: viático por persona",
-  desc: "Escribe el viático semanal de cada agente MBK, compara la pauta con lo real y entiende qué pasa al publicar tu planilla.",
+  desc: "Escribe el viático por día de cada agente MBK, compara la pauta con lo real y entiende qué pasa al publicar tu planilla.",
   pasos: ctx => [
     { antes: () => { ctx.ir("gen"); ctx.gen("planilla"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El viático MBK se prepara en el Generador y se solicita solo cuando publicas tu planilla." },
-    { frame: F, sel: '[data-pf="viatico"]', opcional: true, titulo: "1 · Viático semanal MBK", texto: "En Planilla › Datos del personal, escribe lo que cada persona gasta en transportarse por semana. Déjalo en blanco a quien no lo necesite. RITMO paga ese monto ÷ 7 por cada día que sale a las 8 pm o 10 pm." },
+    { frame: F, sel: '[data-pf="viatico"]', opcional: true, titulo: "1 · Viático por día MBK", texto: "En Planilla › Datos del personal, escribe lo que se le paga a cada persona por cada día que sale a las 8 pm o 10 pm (por ejemplo, C$ 50). Déjalo en blanco a quien no lo necesite. RITMO lo multiplica por sus días con salida." },
     { frame: F, antes: () => ctx.gen("mbk"), sel: "#vtPres", opcional: true, titulo: "2 · La pauta semanal", texto: "Escribe aquí lo que la tienda debería gastar en transporte por semana. Es la pauta con la que se compara lo real. Quien no tiene viático propio comparte esta pauta ÷ 7." },
     { frame: F, sel: "#view-mbk .kpis", opcional: true, titulo: "3 · Pauta contra real", texto: "Arriba ves la pauta, los días con salida, lo real a solicitar y la diferencia: en verde si estás por debajo de la pauta y en rojo si la pasas." },
     { frame: F, sel: "#view-mbk table.vt", opcional: true, titulo: "4 · Detalle por persona", texto: "Aquí está a quién se paga, cuánto y por qué día. Imprímelo o copia la imagen para la firma de recibido." },
