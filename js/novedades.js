@@ -9,12 +9,12 @@ export const NOVEDADES = [
   {
     id: 49, fecha: "2026-10-21", version: "3.5", tipo: "Corrección", para: ["Editor","Superusuario"],
     titulo: "El viático MBK de cada persona es por día, no semanal",
-    detalle: "En Planilla › Datos del personal la columna ahora se llama Viático por día MBK: el monto que escribes es lo que se le paga a esa persona por cada día con salida de 8 pm o 10 pm (por ejemplo, 50 por día) y ya no se divide entre 7. Si ya habías escrito montos, ahora se leen por día. La pauta semanal de la tienda sigue igual y se compara con lo real."
+    detalle: "En Planilla › Datos del personal la columna ahora se llama Viático por día MBK: el monto que escribes es lo que se le paga a esa persona por cada día con salida de 8 pm o 10 pm (por ejemplo, 50 por día) y ya no se divide entre 7. Si ya habías escrito montos, ahora se leen por día. El presupuesto semanal de la tienda sigue igual y se compara con lo real."
   },
   {
     id: 48, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
     titulo: "Viático MBK por persona y solicitud automática con la planilla",
-    detalle: "En Planilla › Datos del personal hay una columna nueva, Viático por día MBK: escribe lo que se le paga a cada persona por cada día con salida de 8 pm o 10 pm. El viático de la semana es ese monto por sus días con salida; quien no lo tiene sigue compartiendo el presupuesto de la tienda. Además, al publicar la planilla el viático de las mismas semanas de pago se solicita solo, y a las tiendas que ya publicaron se les aplicó igual al abrir Mi horario. La tabla de Planilla MBK queda para observar y compara la pauta semanal con lo real. Al publicar, RITMO te avisa «Tu Planilla MBK está lista»."
+    detalle: "En Planilla › Datos del personal hay una columna nueva, Viático por día MBK: escribe lo que se le paga a cada persona por cada día con salida de 8 pm o 10 pm. El viático de la semana es ese monto por sus días con salida; quien no lo tiene sigue compartiendo el presupuesto de la tienda. Además, al publicar la planilla el viático de las mismas semanas de pago se solicita solo, y a las tiendas que ya publicaron se les aplicó igual al abrir Mi horario. La tabla de Planilla MBK queda para observar y compara el presupuesto semanal con lo real. Al publicar, RITMO te avisa «Tu Planilla MBK está lista»."
   },
   {
     id: 47, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
