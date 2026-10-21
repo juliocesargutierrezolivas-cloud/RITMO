@@ -576,7 +576,8 @@ function validar(k,filaId,d,agId){
   if(esClase(ag,d)&&p.turno!=="PM")block.push("Día de clase: ese día solo puede trabajar turno PM");
   {const otros=s.filas.filter(o=>o.id!==filaId&&s.asig[o.id+"|"+d]===agId);
    if(otros.length){if(otros.every(o=>seTocan(pl(o.plantilla),p))&&otros.length===1){const hd=horasDia(s,d,agId,key,p),ex=Math.max(0,hd-8);
-       warn.push("Doble turno continuo: "+hd+" h ese día"+(ex>3?" · "+ex+" h extra en el día (tope legal 3 h, Art. 58)":""))}
+       warn.push("Doble turno continuo: "+hd+" h ese día"+(ex>3?" · "+ex+" h extra en el día (tope legal 3 h, Art. 58)":""));
+       if(hd>=23.5)warn.push("¡Turno de 24 hrs! Solo lo asigna el GT a mano por falta de personal; el generador nunca lo propone")}
      else block.push("Ya tiene turno ese día ("+CAJA_TXT[otros[0].caja]+")")}}
   if(p.turno==="PM"&&esClase(ag,d+1))block.push("Estudia al día siguiente: no puede ir desvelado");
   if(p.turno==="AM"&&turnoDe(k,d-1,agId)==="PM")block.push("Salió de turno PM el día anterior");

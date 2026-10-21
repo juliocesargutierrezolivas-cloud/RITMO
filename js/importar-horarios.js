@@ -80,6 +80,8 @@ const ImportarHorarios = (() => {
       if (dur === 9 || dur === 8 || dur === 12) { if (dur === 9) return { key: "s:9", dur, turno, mbk, txt: "9 h" }; if (turno) return { key: `s:${dur}${turno}${mbk ? "M" : ""}`, dur, turno, mbk, txt: `${dur} h ${turno}${mbk ? " MBK" : ""}` } }
       return { key: null };
     };
+    // Tabla lateral del Excel (NOMBRE · TURNOS · H.E · FERIADO) que está a la derecha de cada bloque semanal
+    const sideCols = (row, c0) => { const r = (row || []).map(nz); let n = -1, t = -1, he = -1, fe = -1; for (let c = c0 + 7; c < r.length; c++) { if (n < 0 && r[c].startsWith("NOMBRE")) n = c; else if (n >= 0) { if (t < 0 && r[c].startsWith("TURNO")) t = c; else if (he < 0 && /^(H E|HE|EXTRAS?|HORAS EXTRAS?)$/.test(r[c])) he = c; else if (fe < 0 && r[c].startsWith("FERIADO")) fe = c } } return n >= 0 && t >= 0 ? { n, t, he, fe } : null };
     const esHdr = row => { const r = (row || []).map(nz); for (let c = 0; c < r.length - 6; c++) if (r[c] === "LUNES" && r[c + 1] === "MARTES" && r[c + 6] === "DOMINGO") return c; return -1 };
     for (let r = 0; r < aoa.length; r++) {
       const c = esHdr(aoa[r]);
@@ -90,8 +92,9 @@ const ImportarHorarios = (() => {
         let k = aLunes(f); const ant = semanas.length ? semanas[semanas.length - 1].k : null, esp = ant ? ymd(addDays(parse(ant), 7)) : null;
         if (esp && k !== esp && (f !== k || k < esp)) { avisos.push(`La fecha ${f} del bloque ${semanas.length + 1} no sigue a la semana anterior (${ant}); se usó el lunes ${esp}. Revísala.`); k = esp }
         else if (f !== k) avisos.push(`La fecha ${f} no es lunes; se usó el lunes ${k}.`);
-        cur = { k, filas: [] }; semanas.push(cur); run = 0; ord = 0; clase = null; ultSem = null; continue;
+        cur = { k, filas: [], resumen: {}, side: sideCols(aoa[r], c) }; semanas.push(cur); run = 0; ord = 0; clase = null; ultSem = null; continue;
       }
+      if (cur && cur.side && r > base) { const rw = aoa[r] || [], nm = limpiar(rw[cur.side.n]), tv = rw[cur.side.t]; if (nm && typeof tv === "number") cur.resumen[nm] = { turnos: tv, he: cur.side.he >= 0 ? rw[cur.side.he] : null, fer: cur.side.fe >= 0 ? rw[cur.side.fe] : null } }
       if (!cur || r <= base + 1) continue;
       const row = aoa[r] || [], hrs = [...Array(7)].map((_, d) => horasNota(row[c0 + d])), cells = [...Array(7)].map((_, d) => limpiar(row[c0 + d])), label = c0 > 0 ? nz(row[c0 - 1]) : "";
       // Las semanas no siempre tienen las mismas filas, así que cada fila se identifica por su bloque (filas seguidas de 12 h, de 8 h o sin título)
@@ -165,6 +168,11 @@ const ImportarHorarios = (() => {
     if (d.length) { const mn = Math.min(...d.map(x => x.d)), c = d.filter(x => x.d === mn).map(x => x.a); if (c.length === 1) return { id: c[0].id, tipo: "parecido", cand: c }; return { id: null, tipo: "ambiguo", cand: c } }
     return { id: null, tipo: "sin match", cand: [] };
   }
+
+  const cargoP = a => (a.cargos || [])[0] || "sin cargo"; // el cargo que va primero es el de mayor prioridad
+  const esGerente = a => /gerente/i.test(cargoP(a));
+  // AM 12 h + PM 12 h el mismo día = turno de 24 h por falta de personal: es válido, no un error
+  const es24 = (s, fids) => { const fs = fids.map(f => s.filas.find(x => x.id === f)); return fs.length === 2 && fs.every(f => f && pl(f.plantilla) && pl(f.plantilla).horas === 12) && new Set(fs.map(f => pl(f.plantilla).turno)).size === 2 };
 
   /* ---------- Destinos (caja + horario) ---------- */
   function destinosDisponibles() {
@@ -276,7 +284,7 @@ const ImportarHorarios = (() => {
       plan.semanas.forEach(s => s.filas.forEach(f => f.cells.forEach(c => { if (!IGNORAR.has(nz(c)) && c) nombres.add(c) })));
       const semRef = plan.semanas[0].k;
       plan.planilla = parsePlanilla(wb); MANUAL = new Set(); AVISO = false;
-      const ctx = { planilla: plan.planilla, memoria: (S.cfg && S.cfg.importMapa) || {} };
+      const ctx = plan.ctx = { planilla: plan.planilla, memoria: (S.cfg && S.cfg.importMapa) || {} };
       nombres.forEach(nm => { const e = emparejar(nm, semRef, ctx); MAPA[nm] = e.id; plan._tipos = plan._tipos || {}; plan._tipos[nm] = e });
       // destinos
       DEST = {};
@@ -292,7 +300,7 @@ const ImportarHorarios = (() => {
     const nombres = Object.keys(MAPA).sort((a, b) => (MAPA[a] ? 1 : 0) - (MAPA[b] ? 1 : 0) || a.localeCompare(b));
     const total = P.semanas.reduce((s, w) => s + w.filas.reduce((x, f) => x + f.cells.filter(c => c && MAPA[c] !== undefined).length, 0), 0);
     const existentes = P.semanas.filter(w => S.semanas[w.k] && !S.semanas[w.k]._draft && Object.keys(S.semanas[w.k].asig || {}).length);
-    const optA = id => S.agentes.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)).map(a => `<option value="${a.id}" ${a.id === id ? "selected" : ""}>${esc(a.nombre)}${a.nombreCompleto ? " · " + esc(a.nombreCompleto) : ""}</option>`).join("");
+    const optA = id => S.agentes.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)).map(a => `<option value="${a.id}" ${a.id === id ? "selected" : ""}>${esc(a.nombre)} (${esc(cargoP(a))})</option>`).join(""); // solo el primer nombre y su cargo principal
     m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ihT" style="width:min(1000px,100%);max-height:92vh;display:flex;flex-direction:column">
       <header><h4 id="ihT">⬆ Importar horarios desde Excel</h4><p>${esc(P.archivo)} · hoja <b>${esc(P.hoja)}</b> · formato <b>${esc(P.formato)}</b> · ${P.semanas.length} semana${P.semanas.length > 1 ? "s" : ""}: ${P.semanas.map(w => fmtRango(w.k)).join(" · ")}</p></header>
       <div class="pad" style="overflow:auto;flex:1">
@@ -304,9 +312,10 @@ const ImportarHorarios = (() => {
       <h5 style="margin:14px 0 4px">2 · Personal: <span id="ihVinc"></span></h5>
       <p class="note" style="margin:0 0 6px">RITMO compara cada nombre del Excel con el personal que RRHH cargó y tú ya tienes en tu Matriz base${P.planilla && P.planilla.length ? ` y con la hoja PLANILLA de tu archivo (${P.planilla.length} personas con cédula)` : ""}. <b>El horario es lo que alimenta la planilla:</b> quien no quede vinculado no tendrá días trabajados ni salario.</p>
       <div class="scroll"><table class="formtable"><thead><tr><th>Nombre en el Excel</th><th>Estado</th><th>Persona de tu personal</th></tr></thead><tbody>
-      ${nombres.map(n => `<tr><td><b>${esc(n)}</b></td><td style="font-size:12px" data-est="${esc(n)}"></td><td><select class="in" data-nom="${esc(n)}"><option value="">— Ignorar —</option>${optA(MAPA[n])}</select></td></tr>`).join("")}</tbody></table></div>
+      ${nombres.map(n => `<tr><td><b>${esc(n)}</b></td><td style="font-size:12px;white-space:normal;min-width:200px;max-width:340px" data-est="${esc(n)}"></td><td><select class="in" style="min-width:200px" data-nom="${esc(n)}"><option value="">— Ignorar —</option>${optA(MAPA[n])}</select></td></tr>`).join("")}</tbody></table></div>
       <h5 style="margin:14px 0 4px">3 · Tu personal frente al horario</h5>
       <div id="ihSin"></div>
+      ${P.semanas.some(w => Object.keys(w.resumen || {}).length) ? `<h5 style="margin:14px 0 4px">4 · Control contra la tabla NOMBRE · TURNOS de tu Excel</h5><div id="ihCtl"></div>` : ""}
       <label class="radio" style="margin-top:12px"><input type="checkbox" id="ihRep" ${existentes.length ? "" : "disabled"}><span><b>Reemplazar semanas que ya tienen horario</b><br><small>${existentes.length ? `Ya tienen asignaciones: ${existentes.map(w => fmtRango(w.k)).join(", ")}. Si no marcas esto, se omiten.` : "Ninguna de estas semanas tiene horario todavía."}</small></span></label>
       <p id="ihRes" class="note" style="margin-top:10px"></p></div>
       <footer><button class="btn" id="ihX">Cancelar</button><button class="btn primary" id="ihOK">Importar</button></footer></div>`;
@@ -339,6 +348,24 @@ const ImportarHorarios = (() => {
     PLAN.semanas.forEach(w => w.filas.forEach(f => { if (!DEST[f.key]) return; f.cells.forEach(c => { if (c && MAPA[c]) con.add(MAPA[c]) }) }));
     return S.agentes.filter(a => !con.has(a.id) && PLAN.semanas.some(w => [0, 1, 2, 3, 4, 5, 6].some(d => vigente(a, addDays(parse(w.k), d)))));
   }
+  // Compara la tabla NOMBRE · TURNOS que trae el Excel con lo que RITMO va a cargar (turnos o días trabajados, lo que coincida)
+  function controlHTML() {
+    const filas = []; let tot = 0, ok = 0;
+    PLAN.semanas.forEach(w => {
+      const R = w.resumen || {}; if (!Object.keys(R).length) return;
+      const cel = {}, dias = {};
+      w.filas.forEach(f => { if (!DEST[f.key]) return; f.cells.forEach((c, d) => { const id = c && !IGNORAR.has(nz(c)) ? MAPA[c] : null; if (!id) return; cel[id] = (cel[id] || 0) + 1; (dias[id] = dias[id] || new Set()).add(d) }) });
+      Object.entries(R).forEach(([nm, v]) => {
+        const id = MAPA[nm] !== undefined ? MAPA[nm] : emparejar(nm, w.k, PLAN.ctx).id, c = id ? cel[id] || 0 : 0, dd = id ? (dias[id] ? dias[id].size : 0) : 0;
+        tot++; if (v.turnos === c || v.turnos === dd) ok++;
+        else filas.push({ k: w.k, nm, xl: v.turnos, ri: dd, causa: !id ? "Su nombre no está vinculado a tu personal" : !c ? "Sus filas no tienen destino" : "Faltan celdas por filas sin destino o nombres sin vincular" });
+      });
+    });
+    if (!tot) return "";
+    const cab = `<p class="note" style="margin:0 0 6px">Tu Excel trae una tabla de turnos por persona al lado de cada semana. RITMO la usa para revisar su carga: <b style="color:var(--ok,#1d7f48)">✔ ${ok} de ${tot}</b> coinciden${filas.length ? ` · <b style="color:var(--bad,#b3261e)">${filas.length} no coinciden</b>` : ""}.</p>`;
+    if (!filas.length) return cab;
+    return cab + `<div class="scroll"><table class="formtable"><thead><tr><th>Semana</th><th>Persona</th><th>Tu Excel dice</th><th>RITMO cargará</th><th>Posible causa</th></tr></thead><tbody>${filas.slice(0, 14).map(x => `<tr><td>${esc(fmtCorta(parse(x.k)))}</td><td><b>${esc(x.nm)}</b></td><td>${x.xl}</td><td style="color:var(--bad,#b3261e)"><b>${x.ri}</b></td><td style="font-size:12px">${esc(x.causa)}</td></tr>`).join("")}</tbody></table></div>${filas.length > 14 ? `<p class="note">…y ${filas.length - 14} más.</p>` : ""}`;
+  }
   function resumen() {
     const c = conteo(), el = document.getElementById("ihRes"); if (!el) return;
     const nombres = Object.keys(MAPA), sinV = nombres.filter(n => !MAPA[n]), st = sinTurnos();
@@ -349,8 +376,9 @@ const ImportarHorarios = (() => {
     });
     const vi = document.getElementById("ihVinc"); if (vi) vi.innerHTML = `${nombres.length - sinV.length} de ${nombres.length} vinculados${sinV.length ? ` · <span style="color:var(--bad,#b3261e)">${sinV.length} sin vincular</span>` : ""}`;
     const sn = document.getElementById("ihSin");
-    if (sn) sn.innerHTML = st.length ? `<div class="banner"><div>⚠️</div><div><b>${st.length} persona${st.length > 1 ? "s" : ""} de tu Matriz base no aparece${st.length > 1 ? "n" : ""} en ningún turno del Excel:</b> ${st.map(a => esc(a.nombre)).join(", ")}.<br><small>Si trabajaron esas semanas, empareja su nombre arriba; de lo contrario quedarán sin días trabajados y sin salario en la planilla.</small></div></div>` : `<p class="note">✔ Todo tu personal vigente tiene turnos en el archivo.</p>`;
+    if (sn) sn.innerHTML = st.length ? `<div class="banner"><div>⚠️</div><div><b>${st.length} persona${st.length > 1 ? "s" : ""} de tu Matriz base no aparece${st.length > 1 ? "n" : ""} en ningún turno del Excel:</b> ${st.map(a => esc(a.nombre)).join(", ")}.<br><small>Si trabajaron esas semanas, empareja su nombre arriba; de lo contrario quedarán sin días trabajados y sin salario en la planilla.${st.some(esGerente) ? " El gerente también debe aparecer en el horario de RITMO, aunque firme la planilla." : ""}</small></div></div>` : `<p class="note">✔ Todo tu personal vigente tiene turnos en el archivo.</p>`;
     el.innerHTML = `Se importarán <b>${c.n}</b> turnos.${c.sin ? ` <span style="color:var(--bad,#b3261e)">${c.sin} celdas se omiten por nombres sin emparejar.</span>` : ""}${c.fuera ? ` ${c.fuera} se omiten porque la persona no estaba vigente ese día (antes de su ingreso o después de su baja).` : ""}${AVISO && (c.sin || st.length) ? `<br><b style="color:var(--bad,#b3261e)">Hay personas sin vincular o sin turnos: no alimentarán la planilla. Pulsa «Importar» otra vez para continuar de todos modos y corregirlo después en la web, o empareja arriba.</b>` : ""}`;
+    const ct = document.getElementById("ihCtl"); if (ct) ct.innerHTML = controlHTML();
     const es = especiales(); if (es.n) el.innerHTML += `<br>🕒 ${es.n} celda${es.n > 1 ? "s" : ""} traen horas anotadas (${es.hs.map(h => h + " h").join(", ")}), como «Paola 16hrs». RITMO las toma como horas trabajadas y crea el horario <b>«RITMO Turno ${es.hs[0]} h»</b> en tu tienda para registrarlas.`;
     document.getElementById("ihOK").disabled = !c.n;
   }
@@ -362,8 +390,9 @@ const ImportarHorarios = (() => {
   function pendActivos(k, s) {
     s = s || S.semanas[k]; const out = []; if (!s || !Array.isArray(s.importPend)) return out;
     s.importPend.forEach(p => {
-      if (p.m === "turnos0") { if (!Object.values(s.asig || {}).includes(p.aid)) { const a = agente(p.aid); if (a) out.push({ sev: "warn", txt: `${a.nombre} no tiene ningún turno en esta semana. Sin días trabajados no tendrá salario en la planilla. Si trabajó, asígnalo en el horario (o revisa que su nombre del Excel coincida con RRHH).` }) } return }
-      if (p.m === "doble") { const n = Object.keys(s.asig || {}).filter(x => x.endsWith("|" + p.d) && s.asig[x] === p.aid).length; if (n >= 2) { const a = agente(p.aid); out.push({ sev: "warn", txt: `${a ? a.nombre : "Una persona"} tiene ${n} turnos el ${diaTxt(k, p.d)} (${p.fids.map(f => filaTxt(s, f)).join(" y ")}). Deja solo uno.` }) } return }
+      if (p.m === "turnos0") { if (!Object.values(s.asig || {}).includes(p.aid)) { const a = agente(p.aid); if (a) out.push({ sev: "warn", txt: esGerente(a) ? `${a.nombre} (${cargoP(a)}) no está en el horario de esta semana. En RITMO el gerente también debe aparecer en el horario, aunque firme la planilla: sin turnos no tendrá días trabajados ni salario.` : `${a.nombre} no tiene ningún turno en esta semana. Sin días trabajados no tendrá salario en la planilla. Si trabajó, asígnalo en el horario (o revisa que su nombre del Excel coincida con RRHH).` }) } return }
+      if (p.m === "doble") {
+        if (es24(s, p.fids)) return; const n = Object.keys(s.asig || {}).filter(x => x.endsWith("|" + p.d) && s.asig[x] === p.aid).length; if (n >= 2) { const a = agente(p.aid); out.push({ sev: "warn", txt: `${a ? a.nombre : "Una persona"} tiene ${n} turnos el ${diaTxt(k, p.d)} (${p.fids.map(f => filaTxt(s, f)).join(" y ")}). Deja solo uno.` }) } return }
       if (s.asig && s.asig[p.fid + "|" + p.d]) return;
       out.push({ sev: "bad", txt: p.m === "vig" ? `${diaTxt(k, p.d)} · ${filaTxt(s, p.fid)}: «${p.nom}» no estaba vigente ese día (revisa su fecha de alta o baja) y quedó vacío. Asigna a otra persona.` : `${diaTxt(k, p.d)} · ${filaTxt(s, p.fid)}: «${p.nom}» no coincidió con el personal de RRHH y quedó vacío: esa persona no sumará días trabajados ni salario en la planilla. Asigna la celda a su persona en la Matriz base.` });
     });
@@ -392,7 +421,7 @@ const ImportarHorarios = (() => {
   }
   function aplicar() {
     const P = PLAN, rep = document.getElementById("ihRep").checked, hechas = [], omit = [], cerr = [], sinDest = [];
-    let turnos = 0, vacias = 0; const ritmo = {};
+    let turnos = 0, vacias = 0; const ritmo = {}, d24 = [];
     for (const w of P.semanas) {
       const k = w.k, ex = S.semanas[k] && !S.semanas[k]._draft && Object.keys(S.semanas[k].asig || {}).length;
       if (semanaCerrada(k)) { cerr.push(k); continue }
@@ -424,7 +453,7 @@ const ImportarHorarios = (() => {
         });
       }
       // doble turno el mismo día (la misma persona en dos filas)
-      for (let di = 0; di < 7; di++) { const por = {}; Object.keys(s.asig).filter(x => x.endsWith("|" + di)).forEach(x => (por[s.asig[x]] = por[s.asig[x]] || []).push(x.split("|")[0])); Object.entries(por).forEach(([aid, fids]) => { if (fids.length > 1) pend.push({ m: "doble", aid, d: di, fids }) }) }
+      for (let di = 0; di < 7; di++) { const por = {}; Object.keys(s.asig).filter(x => x.endsWith("|" + di)).forEach(x => (por[s.asig[x]] = por[s.asig[x]] || []).push(x.split("|")[0])); Object.entries(por).forEach(([aid, fids]) => { if (fids.length > 1) { if (es24(s, fids)) d24.push({ aid, k, d: di }); else pend.push({ m: "doble", aid, d: di, fids }) } }) }
       S.agentes.forEach(a => { if (!Object.values(s.asig).includes(a.id) && [0, 1, 2, 3, 4, 5, 6].some(d => vigente(a, addDays(parse(k), d)))) pend.push({ m: "turnos0", aid: a.id }) });
       s.importPend = pend; s.extra = s.extra !== false; tocarSemana(k); hechas.push(k);
     }
@@ -433,7 +462,7 @@ const ImportarHorarios = (() => {
     if (Object.keys(ritmo).length) { try { persist("base/config") } catch (e) { } }
     cerrarModal();
     if (hechas.length) { S.semana = hechas[0]; S.tab = "horario"; render() }
-    informe({ turnos, hechas, omit, cerr, sinDest, vacias, ritmo });
+    informe({ turnos, hechas, omit, cerr, sinDest, vacias, ritmo, d24 });
     PLAN = null;
   }
   function informe(R) {
@@ -445,6 +474,7 @@ const ImportarHorarios = (() => {
       <div class="pad" style="overflow:auto;flex:1">
       ${sec(`Por corregir en la web (${act.length})`, false, act.slice(0, 14).map(x => esc(x.txt)).concat(act.length > 14 ? [`…y ${act.length - 14} más. Las verás como aviso en cada semana.`] : []))}
       ${sec("Horarios que RITMO creó a partir de las horas anotadas en tu Excel", true, Object.values(R.ritmo || {}).map(x => `«${esc(x.nombre)}»: ${x.n} turno${x.n > 1 ? "s" : ""}. Lo ves y puedes editarlo en Administración › Horarios.`))}
+      ${sec("¡Turno de 24 hrs! (AM 12 h + PM 12 h el mismo día) se cargaron tal cual; el generador nunca los propone, confirma que el GT los autorizó", false, (() => { const g = {}; (R.d24 || []).forEach(x => (g[x.aid] = g[x.aid] || []).push(diaTxt(x.k, x.d))); return Object.entries(g).map(([aid, ds]) => `${esc((agente(aid) || {}).nombre || "?")}: ${ds.length} día${ds.length > 1 ? "s" : ""} (${ds.slice(0, 4).join(", ")}${ds.length > 4 ? "…" : ""})`) })())}
       ${sec("Filas del Excel sin destino (no se importaron)", false, R.sinDest.map(x => `${esc(fmtRango(x.k))} · ${esc(x.label)}: ${x.n} nombre${x.n > 1 ? "s" : ""}`))}
       ${sec("Semanas que ya tenían horario y se omitieron", true, R.omit.length ? [rangos(R.omit) + ". Vuelve a importar marcando «Reemplazar» si quieres sobrescribirlas."] : [])}
       ${sec("Semanas cerradas (no se tocaron)", false, R.cerr.length ? [rangos(R.cerr) + ". Solo tu GZ puede reabrirlas."] : [])}
