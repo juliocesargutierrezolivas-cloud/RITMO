@@ -10,6 +10,8 @@ const ImportarHorarios = (() => {
   const IGNORAR = new Set(["", "-", "X", "L", "LIBRE", "OFF", "DESC", "DESCANSO", "N A", "NA", "VAC", "VACACIONES", "SUB", "SUBSIDIO", "INCAP", "INCAPACIDAD", "PERMISO", "AUSENTE"]);
   const CAJA_ALIAS = { COMPRA: "Compra", COMPRAS: "Compra", MBK: "MBK", "MI BAN KITO": "MBK", ADMINISTRACION: "Administración", ADMIN: "Administración", INDUCCION: "Inducción", CONSERJERIA: "Conserjería", CONSERJE: "Conserjería", "SEGURIDAD INTERNA": "Seguridad Interna", SEGURIDAD: "Seguridad Interna" };
   const pad2 = n => String(n).padStart(2, "0");
+  // "Paola 16hrs", "Mery 8am": se quita la anotación y queda el nombre
+  const limpiar = s => { const t = String(s ?? "").trim(); const w = t.split(/\s+/).filter(x => !/\d/.test(x) && !/^(AM|PM|HRS?|H|HORAS)$/i.test(sinT(x))); return w.join(" ") || t };
 
   /* ---------- Fechas ---------- */
   function aFecha(v, anioRef) {
@@ -53,7 +55,7 @@ const ImportarHorarios = (() => {
       if (cols.iS >= 0) { const f = aFecha(row[cols.iS], anioRef()); if (f) { const k = aLunes(f); if (f !== k) avisos.push(`La fecha ${f} no es lunes; se usó el lunes ${k}.`); if (!cur || cur.k !== k) { cur = semanas.find(x => x.k === k) || { k, filas: [] }; if (!semanas.includes(cur)) semanas.push(cur) } } }
       if (!cur) continue;
       const cajaRaw = nz(row[cols.iC]), caja = CAJA_ALIAS[cajaRaw] || null, horario = row[cols.iH];
-      const cells = cols.dias.map(i => String(row[i] ?? "").trim());
+      const cells = cols.dias.map(i => limpiar(row[i]));
       if (!cells.some(Boolean)) continue; // fila sin nombres: nada que importar
       if (!caja) { avisos.push(`Fila ${r + 1}: la Caja "${row[cols.iC] ?? ""}" no es válida (Compra, MBK, Administración, Inducción, Conserjería, Seguridad Interna).`); continue }
       const turno = nz(row[cols.iT]);
@@ -65,7 +67,17 @@ const ImportarHorarios = (() => {
 
   /* ---------- Formato manual (Hoja1) ---------- */
   function parseManual(aoa) {
-    const semanas = [], avisos = []; let cur = null, base = -1, c0 = -1, run = 0, ord = 0, clase = null;
+    const semanas = [], avisos = []; let cur = null, base = -1, c0 = -1, run = 0, ord = 0, clase = null, ultSem = null, ultTit = ""; const ordSem = {};
+    const semTitulo = L => {
+      const mbk = /\bMBK\b|\bMB\b/.test(L), t = L.replace(/\bHRS?\b/g, " ");
+      const h24 = (h, ap) => (+h % 12) + (ap === "PM" ? 12 : 0);
+      const rg = /(\d{1,2}) ?(AM|PM)? ?(\d{1,2}) ?(AM|PM)\b/.exec(t);
+      let dur = null, turno = null;
+      if (rg) { const a = h24(rg[1], rg[2] || rg[4]), b = h24(rg[3], rg[4]); dur = (b - a + 24) % 24; turno = a < 12 ? "AM" : "PM" }
+      else { const d = /\b(12|9|8)\b/.exec(t); if (d) dur = +d[1]; const ap = /\b(AM|PM)\b/.exec(t); if (ap) turno = ap[1] }
+      if (dur === 9 || dur === 8 || dur === 12) { if (dur === 9) return { key: "s:9", dur, turno, mbk, txt: "9 h" }; if (turno) return { key: `s:${dur}${turno}${mbk ? "M" : ""}`, dur, turno, mbk, txt: `${dur} h ${turno}${mbk ? " MBK" : ""}` } }
+      return { key: null };
+    };
     const esHdr = row => { const r = (row || []).map(nz); for (let c = 0; c < r.length - 6; c++) if (r[c] === "LUNES" && r[c + 1] === "MARTES" && r[c + 6] === "DOMINGO") return c; return -1 };
     for (let r = 0; r < aoa.length; r++) {
       const c = esHdr(aoa[r]);
@@ -73,13 +85,25 @@ const ImportarHorarios = (() => {
         c0 = c; base = r;
         const f = aFecha((aoa[r + 1] || [])[c], anioRef()) || aFecha((aoa[r][c]), anioRef());
         if (!f) { avisos.push(`Fila ${r + 1}: no encontré la fecha del lunes debajo de LUNES.`); cur = null; continue }
-        const k = aLunes(f); if (f !== k) avisos.push(`La fecha ${f} no es lunes; se usó el lunes ${k}.`);
-        cur = { k, filas: [] }; semanas.push(cur); run = 0; ord = 0; clase = null; continue;
+        let k = aLunes(f); const ant = semanas.length ? semanas[semanas.length - 1].k : null, esp = ant ? ymd(addDays(parse(ant), 7)) : null;
+        if (esp && k !== esp && (f !== k || k < esp)) { avisos.push(`La fecha ${f} del bloque ${semanas.length + 1} no sigue a la semana anterior (${ant}); se usó el lunes ${esp}. Revísala.`); k = esp }
+        else if (f !== k) avisos.push(`La fecha ${f} no es lunes; se usó el lunes ${k}.`);
+        cur = { k, filas: [] }; semanas.push(cur); run = 0; ord = 0; clase = null; ultSem = null; continue;
       }
       if (!cur || r <= base + 1) continue;
-      const row = aoa[r] || [], cells = [...Array(7)].map((_, d) => String(row[c0 + d] ?? "").trim()), label = c0 > 0 ? nz(row[c0 - 1]) : "";
+      const row = aoa[r] || [], cells = [...Array(7)].map((_, d) => limpiar(row[c0 + d])), label = c0 > 0 ? nz(row[c0 - 1]) : "";
       // Las semanas no siempre tienen las mismas filas, así que cada fila se identifica por su bloque (filas seguidas de 12 h, de 8 h o sin título)
       // y por su orden dentro del bloque, contando también las filas vacías.
+      // Si el título dice la jornada completa ("12 hrs PM", "Turno MBK 6am-2pm", "Turno 8 hrs AM") la fila se identifica por lo que dice, no por su posición.
+      // Una fila sin título justo debajo de una de esas es otra persona en el mismo turno.
+      let sm = semTitulo(label), tit = label;
+      if (!label && ultSem) { sm = ultSem; tit = ultTit + " (sigue)" } else if (label) { ultSem = sm.key ? sm : null; ultTit = label }
+      if (sm.key) {
+        if (!cells.some(Boolean)) continue;
+        if (!(sm.key in ordSem)) ordSem[sm.key] = Object.keys(ordSem).length;
+        cur.filas.push({ key: sm.key, label: `${tit} (${sm.txt})`, cells, destino: null, o: 9000 + ordSem[sm.key], sem: sm });
+        continue;
+      }
       const cl = /12/.test(label) ? "12" : /8/.test(label) ? "8" : "0";
       if (cl !== clase) { run++; ord = 0; clase = cl }
       ord++;
@@ -90,16 +114,53 @@ const ImportarHorarios = (() => {
   }
 
   /* ---------- Personal: emparejar nombres con la Matriz base ---------- */
-  function emparejar(nombre, semK) {
+  const lev = (a, b) => { const d = [...Array(a.length + 1)].map((_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length] };
+  const cedN = s => String(s || "").toUpperCase().replace(/[^0-9A-Z]/g, "");
+  const umbral = n => (n.length <= 4 ? 1 : 2); // letras de diferencia que se toleran en un nombre mal escrito (Jeferson ≈ Jefferson)
+
+  /* Si el mismo Excel trae la hoja PLANILLA (cédula, nombre completo), sirve de puente: nombre del horario → persona de la planilla → cédula → personal de RRHH */
+  function parsePlanilla(wb) {
+    for (const n of wb.SheetNames) {
+      const aoa = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null });
+      for (let r = 0; r < Math.min(aoa.length, 20); r++) {
+        const row = (aoa[r] || []).map(nz), iC = row.findIndex(x => x.startsWith("CEDULA")), iN = row.findIndex(x => x.startsWith("NOMBRE Y APELLIDO") || x === "NOMBRE");
+        if (iC < 0 || iN < 0) continue;
+        const out = [];
+        for (let q = r + 1; q < aoa.length; q++) { const nom = String((aoa[q] || [])[iN] ?? "").trim(), ced = cedN((aoa[q] || [])[iC]); if (nom && ced.length >= 8) out.push({ nombre: nom, ced }) }
+        if (out.length) return out;
+      }
+    }
+    return [];
+  }
+  const palabras = s => nz(s).split(" ").filter(w => w.length >= 3);
+  function porPlanilla(n, ctx) {
+    if (!ctx || !ctx.planilla || !ctx.planilla.length) return null;
+    const pn = n.split(" ")[0], pri = p => nz(p.nombre).split(" ")[0];
+    let c = ctx.planilla.filter(p => pri(p) === pn);
+    if (!c.length) c = ctx.planilla.filter(p => palabras(p.nombre).includes(pn)); // "Michael" de "Elmer Michael Pérez"
+    if (!c.length) { const d = ctx.planilla.map(p => ({ p, d: lev(pri(p), pn) })).filter(x => x.d <= umbral(pn)); if (d.length) { const mn = Math.min(...d.map(x => x.d)); c = d.filter(x => x.d === mn).map(x => x.p) } }
+    if (c.length !== 1) return null;
+    const p = c[0], a = S.agentes.find(x => x.cedula && cedN(x.cedula) === p.ced) || S.agentes.find(x => x.nombreCompleto && nz(x.nombreCompleto) === nz(p.nombre));
+    return a ? { a, p } : null;
+  }
+  function emparejar(nombre, semK, ctx) {
     const n = nz(nombre); if (!n) return { id: null, tipo: "vacio", cand: [] };
     const vig = S.agentes.filter(a => !semK || enSemana(a, semK)), pool = vig.length ? vig : S.agentes;
+    const mem = ctx && ctx.memoria && ctx.memoria[n]; if (mem && agente(mem)) return { id: mem, tipo: "recordado", cand: [agente(mem)] };
     const ex = pool.filter(a => nz(a.nombre) === n);
     if (ex.length === 1) return { id: ex[0].id, tipo: "exacto", cand: ex };
     if (ex.length > 1) return { id: null, tipo: "ambiguo", cand: ex };
+    const pp = porPlanilla(n, ctx); if (pp) return { id: pp.a.id, tipo: "cédula", nota: pp.p.nombre, cand: [pp.a] };
     const pn = n.split(" ")[0];
     const pr = pool.filter(a => nz(a.nombre).split(" ")[0] === pn || nz(a.nombreCompleto || "").split(" ")[0] === pn);
     if (pr.length === 1) return { id: pr[0].id, tipo: "primer nombre", cand: pr };
     if (pr.length > 1) return { id: null, tipo: "ambiguo", cand: pr };
+    const tk = pool.filter(a => palabras((a.nombreCompleto || "") + " " + a.nombre).includes(pn));
+    if (tk.length === 1) return { id: tk[0].id, tipo: "otro nombre de la persona", cand: tk };
+    if (tk.length > 1) return { id: null, tipo: "ambiguo", cand: tk };
+    const d = pool.map(a => ({ a, d: Math.min(lev(nz(a.nombre).split(" ")[0], pn), lev(nz(a.nombreCompleto || "x").split(" ")[0], pn)) })).filter(x => x.d <= umbral(pn));
+    if (d.length) { const mn = Math.min(...d.map(x => x.d)), c = d.filter(x => x.d === mn).map(x => x.a); if (c.length === 1) return { id: c[0].id, tipo: "parecido", cand: c }; return { id: null, tipo: "ambiguo", cand: c } }
     return { id: null, tipo: "sin match", cand: [] };
   }
 
@@ -111,31 +172,46 @@ const ImportarHorarios = (() => {
   }
   function destinoPorDefecto(plan, mapa) {
     // Solo para el formato manual: 12 h antes de las filas de 8 h = día; después = noche. Las de 8 h se reparten por el cargo de quien las cubre.
-    const claves = []; plan.semanas.forEach(s => s.filas.forEach(f => { if (!claves.includes(f.key)) claves.push(f.key) }));
+    const todas = []; plan.semanas.forEach(s => s.filas.forEach(f => { if (!todas.includes(f.key)) todas.push(f.key) }));
+    const claves = todas.filter(k => !k.startsWith("s:")), dest = {};
+    const cargoSem = k => { const cont = {}; plan.semanas.forEach(s => s.filas.filter(f => f.key === k).forEach(f => f.cells.forEach(nm => { const a = agente(mapa[nm]); if (a) { const c = (a.cargos || [])[0]; cont[c] = (cont[c] || 0) + 1 } }))); return Object.entries(cont).sort((x, y) => y[1] - x[1])[0]?.[0] };
+    todas.filter(k => k.startsWith("s:")).forEach(k => {
+      const m = /^s:(\d+)(AM|PM)?(M)?$/.exec(k), dur = +m[1], t = m[2], mb = !!m[3], g = cargoSem(k);
+      if (dur === 12) dest[k] = mb ? "MBK|MBK12" : "Compra|" + t + "12";
+      else if (dur === 9 || g === "Gerente de tienda" || g === "Gerente en entrenamiento") dest[k] = "Administración|ADM8";
+      else if (g === "Conserje") dest[k] = "Conserjería|ADM8";
+      else if (g === "Seguridad Interna") dest[k] = "Seguridad Interna|ADM8";
+      else dest[k] = "MBK|" + t + "8";
+    });
     const num = k => { const m = /^r(\d+)\.(\d+)$/.exec(k); return m ? +m[1] * 100 + +m[2] : 0 };
     claves.sort((a, b) => num(a) - num(b));
     const etiqueta = {}; plan.semanas.forEach(s => s.filas.forEach(f => { if (!etiqueta[f.key]) etiqueta[f.key] = f.label }));
     const lab = k => String(etiqueta[k] || "").split("·").pop(); // sin el número de fila
-    const hay8 = k => /8/.test(lab(k)) && !/12/.test(lab(k));
-    const primer8 = claves.findIndex(hay8);
+    const cls = k => (/12/.test(lab(k)) ? "12" : /8/.test(lab(k)) ? "8" : "0");
+    const i8 = claves.map((k, i) => (cls(k) === "8" ? i : -1)).filter(i => i >= 0), primer8 = i8[0] ?? -1, ultimo8 = i8[i8.length - 1] ?? -1;
     const cargoDe = k => { const cont = {}; plan.semanas.forEach(s => s.filas.filter(f => f.key === k).forEach(f => f.cells.forEach(nm => { const a = agente(mapa[nm]); if (a) { const c = (a.cargos || [])[0]; cont[c] = (cont[c] || 0) + 1 } }))); return Object.entries(cont).sort((x, y) => y[1] - x[1])[0]?.[0] };
-    const dest = {}; let mbk = 0;
+    let mbk = 0;
     claves.forEach((k, i) => {
-      const e = lab(k);
-      if (/12/.test(e)) dest[k] = (primer8 >= 0 && i > primer8) ? "Compra|PM12" : "Compra|AM12";
-      else if (/8/.test(e)) {
-        const c = cargoDe(k);
-        if (c === "Gerente de tienda" || c === "Gerente en entrenamiento") dest[k] = "Administración|ADM8";
-        else if (c === "Conserje") dest[k] = "Conserjería|ADM8";
-        else if (c === "Seguridad Interna") dest[k] = "Seguridad Interna|ADM8";
-        else { dest[k] = mbk === 0 ? "MBK|AM8" : mbk === 1 ? "MBK|PM8" : ""; mbk++ }
+      const c = cls(k);
+      if (c === "12") dest[k] = primer8 < 0 || i < primer8 ? "Compra|AM12" : i > ultimo8 ? "Compra|PM12" : "MBK|MBK12"; // 12 h entre filas de 8 h = el MBK de 12 h
+      else if (c === "8") {
+        const g = cargoDe(k);
+        if (g === "Gerente de tienda" || g === "Gerente en entrenamiento") dest[k] = "Administración|ADM8";
+        else if (g === "Conserje") dest[k] = "Conserjería|ADM8";
+        else if (g === "Seguridad Interna") dest[k] = "Seguridad Interna|ADM8";
+        else dest[k] = (mbk++ % 2 === 0) ? "MBK|AM8" : "MBK|PM8"; // MBK de 8 h: la mañana y la tarde se alternan
       } else dest[k] = "";
     });
+    // fila sin título con nombres: es un refuerzo de la fila de 12 h que tiene al lado (la de abajo, o la de arriba)
+    claves.forEach((k, i) => { if (cls(k) === "0") { const sig = claves.slice(i + 1).find(x => cls(x) !== "0"), ant = claves.slice(0, i).reverse().find(x => cls(x) !== "0"); dest[k] = (sig && cls(sig) === "12" && dest[sig]) || (ant && cls(ant) === "12" && dest[ant]) || "" } });
+    // lo que el usuario ya confirmó en una importación anterior manda sobre la propuesta
+    const rec = (S.cfg && S.cfg.importDest) || {};
+    todas.forEach(k => { const mk = k + "|" + nz(lab(k)); if (rec[mk]) dest[k] = rec[mk] });
     return dest;
   }
 
   /* ---------- Interfaz ---------- */
-  let PLAN = null, MAPA = {}, DEST = {}, EDIT = new Set();
+  let PLAN = null, MAPA = {}, DEST = {}, EDIT = new Set(), MANUAL = new Set(), AVISO = false;
   function abrir() {
     if (!window.XLSX) { toast("Conéctate a internet para leer el Excel."); return }
     const m = document.getElementById("modal"), sinP = !S.agentes.length;
@@ -197,7 +273,9 @@ const ImportarHorarios = (() => {
       MAPA = {}; const nombres = new Set();
       plan.semanas.forEach(s => s.filas.forEach(f => f.cells.forEach(c => { if (!IGNORAR.has(nz(c)) && c) nombres.add(c) })));
       const semRef = plan.semanas[0].k;
-      nombres.forEach(nm => { const e = emparejar(nm, semRef); MAPA[nm] = e.id; plan._tipos = plan._tipos || {}; plan._tipos[nm] = e });
+      plan.planilla = parsePlanilla(wb); MANUAL = new Set(); AVISO = false;
+      const ctx = { planilla: plan.planilla, memoria: (S.cfg && S.cfg.importMapa) || {} };
+      nombres.forEach(nm => { const e = emparejar(nm, semRef, ctx); MAPA[nm] = e.id; plan._tipos = plan._tipos || {}; plan._tipos[nm] = e });
       // destinos
       DEST = {};
       if (plan.manual) DEST = destinoPorDefecto(plan, MAPA);
@@ -221,17 +299,19 @@ const ImportarHorarios = (() => {
       <p class="note" style="margin:0 0 6px">${P.manual ? "El Excel manual solo dice 12 h u 8 h. Elige la caja y el horario de cada fila; ya dejé una propuesta. Aplica a todas las semanas." : "Tomé la Caja y el Horario de tu Excel. Revisa los que quedaron sin destino."}</p>
       <div class="scroll"><table class="formtable"><thead><tr><th>Fila del Excel</th><th>Ejemplo</th><th>Va a</th></tr></thead><tbody>
       ${claves.map(c => `<tr><td>${esc(c.label)}</td><td style="font-size:12px;color:var(--muted)">${esc(c.ej)}</td><td><select class="in" style="font-size:12px;min-width:230px" data-dest="${esc(c.key)}"><option value="">— No importar —</option>${dst.map(d => `<option value="${esc(d.v)}" ${DEST[c.key] === d.v ? "selected" : ""}>${esc(d.t)}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div>
-      <h5 style="margin:14px 0 4px">2 · Personal: ${nombres.filter(n => MAPA[n]).length} de ${nombres.length} nombres coinciden con tu Matriz base</h5>
-      <p class="note" style="margin:0 0 6px">Los que no coinciden se pueden emparejar a mano o ignorar.</p>
-      <div class="scroll"><table class="formtable"><thead><tr><th>Nombre en el Excel</th><th>Coincidencia</th><th>Persona de tu Matriz base</th></tr></thead><tbody>
-      ${nombres.map(n => { const e = P._tipos[n]; return `<tr><td><b>${esc(n)}</b></td><td style="font-size:12px;color:${MAPA[n] ? "var(--ok,#1d7f48)" : "var(--bad,#b3261e)"}">${MAPA[n] ? esc(e.tipo) : esc(e.tipo)}</td><td><select class="in" data-nom="${esc(n)}"><option value="">— Ignorar —</option>${optA(MAPA[n])}</select></td></tr>` }).join("")}</tbody></table></div>
+      <h5 style="margin:14px 0 4px">2 · Personal: <span id="ihVinc"></span></h5>
+      <p class="note" style="margin:0 0 6px">RITMO compara cada nombre del Excel con el personal que RRHH cargó y tú ya tienes en tu Matriz base${P.planilla && P.planilla.length ? ` y con la hoja PLANILLA de tu archivo (${P.planilla.length} personas con cédula)` : ""}. <b>El horario es lo que alimenta la planilla:</b> quien no quede vinculado no tendrá días trabajados ni salario.</p>
+      <div class="scroll"><table class="formtable"><thead><tr><th>Nombre en el Excel</th><th>Estado</th><th>Persona de tu personal</th></tr></thead><tbody>
+      ${nombres.map(n => `<tr><td><b>${esc(n)}</b></td><td style="font-size:12px" data-est="${esc(n)}"></td><td><select class="in" data-nom="${esc(n)}"><option value="">— Ignorar —</option>${optA(MAPA[n])}</select></td></tr>`).join("")}</tbody></table></div>
+      <h5 style="margin:14px 0 4px">3 · Tu personal frente al horario</h5>
+      <div id="ihSin"></div>
       <label class="radio" style="margin-top:12px"><input type="checkbox" id="ihRep" ${existentes.length ? "" : "disabled"}><span><b>Reemplazar semanas que ya tienen horario</b><br><small>${existentes.length ? `Ya tienen asignaciones: ${existentes.map(w => fmtRango(w.k)).join(", ")}. Si no marcas esto, se omiten.` : "Ninguna de estas semanas tiene horario todavía."}</small></span></label>
       <p id="ihRes" class="note" style="margin-top:10px"></p></div>
       <footer><button class="btn" id="ihX">Cancelar</button><button class="btn primary" id="ihOK">Importar</button></footer></div>`;
     m.hidden = false;
     m.querySelectorAll("[data-dest]").forEach(s => s.onchange = () => { DEST[s.dataset.dest] = s.value; EDIT.add(s.dataset.dest); resumen() });
     m.querySelectorAll("[data-nom]").forEach(s => s.onchange = () => {
-      MAPA[s.dataset.nom] = s.value || null;
+      MAPA[s.dataset.nom] = s.value || null; MANUAL.add(s.dataset.nom); AVISO = false;
       if (PLAN.manual) { // al emparejar a las personas, la propuesta de caja/horario mejora (gerente → Administración, etc.); no pisa lo que ya elegiste
         const nd = destinoPorDefecto(PLAN, MAPA);
         m.querySelectorAll("[data-dest]").forEach(x => { const k = x.dataset.dest; if (!EDIT.has(k) && nd[k] !== undefined) { DEST[k] = nd[k]; x.value = nd[k] } });
@@ -239,7 +319,11 @@ const ImportarHorarios = (() => {
       resumen();
     });
     document.getElementById("ihX").onclick = () => { cerrarModal(); PLAN = null };
-    document.getElementById("ihOK").onclick = aplicar;
+    document.getElementById("ihOK").onclick = () => {
+      const c = conteo(), st = sinTurnos();
+      if ((c.sin || st.length) && !AVISO) { AVISO = true; resumen(); return } // primera vez: avisa qué quedará sin vincular
+      aplicar();
+    };
     resumen();
   }
   function conteo() {
@@ -247,9 +331,24 @@ const ImportarHorarios = (() => {
     PLAN.semanas.forEach(w => w.filas.forEach(f => { if (!DEST[f.key]) return; f.cells.forEach((c, d) => { if (!c || IGNORAR.has(nz(c))) return; const a = agente(MAPA[c]); if (!a) { sin++; return } if (!vigente(a, addDays(parse(w.k), d))) { fuera++; return } n++ }) }));
     return { n, sin, fuera };
   }
+  // personal vigente en alguna semana del archivo que no queda con ningún turno (no tendría días trabajados ni salario)
+  function sinTurnos() {
+    const con = new Set();
+    PLAN.semanas.forEach(w => w.filas.forEach(f => { if (!DEST[f.key]) return; f.cells.forEach(c => { if (c && MAPA[c]) con.add(MAPA[c]) }) }));
+    return S.agentes.filter(a => !con.has(a.id) && PLAN.semanas.some(w => [0, 1, 2, 3, 4, 5, 6].some(d => vigente(a, addDays(parse(w.k), d)))));
+  }
   function resumen() {
     const c = conteo(), el = document.getElementById("ihRes"); if (!el) return;
-    el.innerHTML = `Se importarán <b>${c.n}</b> turnos.${c.sin ? ` <span style="color:var(--bad,#b3261e)">${c.sin} celdas se omiten por nombres sin emparejar.</span>` : ""}${c.fuera ? ` ${c.fuera} se omiten porque la persona no estaba vigente ese día (antes de su ingreso o después de su baja).` : ""}`;
+    const nombres = Object.keys(MAPA), sinV = nombres.filter(n => !MAPA[n]), st = sinTurnos();
+    document.querySelectorAll("[data-est]").forEach(td => {
+      const n = td.dataset.est, e = PLAN._tipos[n], ok = !!MAPA[n];
+      const via = MANUAL.has(n) ? "emparejado a mano" : (e ? e.tipo : "");
+      td.innerHTML = ok ? `<span style="color:var(--ok,#1d7f48)">✔ Vinculado</span> · ${esc(via)}` : `<span style="color:var(--bad,#b3261e)"><b>✖ Sin vincular.</b> No coincidió con el personal que cargó RRHH${e && e.tipo === "ambiguo" ? " (hay varias personas parecidas)" : ""}. Sin días trabajados, no tendrá salario en la planilla.</span>`;
+    });
+    const vi = document.getElementById("ihVinc"); if (vi) vi.innerHTML = `${nombres.length - sinV.length} de ${nombres.length} vinculados${sinV.length ? ` · <span style="color:var(--bad,#b3261e)">${sinV.length} sin vincular</span>` : ""}`;
+    const sn = document.getElementById("ihSin");
+    if (sn) sn.innerHTML = st.length ? `<div class="banner"><div>⚠️</div><div><b>${st.length} persona${st.length > 1 ? "s" : ""} de tu Matriz base no aparece${st.length > 1 ? "n" : ""} en ningún turno del Excel:</b> ${st.map(a => esc(a.nombre)).join(", ")}.<br><small>Si trabajaron esas semanas, empareja su nombre arriba; de lo contrario quedarán sin días trabajados y sin salario en la planilla.</small></div></div>` : `<p class="note">✔ Todo tu personal vigente tiene turnos en el archivo.</p>`;
+    el.innerHTML = `Se importarán <b>${c.n}</b> turnos.${c.sin ? ` <span style="color:var(--bad,#b3261e)">${c.sin} celdas se omiten por nombres sin emparejar.</span>` : ""}${c.fuera ? ` ${c.fuera} se omiten porque la persona no estaba vigente ese día (antes de su ingreso o después de su baja).` : ""}${AVISO && (c.sin || st.length) ? `<br><b style="color:var(--bad,#b3261e)">Hay personas sin vincular o sin turnos: no alimentarán la planilla. Pulsa «Importar» otra vez para continuar de todos modos y corregirlo después en la web, o empareja arriba.</b>` : ""}`;
     document.getElementById("ihOK").disabled = !c.n;
   }
   /* ---------- Alertas de conflictos de la carga ----------
@@ -260,9 +359,10 @@ const ImportarHorarios = (() => {
   function pendActivos(k, s) {
     s = s || S.semanas[k]; const out = []; if (!s || !Array.isArray(s.importPend)) return out;
     s.importPend.forEach(p => {
+      if (p.m === "turnos0") { if (!Object.values(s.asig || {}).includes(p.aid)) { const a = agente(p.aid); if (a) out.push({ sev: "warn", txt: `${a.nombre} no tiene ningún turno en esta semana. Sin días trabajados no tendrá salario en la planilla. Si trabajó, asígnalo en el horario (o revisa que su nombre del Excel coincida con RRHH).` }) } return }
       if (p.m === "doble") { const n = Object.keys(s.asig || {}).filter(x => x.endsWith("|" + p.d) && s.asig[x] === p.aid).length; if (n >= 2) { const a = agente(p.aid); out.push({ sev: "warn", txt: `${a ? a.nombre : "Una persona"} tiene ${n} turnos el ${diaTxt(k, p.d)} (${p.fids.map(f => filaTxt(s, f)).join(" y ")}). Deja solo uno.` }) } return }
       if (s.asig && s.asig[p.fid + "|" + p.d]) return;
-      out.push({ sev: "bad", txt: p.m === "vig" ? `${diaTxt(k, p.d)} · ${filaTxt(s, p.fid)}: «${p.nom}» no estaba vigente ese día (revisa su fecha de alta o baja) y quedó vacío. Asigna a otra persona.` : `${diaTxt(k, p.d)} · ${filaTxt(s, p.fid)}: «${p.nom}» no está en tu Matriz base y quedó vacío. Dalo de alta en la Matriz base o asigna la celda a mano.` });
+      out.push({ sev: "bad", txt: p.m === "vig" ? `${diaTxt(k, p.d)} · ${filaTxt(s, p.fid)}: «${p.nom}» no estaba vigente ese día (revisa su fecha de alta o baja) y quedó vacío. Asigna a otra persona.` : `${diaTxt(k, p.d)} · ${filaTxt(s, p.fid)}: «${p.nom}» no coincidió con el personal de RRHH y quedó vacío: esa persona no sumará días trabajados ni salario en la planilla. Asigna la celda a su persona en la Matriz base.` });
     });
     return out;
   }
@@ -299,8 +399,11 @@ const ImportarHorarios = (() => {
       }
       // doble turno el mismo día (la misma persona en dos filas)
       for (let di = 0; di < 7; di++) { const por = {}; Object.keys(s.asig).filter(x => x.endsWith("|" + di)).forEach(x => (por[s.asig[x]] = por[s.asig[x]] || []).push(x.split("|")[0])); Object.entries(por).forEach(([aid, fids]) => { if (fids.length > 1) pend.push({ m: "doble", aid, d: di, fids }) }) }
+      S.agentes.forEach(a => { if (!Object.values(s.asig).includes(a.id) && [0, 1, 2, 3, 4, 5, 6].some(d => vigente(a, addDays(parse(k), d)))) pend.push({ m: "turnos0", aid: a.id }) });
       s.importPend = pend; s.extra = s.extra !== false; tocarSemana(k); hechas.push(k);
     }
+    // memoria: los emparejamientos hechos a mano se recuerdan para la próxima importación
+    if (MANUAL.size && S.cfg) { S.cfg.importMapa = S.cfg.importMapa || {}; MANUAL.forEach(n => { if (MAPA[n]) S.cfg.importMapa[nz(n)] = MAPA[n] }); try { persist("base/config") } catch (e) { } }
     cerrarModal();
     if (hechas.length) { S.semana = hechas[0]; S.tab = "horario"; render() }
     informe({ turnos, hechas, omit, cerr, sinDest, vacias });
