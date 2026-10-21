@@ -706,7 +706,9 @@ $('genRotOk').onclick=()=>{try{sessionStorage.setItem('genRotOk','1')}catch(e){}
 // ---------- Tutoriales: recorridos guiados por rol (motor y lecciones en js/tutorial.js)
 const ctxTour={
   ir:k=>{const b=document.querySelector(`#tabs [data-k="${k}"]`);if(b&&b.getAttribute('aria-selected')!=='true')b.click()},
-  gen:t=>{const d=$('genF').contentDocument,b=d&&d.getElementById('tab-'+t);if(b)b.click()}
+  gen:t=>{const d=$('genF').contentDocument,b=d&&d.getElementById('tab-'+t);if(b)b.click()},
+  genCerrar:()=>{const d=$('genF').contentDocument,b=d&&d.getElementById('iiX');if(b)b.click()},
+  genAct:a=>{const d=$('genF').contentDocument,b=d&&d.querySelector('[data-act="'+a+'"]');if(b)b.click()}
 };
 const correoTour=()=>(REAL||ME)?.correo||'';
 function lanzarLeccion(id){

@@ -9,7 +9,12 @@ export const NOVEDADES = [
   {
     id: 46, fecha: "2026-10-20", version: "3.5", tipo: "Nuevo", para: "Gerentes de tienda",
     titulo: "Importar horarios desde Excel",
-    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO, TURNO 12HRS / 8HRS), empareja los nombres con tu personal ya cargado y arma las semanas. Si algo no se puede cargar (un nombre que no está en la Matriz base, alguien fuera de vigencia o dos turnos el mismo día), RITMO te lo avisa con un informe, un aviso rojo en la semana y la campanita, hasta que lo corrijas. Desde la misma pantalla puedes bajar la plantilla ya con tu personal y las próximas semanas."
+    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO), reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Quien no se pueda vincular se marca en rojo: sin turnos no hay días trabajados ni salario en la planilla. También compara la tabla NOMBRE · TURNOS de tu Excel, crea el horario «RITMO Turno 16 h» cuando una celda trae horas anotadas, y los turnos de 24 h quedan con la alerta «¡Turno de 24 hrs!». Los avisos de la carga quedan en la semana y en la campanita hasta que los corrijas."
+  },
+  {
+    id: 47, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: "Gerentes de tienda",
+    titulo: "Liquidación a la par del horario, celular y tutoriales nuevos",
+    detalle: "La Liquidación semana ahora es una tabla como la de tu Excel (Nombre, Turnos, Horas, H.E. y Feriado, con el total) y va a la par del horario en pantallas grandes. En el celular, Mi horario se abre a pantalla completa y, en vertical, te sugiere girar el teléfono sin bloquearte. Los tutoriales y el asistente de ayuda ya explican todo esto, con un recorrido nuevo: «Importar horarios desde Excel»."
   },
   {
     id: 45, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "Todos",

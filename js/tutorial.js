@@ -269,10 +269,25 @@ const L_EDITOR_HORARIO = {
     { frame: F, sel: ".toolbar .switch", opcional: true, titulo: "Horas extra", texto: "Activa las horas extra solo cuando la semana lo necesite. Si está apagado, nadie pasa del tope de horas." },
     { frame: F, sel: "table.nov", opcional: true, titulo: "Novedades del personal", texto: "Toca una celda para marcar vacaciones, subsidio, extraordinario o ausencia. Si alguien cumple años esa semana verás un 🎂." },
     { frame: F, sel: '[data-act="asis"]', opcional: true, titulo: "Hoja de asistencia", texto: "Imprime la semana en tamaño carta, con el turno de cada colaborador y espacio para su firma." },
-    { frame: F, sel: "aside.side", opcional: true, titulo: "Liquidación y alertas", texto: "Aquí ves las horas de cada persona y las alertas de reglas: bloqueos en rojo y avisos en amarillo. Revísalas antes de entregar." },
+    { frame: F, sel: '[data-act="impxlsx"]', opcional: true, titulo: "Importar tu horario desde Excel", texto: "Si ya armaste tus semanas en tu hoja manual, súbelas aquí en vez de escribirlas. La lección «Importar horarios desde Excel» te lo muestra paso a paso." },
+    { frame: F, sel: "aside.side", opcional: true, titulo: "Liquidación semana y alertas", texto: "A la par del horario ves una tabla como la de tu Excel: Nombre, Turnos, Horas, H.E. y Feriado de cada persona, con el total. Debajo van las alertas de reglas: bloqueos en rojo y avisos en amarillo. Un «¡Turno de 24 hrs!» solo aparece cuando tú lo asignas a mano. Revisa todo antes de entregar." },
     { frame: F, antes: () => ctx.gen("planilla"), sel: "#plMes", opcional: true, titulo: "3. Planilla", texto: "Elige el mes y la quincena y marca las semanas de horas extra que se pagan. Completa cédula, nombre, ingreso y salario una sola vez." },
     { frame: F, sel: '[data-act="publicar"]', opcional: true, titulo: "Publicar planilla", texto: "Este botón entrega la planilla a RITMO. Queda en gris cuando está publicada y vuelve a color si haces cambios." },
     { frame: F, antes: () => ctx.gen("horario"), sel: ".save", opcional: true, titulo: "Se guarda solo", texto: "Este indicador muestra que tus cambios se están guardando. No necesitas guardar nada a mano." }
+  ]
+};
+
+const L_EDITOR_IMPORTAR = {
+  id: "importar", icono: "⬆", titulo: "Importar horarios desde Excel",
+  desc: "Sube tu hoja manual (o la plantilla de RITMO), vincula a tu personal y corrige lo que RITMO te avise.",
+  pasos: ctx => [
+    { antes: () => { ctx.ir("gen"); ctx.gen("horario"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Importar sirve para no volver a escribir a mano las semanas que ya armaste. RITMO lee tu archivo y arma el horario por ti. Para vincular nombres, tu personal ya debe estar en la Matriz base (lo cargó RRHH y tú lo confirmaste)." },
+    { frame: F, antes: async () => { ctx.genAct("impxlsx"); await new Promise(r => setTimeout(r, 500)); }, sel: "#iiP", opcional: true, titulo: "Plantilla con tu personal", texto: "¿Primera vez? Baja la plantilla: ya trae a tu personal y las próximas semanas con sus fechas. También puedes subir tu hoja de siempre (LUNES a DOMINGO con las filas de 12 y 8 horas)." },
+    { frame: F, sel: "#iiF", opcional: true, titulo: "Elegir archivo", texto: "Aquí eliges el Excel. Funciona con la hoja manual completa: no hace falta quitarle las tablas de planilla ni de turnos. RITMO usa la hoja PLANILLA (cédulas) para reconocer a cada persona." },
+    { antes: () => ctx.genCerrar(), titulo: "1 · ¿A qué fila va cada fila?", texto: "RITMO propone la caja y el horario de cada fila según su título («12 hrs PM», «Turno MBK 6am-2pm»…) y según las personas que la cubren. Revisa la propuesta y corrígela si hace falta; la recordará la próxima vez." },
+    { titulo: "2 · Personal: vinculado o sin vincular", texto: "Cada nombre del Excel aparece como «Vinculado» (con la cédula, el nombre exacto o uno parecido) o «Sin vincular». Quien quede sin vincular no tendrá días trabajados en el horario y, por eso, tampoco salario en la planilla: empareja su nombre a mano con el selector. Si hay un «Paola 16hrs», RITMO crea el horario «RITMO Turno 16 h» para registrar esas horas." },
+    { titulo: "3 y 4 · Tu personal y el control", texto: "RITMO te avisa qué personas de tu Matriz base no aparecen en ningún turno (el gerente también debe estar en el horario, aunque firme la planilla) y compara la tabla NOMBRE · TURNOS de tu Excel con lo que va a cargar. Si algo no cuadra, te dice la posible causa." },
+    { titulo: "Después de importar", texto: "El informe lista lo que debes corregir en la web. Esos avisos quedan en la semana y en la campanita, y se quitan solos cuando lo arreglas. Un turno de 24 horas (AM 12 h + PM 12 h el mismo día) se carga como lo escribiste y queda con el aviso «¡Turno de 24 hrs!»: el generador nunca lo propone, solo tú a mano." }
   ]
 };
 
@@ -306,7 +321,7 @@ const L_PRONTO = {
 };
 
 export const LECCIONES = {
-  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
+  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_IMPORTAR, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
   RRHH: [L_PANEL, L_PRONTO],
   Visualizar: [L_PANEL, L_PRONTO],
   Descargar: [L_PANEL, L_PRONTO],
