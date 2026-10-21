@@ -11,6 +11,8 @@ const ImportarHorarios = (() => {
   const CAJA_ALIAS = { COMPRA: "Compra", COMPRAS: "Compra", MBK: "MBK", "MI BAN KITO": "MBK", ADMINISTRACION: "Administración", ADMIN: "Administración", INDUCCION: "Inducción", CONSERJERIA: "Conserjería", CONSERJE: "Conserjería", "SEGURIDAD INTERNA": "Seguridad Interna", SEGURIDAD: "Seguridad Interna" };
   const pad2 = n => String(n).padStart(2, "0");
   // "Paola 16hrs", "Mery 8am": se quita la anotación y queda el nombre
+  // La anotación sí dice algo: "Paola 16hrs" = esa persona trabajó 16 h ese día (no el turno normal). Se guarda aparte para crear el horario.
+  const horasNota = s => { const m = /(\d{1,2}(?:[.,]\d)?)\s*(?:HRS?|H|HORAS)\b/i.exec(String(s ?? "")); const h = m ? +m[1].replace(",", ".") : 0; return h > 0 && h <= 24 ? h : 0 };
   const limpiar = s => { const t = String(s ?? "").trim(); const w = t.split(/\s+/).filter(x => !/\d/.test(x) && !/^(AM|PM|HRS?|H|HORAS)$/i.test(sinT(x))); return w.join(" ") || t };
 
   /* ---------- Fechas ---------- */
@@ -55,11 +57,11 @@ const ImportarHorarios = (() => {
       if (cols.iS >= 0) { const f = aFecha(row[cols.iS], anioRef()); if (f) { const k = aLunes(f); if (f !== k) avisos.push(`La fecha ${f} no es lunes; se usó el lunes ${k}.`); if (!cur || cur.k !== k) { cur = semanas.find(x => x.k === k) || { k, filas: [] }; if (!semanas.includes(cur)) semanas.push(cur) } } }
       if (!cur) continue;
       const cajaRaw = nz(row[cols.iC]), caja = CAJA_ALIAS[cajaRaw] || null, horario = row[cols.iH];
-      const cells = cols.dias.map(i => limpiar(row[i]));
+      const cells = cols.dias.map(i => limpiar(row[i])), hrs = cols.dias.map(i => horasNota(row[i]));
       if (!cells.some(Boolean)) continue; // fila sin nombres: nada que importar
       if (!caja) { avisos.push(`Fila ${r + 1}: la Caja "${row[cols.iC] ?? ""}" no es válida (Compra, MBK, Administración, Inducción, Conserjería, Seguridad Interna).`); continue }
       const turno = nz(row[cols.iT]);
-      cur.filas.push({ key: caja + "|" + String(horario ?? "").trim(), label: `${caja} · ${String(horario ?? "").trim()}${turno ? " · " + turno : ""}`, cells, destino: resolverDestino(caja, horario), refuerzo: /REFUERZO/.test(turno) });
+      cur.filas.push({ key: caja + "|" + String(horario ?? "").trim(), label: `${caja} · ${String(horario ?? "").trim()}${turno ? " · " + turno : ""}`, cells, hrs, destino: resolverDestino(caja, horario), refuerzo: /REFUERZO/.test(turno) });
     }
     semanas.forEach(w => { const c = {}; w.filas.forEach(f => { c[f.key] = (c[f.key] || 0) + 1 }); const rep = Object.entries(c).filter(([, n]) => n > 3); if (rep.length) avisos.push(`La semana ${w.k} tiene ${rep[0][1]} filas con el mismo horario y caja (${rep[0][0].replace("|", " · ")}). ¿Falta la fecha del lunes en algún bloque?`) });
     return { formato: "Matriz RITMO", semanas: semanas.filter(s => s.filas.some(f => f.cells.some(Boolean))), avisos, manual: false };
@@ -91,7 +93,7 @@ const ImportarHorarios = (() => {
         cur = { k, filas: [] }; semanas.push(cur); run = 0; ord = 0; clase = null; ultSem = null; continue;
       }
       if (!cur || r <= base + 1) continue;
-      const row = aoa[r] || [], cells = [...Array(7)].map((_, d) => limpiar(row[c0 + d])), label = c0 > 0 ? nz(row[c0 - 1]) : "";
+      const row = aoa[r] || [], hrs = [...Array(7)].map((_, d) => horasNota(row[c0 + d])), cells = [...Array(7)].map((_, d) => limpiar(row[c0 + d])), label = c0 > 0 ? nz(row[c0 - 1]) : "";
       // Las semanas no siempre tienen las mismas filas, así que cada fila se identifica por su bloque (filas seguidas de 12 h, de 8 h o sin título)
       // y por su orden dentro del bloque, contando también las filas vacías.
       // Si el título dice la jornada completa ("12 hrs PM", "Turno MBK 6am-2pm", "Turno 8 hrs AM") la fila se identifica por lo que dice, no por su posición.
@@ -101,14 +103,14 @@ const ImportarHorarios = (() => {
       if (sm.key) {
         if (!cells.some(Boolean)) continue;
         if (!(sm.key in ordSem)) ordSem[sm.key] = Object.keys(ordSem).length;
-        cur.filas.push({ key: sm.key, label: `${tit} (${sm.txt})`, cells, destino: null, o: 9000 + ordSem[sm.key], sem: sm });
+        cur.filas.push({ key: sm.key, label: `${tit} (${sm.txt})`, cells, hrs, destino: null, o: 9000 + ordSem[sm.key], sem: sm });
         continue;
       }
       const cl = /12/.test(label) ? "12" : /8/.test(label) ? "8" : "0";
       if (cl !== clase) { run++; ord = 0; clase = cl }
       ord++;
       if (!cells.some(Boolean)) continue;
-      cur.filas.push({ key: `r${run}.${ord}`, label: `Bloque ${run}, fila ${ord} · ${label || "(sin título)"}`, cells, destino: null, o: run * 100 + ord, run, ord });
+      cur.filas.push({ key: `r${run}.${ord}`, label: `Bloque ${run}, fila ${ord} · ${label || "(sin título)"}`, cells, hrs, destino: null, o: run * 100 + ord, run, ord });
     }
     return { formato: "Manual (Hoja1)", semanas: semanas.filter(s => s.filas.length), avisos, manual: true };
   }
@@ -349,6 +351,7 @@ const ImportarHorarios = (() => {
     const sn = document.getElementById("ihSin");
     if (sn) sn.innerHTML = st.length ? `<div class="banner"><div>⚠️</div><div><b>${st.length} persona${st.length > 1 ? "s" : ""} de tu Matriz base no aparece${st.length > 1 ? "n" : ""} en ningún turno del Excel:</b> ${st.map(a => esc(a.nombre)).join(", ")}.<br><small>Si trabajaron esas semanas, empareja su nombre arriba; de lo contrario quedarán sin días trabajados y sin salario en la planilla.</small></div></div>` : `<p class="note">✔ Todo tu personal vigente tiene turnos en el archivo.</p>`;
     el.innerHTML = `Se importarán <b>${c.n}</b> turnos.${c.sin ? ` <span style="color:var(--bad,#b3261e)">${c.sin} celdas se omiten por nombres sin emparejar.</span>` : ""}${c.fuera ? ` ${c.fuera} se omiten porque la persona no estaba vigente ese día (antes de su ingreso o después de su baja).` : ""}${AVISO && (c.sin || st.length) ? `<br><b style="color:var(--bad,#b3261e)">Hay personas sin vincular o sin turnos: no alimentarán la planilla. Pulsa «Importar» otra vez para continuar de todos modos y corregirlo después en la web, o empareja arriba.</b>` : ""}`;
+    const es = especiales(); if (es.n) el.innerHTML += `<br>🕒 ${es.n} celda${es.n > 1 ? "s" : ""} traen horas anotadas (${es.hs.map(h => h + " h").join(", ")}), como «Paola 16hrs». RITMO las toma como horas trabajadas y crea el horario <b>«RITMO Turno ${es.hs[0]} h»</b> en tu tienda para registrarlas.`;
     document.getElementById("ihOK").disabled = !c.n;
   }
   /* ---------- Alertas de conflictos de la carga ----------
@@ -371,9 +374,25 @@ const ImportarHorarios = (() => {
     return `<div class="banner"><div>📥</div><div><b>Importación de Excel: ${L.length} cosa${L.length > 1 ? "s" : ""} por corregir en esta semana.</b><br>${L.slice(0, 8).map(x => esc(x.txt)).join("<br>")}${L.length > 8 ? `<br>…y ${L.length - 8} más.` : ""}<br><small>Estos avisos se quitan solos cuando lo corriges.</small></div></div>`;
   }
 
+  // Crea (una sola vez) el horario «RITMO Turno N h» en los horarios de la tienda; nace del Excel y se puede editar o borrar en Administración.
+  function horarioRitmo(h, pid, reg) {
+    const b = pl(pid), id = "RITMO" + String(h).replace(".", "_") + b.turno;
+    if (!S.cfg.plantillas[id]) {
+      const [hh, mm] = b.ini.split(":").map(Number), f = (hh * 60 + mm + Math.round(h * 60)) % 1440;
+      S.cfg.plantillas[id] = { nombre: `RITMO Turno ${h} h · ${b.turno}`, turno: b.turno, ini: b.ini, fin: pad2(Math.floor(f / 60)) + ":" + pad2(f % 60), horas: h, confirmado: true, custom: true, ritmo: true, cajas: Object.keys(CAJAS) };
+    }
+    if (reg && !reg[id]) reg[id] = { nombre: S.cfg.plantillas[id].nombre, n: 0 };
+    return id;
+  }
+  // celdas con horas anotadas que no son las del horario elegido (vista previa para el diálogo)
+  function especiales() {
+    let n = 0; const hs = new Set();
+    PLAN.semanas.forEach(w => w.filas.forEach(f => { const d = DEST[f.key]; if (!d || !f.hrs) return; const bp = pl(d.split("|")[1]); f.hrs.forEach((h, i) => { if (h && bp && f.cells[i] && Math.abs(h - bp.horas) > 0.01 && MAPA[f.cells[i]]) { n++; hs.add(h) } }) }));
+    return { n, hs: [...hs].sort((a, b) => a - b) };
+  }
   function aplicar() {
     const P = PLAN, rep = document.getElementById("ihRep").checked, hechas = [], omit = [], cerr = [], sinDest = [];
-    let turnos = 0, vacias = 0;
+    let turnos = 0, vacias = 0; const ritmo = {};
     for (const w of P.semanas) {
       const k = w.k, ex = S.semanas[k] && !S.semanas[k]._draft && Object.keys(S.semanas[k].asig || {}).length;
       if (semanaCerrada(k)) { cerr.push(k); continue }
@@ -393,6 +412,13 @@ const ImportarHorarios = (() => {
           const a = agente(MAPA[c]);
           if (!a) { pend.push({ m: "sin", fid: fila.id, d: di, nom: c }); vacias++; return }
           if (!vigente(a, addDays(parse(k), di))) { pend.push({ m: "vig", fid: fila.id, d: di, nom: c }); vacias++; return }
+          const hh = f.hrs && f.hrs[di], bp = pl(pid);
+          if (hh && bp && Math.abs(hh - bp.horas) > 0.01) { // "Paola 16hrs": trabajó otras horas, se asigna a un horario propio «RITMO Turno 16 h»
+            const nid = horarioRitmo(hh, pid, ritmo);
+            let fx = s.filas.find(x => x.caja === caja && x.plantilla === nid && !s.asig[x.id + "|" + di]);
+            if (!fx) { fx = { id: "i" + Math.random().toString(36).slice(2, 8), caja, plantilla: nid, refuerzo: true }; s.filas.push(fx) }
+            s.asig[fx.id + "|" + di] = a.id; turnos++; ritmo[nid].n++; return;
+          }
           if (fila.dias && !fila.dias.includes(di)) fila.dias.push(di);
           s.asig[fila.id + "|" + di] = a.id; turnos++;
         });
@@ -404,9 +430,10 @@ const ImportarHorarios = (() => {
     }
     // memoria: los emparejamientos hechos a mano se recuerdan para la próxima importación
     if (MANUAL.size && S.cfg) { S.cfg.importMapa = S.cfg.importMapa || {}; MANUAL.forEach(n => { if (MAPA[n]) S.cfg.importMapa[nz(n)] = MAPA[n] }); try { persist("base/config") } catch (e) { } }
+    if (Object.keys(ritmo).length) { try { persist("base/config") } catch (e) { } }
     cerrarModal();
     if (hechas.length) { S.semana = hechas[0]; S.tab = "horario"; render() }
-    informe({ turnos, hechas, omit, cerr, sinDest, vacias });
+    informe({ turnos, hechas, omit, cerr, sinDest, vacias, ritmo });
     PLAN = null;
   }
   function informe(R) {
@@ -417,6 +444,7 @@ const ImportarHorarios = (() => {
       <header><h4 id="ifT">${R.hechas.length ? "✅ Importación lista" : "No se importó nada"}</h4><p>${R.hechas.length ? `<b>${R.turnos}</b> turnos cargados en ${R.hechas.length} semana${R.hechas.length > 1 ? "s" : ""}: ${rangos(R.hechas)}.` : "Revisa los motivos de abajo."}</p></header>
       <div class="pad" style="overflow:auto;flex:1">
       ${sec(`Por corregir en la web (${act.length})`, false, act.slice(0, 14).map(x => esc(x.txt)).concat(act.length > 14 ? [`…y ${act.length - 14} más. Las verás como aviso en cada semana.`] : []))}
+      ${sec("Horarios que RITMO creó a partir de las horas anotadas en tu Excel", true, Object.values(R.ritmo || {}).map(x => `«${esc(x.nombre)}»: ${x.n} turno${x.n > 1 ? "s" : ""}. Lo ves y puedes editarlo en Administración › Horarios.`))}
       ${sec("Filas del Excel sin destino (no se importaron)", false, R.sinDest.map(x => `${esc(fmtRango(x.k))} · ${esc(x.label)}: ${x.n} nombre${x.n > 1 ? "s" : ""}`))}
       ${sec("Semanas que ya tenían horario y se omitieron", true, R.omit.length ? [rangos(R.omit) + ". Vuelve a importar marcando «Reemplazar» si quieres sobrescribirlas."] : [])}
       ${sec("Semanas cerradas (no se tocaron)", false, R.cerr.length ? [rangos(R.cerr) + ". Solo tu GZ puede reabrirlas."] : [])}
