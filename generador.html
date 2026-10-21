@@ -70,7 +70,7 @@ button{cursor:pointer}
 .dot{width:8px;height:8px;border-radius:50%;background:#47d08a;flex:none}
 .dot.busy{background:var(--amber)} .dot.err{background:#ff6b7c} .dot.local{background:#7fb2ff}
 
-.wrap{max-width:1480px;margin:0 auto;padding-inline:16px;padding-block:18px 48px}
+.wrap{max-width:1780px;margin:0 auto;padding-inline:16px;padding-block:18px 48px}
 
 /* Week bar */
 .weekbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -95,8 +95,8 @@ button{cursor:pointer}
 .banner.info{background:var(--surface);border-color:var(--line)}
 
 /* Main layout */
-.board{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
-@media (max-width:1150px){.board{grid-template-columns:minmax(0,1fr)}}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 282px;gap:16px;align-items:start}
+@media (max-width:1300px){.board{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:0}
 .panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line-2)}
 .panel-h h3{margin:0;font-family:var(--f-display);font-size:16px;letter-spacing:.02em;text-transform:uppercase}
@@ -171,8 +171,19 @@ tr.sep td span{display:inline-flex;align-items:center;gap:6px}
 .lg{width:12px;height:12px;border-radius:3px;display:inline-block}
 
 /* Liquidación */
-.side{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+.side{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (max-width:1300px){.side{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start}}
 @media (max-width:980px){.side{grid-template-columns:minmax(0,1fr)}}
+.liq-t{width:100%;border-collapse:collapse;font-size:12.5px}
+.liq-t th{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:right;padding:8px 6px;border-bottom:1px solid var(--line-2);font-weight:700}
+.liq-t th:first-child,.liq-t td.who{text-align:left}
+.liq-t td{padding:6px 6px;border-bottom:1px solid var(--line-2);text-align:right;font-family:var(--f-mono);vertical-align:top}
+.liq-t td.who{font-family:var(--f-body);font-weight:700}
+.liq-t td.who .n{display:flex;align-items:center;min-width:0}
+.liq-t .sub{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;font-weight:400}
+.liq-t td .bar{margin-top:4px;height:4px;min-width:34px}
+.liq-t td.x{color:var(--orange-d);font-weight:700} .liq-t td.f{color:var(--fer-ink);font-weight:700}
+.liq-t tfoot td{font-weight:700;background:var(--surface-2);border-bottom:0}
 @media (max-width:1150px){.side{position:static}}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-2)}
 .kpi{background:var(--surface);padding:12px 14px}
@@ -958,16 +969,16 @@ function renderHorario(){
   const people=Object.values(R.per).filter(r=>enSemana(r.ag,k)||r.h>0).sort((a,b)=>b.h-a.h);
   const maxH=Math.max(tope+16,...people.map(r=>r.h));
   const bad=R.alertas.filter(a=>a.sev==="bad").length;
-  h+=`<aside class="side"><div class="panel"><div class="panel-h"><h3>Liquidación semana</h3><p>Tope ${tope} h · extra ${ext?"permitida":"desactivada"}</p></div>
+  const tot=people.reduce((x,r)=>({t:x.t+r.dias.size,h:x.h+r.h,e:x.e+r.extra,f:x.f+r.ferH}),{t:0,h:0,e:0,f:0});
+  h+=`<aside class="side"><div class="panel liq"><div class="panel-h"><h3>Liquidación semana</h3><p>Tope ${tope} h · extra ${ext?"permitida":"desactivada"}</p></div>
     ${S.cfg.presupuesto?`<div class="budget"><span>Presupuesto <b>${S.cfg.presupuesto}</b></span><span>Agentes activos <b>${activos(k)}</b></span>${vacantes(k)?`<span style="color:var(--orange-d)">Vacantes <b>${vacantes(k)}</b> → <b>${vacantes(k)*48}</b> h extra autorizadas</span>`:activos(k)>S.cfg.presupuesto?`<span style="color:var(--warn)">${activos(k)-S.cfg.presupuesto} sobre presupuesto</span>`:"<span>Plantilla completa</span>"}</div>`:""}
-    <div class="kpis"><div class="kpi"><b>${R.total}</b><span>Horas programadas</span></div><div class="kpi ${R.extra?"hot":""}"><b>${R.extra}</b><span>Horas extra ×2</span></div>
-    <div class="kpi ${R.ferH?"hot":""}"><b>${R.ferH}</b><span>Horas en feriado ×2</span></div><div class="kpi ${bad?"alert":""}"><b>${bad}</b><span>Bloqueos activos</span></div></div>
-    ${R.costo?`<div class="pad" style="border-top:1px solid var(--line-2);font-size:13px">Adicional estimado por extras y feriados: <b class="num">${money(R.costo)}</b><div class="note">Valor hora = salario ÷ 30 ÷ 8. Solo agentes con salario cargado.</div></div>`:""}
-    <ul class="people">${people.map(r=>{const w=Math.min(r.h,tope)/maxH*100,e=Math.max(0,r.h-tope)/maxH*100;
-      return `<li class="person"><span class="n"><span class="swatch" style="background:${esc(r.ag.color)}"></span>${esc(r.ag.nombre)}</span><span class="h">${r.h} h</span>
-      <div class="bar" aria-hidden="true"><i style="width:${w}%"></i><em style="left:${w}%;width:${e}%"></em><s style="left:${tope/maxH*100}%"></s></div>
-      <div class="pills"><span class="pill">${r.dias.size} día${r.dias.size===1?"":"s"}</span>${r.extra?`<span class="pill x">+${r.extra} h extra</span>`:""}${r.ferH?`<span class="pill f">${r.ferH} h feriado</span>`:""}${r.vac?`<span class="pill v">${r.vac} vacac.</span>`:""}${r.sub?`<span class="pill s">${r.sub} subsidio</span>`:""}${r.ext?`<span class="pill e">${r.ext} extraord.</span>`:""}${r.a8+r.a12?`<span class="pill au">${r.a8+r.a12} ausencia${r.a8+r.a12>1?"s":""}</span>`:""}${r.clase?`<span class="pill c">clase</span>`:""}${r.noches?`<span class="pill">${r.noches} noche${r.noches>1?"s":""}</span>`:""}${r.costo?`<span class="pill">${money(r.costo)}</span>`:""}${r.h<r.min?`<span class="pill" style="background:var(--bad-bg);color:var(--bad)">faltan ${r.min-r.h} h</span>`:""}${!r.extra&&r.h>=r.min&&r.h?`<span class="pill ok">${r.h===tope?tope+" h exactas":"cumple mínimo "+r.min+" h"}</span>`:""}</div></li>`}).join("")}</ul></div>
-    <div class="panel"><div class="panel-h"><h3>Alertas</h3><p>${R.vacias} posiciones vacías</p></div>
+    <div class="scroll"><table class="liq-t"><thead><tr><th>Nombre</th><th title="Días con turno">Turnos</th><th title="Horas programadas">Horas</th><th title="Horas extra ×2">H.E.</th><th title="Horas en feriado ×2">Fer.</th></tr></thead><tbody>
+    ${people.map(r=>{const w=Math.min(r.h,tope)/maxH*100,e=Math.max(0,r.h-tope)/maxH*100;
+      const nt=[r.h<r.min?`<span class="pill" style="background:var(--bad-bg);color:var(--bad)">faltan ${r.min-r.h} h</span>`:"",r.vac?`<span class="pill v">${r.vac} vacac.</span>`:"",r.sub?`<span class="pill s">${r.sub} subsidio</span>`:"",r.ext?`<span class="pill e">${r.ext} extraord.</span>`:"",r.a8+r.a12?`<span class="pill au">${r.a8+r.a12} ausencia${r.a8+r.a12>1?"s":""}</span>`:"",r.clase?`<span class="pill c">clase</span>`:"",""].join("");
+      return `<tr><td class="who"><span class="n"><span class="swatch" style="background:${esc(r.ag.color)}"></span>${esc(r.ag.nombre)}</span>${nt?`<div class="sub">${nt}</div>`:""}</td><td>${r.dias.size}</td><td>${r.h}<div class="bar" aria-hidden="true"><i style="width:${w}%"></i><em style="left:${w}%;width:${e}%"></em><s style="left:${tope/maxH*100}%"></s></div></td><td class="${r.extra?"x":""}">${r.extra||"–"}</td><td class="${r.ferH?"f":""}">${r.ferH||"–"}</td></tr>`}).join("")}</tbody>
+    <tfoot><tr><td class="who">Total</td><td>${tot.t}</td><td>${tot.h}</td><td class="${tot.e?"x":""}">${tot.e||"–"}</td><td class="${tot.f?"f":""}">${tot.f||"–"}</td></tr></tfoot></table></div>
+    ${R.costo?`<div class="pad" style="border-top:1px solid var(--line-2);font-size:13px">Adicional estimado por extras y feriados: <b class="num">${money(R.costo)}</b><div class="note">Valor hora = salario ÷ 30 ÷ 8. Solo agentes con salario cargado.</div></div>`:""}</div>
+    <div class="panel"><div class="panel-h"><h3>Alertas</h3><p>${bad?`${bad} bloqueo${bad>1?"s":""} · `:""}${R.vacias} posiciones vacías</p></div>
     ${R.alertas.length?`<ul class="alerts">${R.alertas.map(a=>`<li><span class="sev ${a.sev}"></span><div><b>${a.ag?esc(a.ag.nombre):"Cobertura"}</b> · ${esc(a.msg)}<div class="where">${esc(a.where)}</div></div></li>`).join("")}</ul>`:'<div class="empty">Sin conflictos de reglas en esta semana.</div>'}</div></aside>`}
   h+=`</div>`;
   v.innerHTML=h;
