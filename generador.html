@@ -747,6 +747,8 @@ async function cargar(){
         else if(d.tipo==="ritmo-estado"){S.pub={ok:!!d.publicado,fecha:d.fecha||"",bloqueada:!!d.bloqueada,cierre:d.cierre||null,q:d.q||""};S.cierres=Array.isArray(d.cierres)?d.cierres:[];
           // A quien ya publicó su planilla se le aplica lo mismo: su viático MBK queda solicitado con esa planilla (una sola vez por quincena)
           if(S.loaded&&S.pub.ok&&S.pub.q){const vc=vtCfg();vc.autoQ=vc.autoQ||{};if(!vc.autoQ[S.pub.q]){vc.autoQ[S.pub.q]=1;const mm=solicitarMBKconPlanilla(S.pub.q,ymd(new Date()));persist("base/config");S.pub.ok=true;/* guardar marca la planilla como "cambiada"; marcar el viático no cambia lo publicado */if(mm.length)toast("Tu Planilla MBK ya quedó solicitada con tu planilla publicada: "+mm.map(x=>fmtRango(x.k)).join(" · ")+".")}}
+          // al abrir Mi horario, lo solicitado se pone al día con lo real (sin tocar el estado de publicación)
+          if(S.loaded&&!S.esperaPub&&sincronizarSolicitudMBK()){const ok=S.pub.ok;persist("base/config");S.pub.ok=ok}
           if(S.loaded)render();
           if(S.esperaPub&&S.pub.ok){const x=S.esperaPub;S.esperaPub=null;S.marcadasPub=null;if(x.length)avisoMBK(x)}}
         else if(d.tipo==="ritmo-guardado"){if(!d.ok&&S.esperaPub){S.esperaPub=null;deshacerSolicitudMBK(S.marcadasPub);S.marcadasPub=null;if(S.loaded)render()}setSave(d.ok?"":"err",d.ok?"Guardado en RITMO":"No se guardó: "+(d.error||"sin conexión"));}
@@ -1761,7 +1763,7 @@ function solicitarMBKconPlanilla(q,fecha){
     if(marc.length)persist("base/config");return marc}catch(e){return []}}
 // La solicitud de viático MBK sigue siempre a lo real: si cambian los horarios o los viáticos, el monto solicitado se actualiza solo en cada guardado.
 // Si el GZ ya había aprobado otro monto, su vista lo marca para volver a aprobar (así el cambio nunca pasa desapercibido).
-function sincronizarSolicitudMBK(){try{const v=vtCfg();Object.entries(v.semanas).forEach(([k,w])=>{if(!w.solicitado||!S.semanas[k]||S.semanas[k]._draft)return;const V=calcViatico(k);if(V.total>0&&(w.montoSol==null||r2(w.montoSol)!==V.total))w.montoSol=V.total})}catch(e){}}
+function sincronizarSolicitudMBK(){let n=0;try{const v=vtCfg();Object.entries(v.semanas).forEach(([k,w])=>{if(!w.solicitado||!S.semanas[k]||S.semanas[k]._draft)return;const V=calcViatico(k);if(V.total>0&&(w.montoSol==null||r2(w.montoSol)!==V.total)){w.montoSol=V.total;n++}})}catch(e){}return n}
 // Si la planilla no se pudo publicar (p. ej. falta la hoja de asistencia), el viático que se marcó con ese intento se deshace
 function deshacerSolicitudMBK(marc){try{const v=vtCfg();(marc||[]).forEach(m=>{const w=v.semanas[m.k];if(!w)return;if(m.prev){w.solicitado=m.prev.solicitado;w.montoSol=m.prev.montoSol;if(m.prev.auto===undefined)delete w.auto;else w.auto=m.prev.auto}else{delete w.solicitado;delete w.montoSol;delete w.auto}});if((marc||[]).length)persist("base/config")}catch(e){}}
 function horaCorta(t){const [h]=t.split(":").map(Number);return (h%12||12)+" "+(h<12?"AM":"PM")}
