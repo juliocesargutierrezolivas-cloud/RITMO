@@ -364,6 +364,13 @@ td.off{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,transp
 .vttot td{font-weight:700;background:var(--surface-2)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:640px){.brand h1{font-size:17px}.weeknav h2{font-size:19px}.save{margin-left:0}}
+@media (max-width:640px),(max-height:520px){
+  /* Celular: encabezado compacto (una fila de pestañas que se desliza) para que el horario tenga la pantalla */
+  .top-in{padding:6px 12px;gap:6px 12px}.brand small,.brand-txt{display:none}.brand img,.brand svg{max-height:30px;width:auto}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%}.tabs::-webkit-scrollbar{display:none}.tabs button{white-space:nowrap;flex:none}
+  .save{font-size:11px}}
+/* Importar Excel en celular: cada fila es una tarjeta (nombre, ejemplo y selector uno debajo del otro) para no esconder el selector a la derecha */
+@media (max-width:640px){#modal .ih-t thead{display:none}#modal .ih-t,#modal .ih-t tbody,#modal .ih-t tr,#modal .ih-t td{display:block;width:100%}#modal .ih-t tr{padding:8px 0;border-bottom:1px solid var(--line-2)}#modal .ih-t td{padding:2px 0;border:0;min-width:0!important;max-width:none!important}#modal .ih-t select{width:100%;min-width:0!important}}
 /* Modo visor (RITMO · solo lectura) */
 .ro label[for="restore"],.ro #restore,.ro [data-delpl],.ro [data-delfi],.ro [data-delag],.ro [data-act="auto"],.ro [data-act="dup"],.ro [data-act="undo"],.ro [data-act="limpiar"],
 .ro [data-addrow],.ro [data-delrow],.ro [data-askdel],.ro [data-act="addag"],.ro [data-act="addpl"],.ro [data-act="addfi"],.ro [data-act="basecero"],.ro [data-act="backup"]{display:none!important}

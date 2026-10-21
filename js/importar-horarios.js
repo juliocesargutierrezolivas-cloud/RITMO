@@ -214,6 +214,25 @@ const ImportarHorarios = (() => {
     });
     // fila sin título con nombres: es un refuerzo de la fila de 12 h que tiene al lado (la de abajo, o la de arriba)
     claves.forEach((k, i) => { if (cls(k) === "0") { const sig = claves.slice(i + 1).find(x => cls(x) !== "0"), ant = claves.slice(0, i).reverse().find(x => cls(x) !== "0"); dest[k] = (sig && cls(sig) === "12" && dest[sig]) || (ant && cls(ant) === "12" && dest[ant]) || "" } });
+    // Filas de 8 h sin AM/PM y filas sin título: la mañana o la tarde se decide mirando a las personas. Gana el turno que no choca con
+    // otro turno de la misma persona el mismo día y que sigue su rutina (AM tras AM, PM tras PM); si no hay pistas, se queda la propuesta.
+    const turnoDeDest = d => { const p = d && pl(d.split("|")[1]); return p ? p.turno : null };
+    const idDe = c => (c && !IGNORAR.has(nz(c)) ? mapa[c] : null);
+    const puntaje = (k, cand) => {
+      let tot = 0; const t = turnoDeDest(cand);
+      plan.semanas.forEach(w => { const f = w.filas.find(x => x.key === k); if (!f) return;
+        f.cells.forEach((c, di) => { const id = idDe(c); if (!id) return;
+          w.filas.forEach(g => { if (g.key === k || !dest[g.key]) return; const tg = turnoDeDest(dest[g.key]);
+            if (idDe(g.cells[di]) === id) tot += 2;
+            if (di > 0 && idDe(g.cells[di - 1]) === id) tot += tg === t ? -0.3 : (t === "AM" && tg === "PM" ? 1.5 : 0.5);
+            if (di < 6 && idDe(g.cells[di + 1]) === id) tot += tg === t ? -0.3 : (t === "PM" && tg === "AM" ? 1.5 : 0.5) }) }) });
+      return tot;
+    };
+    const mejorDe = (k, cands, ini) => { let mej = ini || cands[0], pm = puntaje(k, mej); cands.forEach(c => { const p = puntaje(k, c); if (p < pm - 0.01) { pm = p; mej = c } }); return mej };
+    for (let vuelta = 0; vuelta < 2; vuelta++) claves.forEach(k => {
+      if (/^MBK\|(AM|PM)8$/.test(dest[k] || "") && cls(k) === "8") dest[k] = mejorDe(k, ["MBK|AM8", "MBK|PM8"], dest[k]);
+      else if (cls(k) === "0") dest[k] = mejorDe(k, ["Compra|AM12", "Compra|PM12"], dest[k] || "");
+    });
     // lo que el usuario ya confirmó en una importación anterior manda sobre la propuesta
     const rec = (S.cfg && S.cfg.importDest) || {};
     todas.forEach(k => { const mk = k + "|" + nz(lab(k)); if (rec[mk]) dest[k] = rec[mk] });
@@ -225,7 +244,7 @@ const ImportarHorarios = (() => {
   function abrir() {
     if (!window.XLSX) { toast("Conéctate a internet para leer el Excel."); return }
     const m = document.getElementById("modal"), sinP = !S.agentes.length;
-    m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="iiT" style="width:min(580px,100%)"><header><h4 id="iiT">⬆ Importar horarios desde Excel</h4><p>Carga horarios que ya hiciste y RITMO los empareja con tu personal, sin armarlos celda por celda.</p></header>
+    m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="iiT" style="width:min(580px,calc(100vw - 16px))"><header><h4 id="iiT">⬆ Importar horarios desde Excel</h4><p>Carga horarios que ya hiciste y RITMO los empareja con tu personal, sin armarlos celda por celda.</p></header>
       <div class="pad">
       ${sinP ? '<div class="banner"><div>⚠️</div><div><b>Aún no hay personal en tu Matriz base.</b> Primero confirma a las personas que RRHH cargó en tu tienda (o dalas de alta en la Matriz base) para que RITMO pueda emparejar los nombres.</div></div>' : ""}
       <p style="margin:0 0 6px"><b>Puedes importar:</b></p>
@@ -301,17 +320,17 @@ const ImportarHorarios = (() => {
     const total = P.semanas.reduce((s, w) => s + w.filas.reduce((x, f) => x + f.cells.filter(c => c && MAPA[c] !== undefined).length, 0), 0);
     const existentes = P.semanas.filter(w => S.semanas[w.k] && !S.semanas[w.k]._draft && Object.keys(S.semanas[w.k].asig || {}).length);
     const optA = id => S.agentes.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)).map(a => `<option value="${a.id}" ${a.id === id ? "selected" : ""}>${esc(a.nombre)} (${esc(cargoP(a))})</option>`).join(""); // solo el primer nombre y su cargo principal
-    m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ihT" style="width:min(1000px,100%);max-height:92vh;display:flex;flex-direction:column">
+    m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ihT" style="width:min(1000px,calc(100vw - 16px));max-height:92vh;display:flex;flex-direction:column">
       <header><h4 id="ihT">⬆ Importar horarios desde Excel</h4><p>${esc(P.archivo)} · hoja <b>${esc(P.hoja)}</b> · formato <b>${esc(P.formato)}</b> · ${P.semanas.length} semana${P.semanas.length > 1 ? "s" : ""}: ${P.semanas.map(w => fmtRango(w.k)).join(" · ")}</p></header>
       <div class="pad" style="overflow:auto;flex:1">
       ${P.avisos.length ? `<div class="banner"><div>⚠️</div><div>${P.avisos.slice(0, 6).map(esc).join("<br>")}</div></div>` : ""}
       <h5 style="margin:10px 0 4px">1 · ¿A qué fila del horario va cada fila del Excel?</h5>
       <p class="note" style="margin:0 0 6px">${P.manual ? "El Excel manual solo dice 12 h u 8 h. Elige la caja y el horario de cada fila; ya dejé una propuesta. Aplica a todas las semanas." : "Tomé la Caja y el Horario de tu Excel. Revisa los que quedaron sin destino."}</p>
-      <div class="scroll"><table class="formtable"><thead><tr><th>Fila del Excel</th><th>Ejemplo</th><th>Va a</th></tr></thead><tbody>
+      <div class="scroll"><table class="formtable ih-t"><thead><tr><th>Fila del Excel</th><th>Ejemplo</th><th>Va a</th></tr></thead><tbody>
       ${claves.map(c => `<tr><td>${esc(c.label)}</td><td style="font-size:12px;color:var(--muted)">${esc(c.ej)}</td><td><select class="in" style="font-size:12px;min-width:230px" data-dest="${esc(c.key)}"><option value="">— No importar —</option>${dst.map(d => `<option value="${esc(d.v)}" ${DEST[c.key] === d.v ? "selected" : ""}>${esc(d.t)}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div>
       <h5 style="margin:14px 0 4px">2 · Personal: <span id="ihVinc"></span></h5>
       <p class="note" style="margin:0 0 6px">RITMO compara cada nombre del Excel con el personal que RRHH cargó y tú ya tienes en tu Matriz base${P.planilla && P.planilla.length ? ` y con la hoja PLANILLA de tu archivo (${P.planilla.length} personas con cédula)` : ""}. <b>El horario es lo que alimenta la planilla:</b> quien no quede vinculado no tendrá días trabajados ni salario.</p>
-      <div class="scroll"><table class="formtable"><thead><tr><th>Nombre en el Excel</th><th>Estado</th><th>Persona de tu personal</th></tr></thead><tbody>
+      <div class="scroll"><table class="formtable ih-t"><thead><tr><th>Nombre en el Excel</th><th>Estado</th><th>Persona de tu personal</th></tr></thead><tbody>
       ${nombres.map(n => `<tr><td><b>${esc(n)}</b></td><td style="font-size:12px;white-space:normal;min-width:200px;max-width:340px" data-est="${esc(n)}"></td><td><select class="in" style="min-width:200px" data-nom="${esc(n)}"><option value="">— Ignorar —</option>${optA(MAPA[n])}</select></td></tr>`).join("")}</tbody></table></div>
       <h5 style="margin:14px 0 4px">3 · Tu personal frente al horario</h5>
       <div id="ihSin"></div>
@@ -353,12 +372,16 @@ const ImportarHorarios = (() => {
     const filas = []; let tot = 0, ok = 0;
     PLAN.semanas.forEach(w => {
       const R = w.resumen || {}; if (!Object.keys(R).length) return;
-      const cel = {}, dias = {};
-      w.filas.forEach(f => { if (!DEST[f.key]) return; f.cells.forEach((c, d) => { const id = c && !IGNORAR.has(nz(c)) ? MAPA[c] : null; if (!id) return; cel[id] = (cel[id] || 0) + 1; (dias[id] = dias[id] || new Set()).add(d) }) });
+      const cel = {}, dias = {}, hor = {};
+      w.filas.forEach(f => { const dp = DEST[f.key]; if (!dp) return; const hp = (pl(dp.split("|")[1]) || {}).horas || 0; f.cells.forEach((c, d) => { const id = c && !IGNORAR.has(nz(c)) ? MAPA[c] : null; if (!id) return; cel[id] = (cel[id] || 0) + 1; hor[id] = (hor[id] || 0) + ((f.hrs && f.hrs[d]) || hp); (dias[id] = dias[id] || new Set()).add(d) }) });
       Object.entries(R).forEach(([nm, v]) => {
-        const id = MAPA[nm] !== undefined ? MAPA[nm] : emparejar(nm, w.k, PLAN.ctx).id, c = id ? cel[id] || 0 : 0, dd = id ? (dias[id] ? dias[id].size : 0) : 0;
-        tot++; if (v.turnos === c || v.turnos === dd) ok++;
-        else filas.push({ k: w.k, nm, xl: v.turnos, ri: dd, causa: !id ? "Su nombre no está vinculado a tu personal" : !c ? "Sus filas no tienen destino" : "Faltan celdas por filas sin destino o nombres sin vincular" });
+        const id = MAPA[nm] !== undefined ? MAPA[nm] : emparejar(nm, w.k, PLAN.ctx).id, c = id ? cel[id] || 0 : 0, dd = id ? (dias[id] ? dias[id].size : 0) : 0, hh = id ? hor[id] || 0 : 0;
+        // El «TURNOS» de muchos Excel no son días: son turnos pagados (horas ÷ 12, o ÷ 8 en los de 8 h). Cualquiera de las lecturas que coincida vale.
+        tot++; if (v.turnos === c || v.turnos === dd || Math.abs(v.turnos - hh / 12) <= 0.26 || Math.abs(v.turnos - hh / 8) <= 0.26) ok++;
+        else {
+          const sinD = id ? w.filas.reduce((x, f) => x + (DEST[f.key] ? 0 : f.cells.filter(z => z && MAPA[z] === id).length), 0) : 0;
+          filas.push({ k: w.k, nm, xl: v.turnos, ri: dd, causa: !id ? "Su nombre no está vinculado a tu personal" : sinD ? `Tiene ${sinD} celda${sinD > 1 ? "s" : ""} en filas sin destino (arriba, sección 1)` : !c ? "No aparece en el horario esa semana (¿subsidio, vacaciones o baja?)" : "El horario de tu Excel no suma lo que dice su propia tabla: revísalo" });
+        }
       });
     });
     if (!tot) return "";
@@ -469,7 +492,7 @@ const ImportarHorarios = (() => {
     const m = document.getElementById("modal"), act = R.hechas.flatMap(k => pendActivos(k).map(x => ({ k, ...x })));
     const rangos = a => a.map(fmtRango).join(" · ");
     const sec = (tit, ok, items) => items.length ? `<div class="banner ${ok ? "info" : ""}"><div>${ok ? "ℹ️" : "⚠️"}</div><div><b>${tit}</b><br>${items.join("<br>")}</div></div>` : "";
-    m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ifT" style="width:min(720px,100%);max-height:90vh;display:flex;flex-direction:column">
+    m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ifT" style="width:min(720px,calc(100vw - 16px));max-height:90vh;display:flex;flex-direction:column">
       <header><h4 id="ifT">${R.hechas.length ? "✅ Importación lista" : "No se importó nada"}</h4><p>${R.hechas.length ? `<b>${R.turnos}</b> turnos cargados en ${R.hechas.length} semana${R.hechas.length > 1 ? "s" : ""}: ${rangos(R.hechas)}.` : "Revisa los motivos de abajo."}</p></header>
       <div class="pad" style="overflow:auto;flex:1">
       ${sec(`Por corregir en la web (${act.length})`, false, act.slice(0, 14).map(x => esc(x.txt)).concat(act.length > 14 ? [`…y ${act.length - 14} más. Las verás como aviso en cada semana.`] : []))}
