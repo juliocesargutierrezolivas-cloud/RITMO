@@ -683,21 +683,25 @@ function ajustarGen(){
   const en=!g.hidden;document.body.classList.toggle('gen-on',en);
   // Celular: el horario se abre a pantalla completa (si no, el iframe queda de ~400 px y los diálogos se cortan).
   // Si el teléfono está en vertical se sugiere girarlo, pero no se bloquea nada.
-  const bd=document.body,movil=matchMedia('(max-width:820px),(max-height:520px)').matches;
+  const bd=document.body,movil=matchMedia('(pointer:coarse) and (max-width:820px), (pointer:coarse) and (max-height:520px)').matches;
   if(!en)bd.classList.remove('gen-min');
   const listo=en&&!f.hidden&&movil,full=listo&&!bd.classList.contains('gen-min');
   bd.classList.toggle('gen-full',full);
   $('genMin').hidden=!full;$('genFull').hidden=!(listo&&!full);
   let ok=false;try{ok=sessionStorage.getItem('genRotOk')==='1'}catch(e){}
-  const rot=full&&!ok&&matchMedia('(max-width:600px) and (orientation:portrait)').matches;
+  const rot=full&&!ok&&matchMedia('(pointer:coarse) and (max-width:600px) and (orientation:portrait)').matches;
   bd.classList.toggle('gen-rot',rot);$('genRot').hidden=!rot;
   if(full){document.documentElement.classList.add('gen-lock');f.style.height='';return}
-  const fijo=en&&!f.hidden&&innerHeight>=640;
-  document.documentElement.classList.toggle('gen-lock',fijo);
-  if(!fijo){f.style.height='';return}
-  scrollTo(0,0);
-  f.style.height=Math.max(420,innerHeight-f.getBoundingClientRect().top-14)+'px';
+  // Pantallas grandes: una sola barra de desplazamiento para toda la página. El marco crece con el horario (el Generador informa su alto).
+  document.documentElement.classList.remove('gen-lock');
+  if(en&&!f.hidden)vistaGen();
 }
+// Le dice al Generador qué parte de su marco está a la vista, para que los diálogos y avisos salgan donde el usuario está mirando.
+let vistaPend=false;
+function vistaGen(){if(vistaPend)return;vistaPend=true;requestAnimationFrame(()=>{vistaPend=false;const f=$('genF');if(!f||f.hidden||!f.contentWindow)return;
+  const r=f.getBoundingClientRect(),top=Math.max(0,-r.top),h=Math.max(300,Math.min(innerHeight,r.bottom)-Math.max(0,r.top));
+  f.contentWindow.postMessage({tipo:'ritmo-vista',top:Math.round(top),h:Math.round(h)},location.origin)})}
+addEventListener('scroll',vistaGen,{passive:true});
 addEventListener('resize',ajustarGen);addEventListener('orientationchange',()=>setTimeout(ajustarGen,250));
 $('genMin').onclick=()=>{document.body.classList.add('gen-min');ajustarGen()};
 $('genFull').onclick=()=>{document.body.classList.remove('gen-min');ajustarGen()};
@@ -2330,7 +2334,8 @@ function excelPlanilla(data){return new Promise((ok,mal)=>{
   let t=setTimeout(()=>{fin();mal(new Error('tiempo de espera agotado'))},20000);
   const fin=()=>{clearTimeout(t);removeEventListener('message',on);f.remove()};
   const on=ev=>{if(ev.source!==f.contentWindow)return;const d=ev.data||{};
-    if(d.tipo==='ritmo-listo'){f.contentWindow.postMessage({tipo:'ritmo-datos',data,meta:{descarga:true,q:Q}},location.origin);
+    if(d.tipo==='ritmo-alto'){if(!document.body.classList.contains('gen-full'))genF.style.height=Math.max(520,Number(d.h)||0)+'px';vistaGen();return}
+  if(d.tipo==='ritmo-listo'){f.contentWindow.postMessage({tipo:'ritmo-datos',data,meta:{descarga:true,q:Q}},location.origin);
       setTimeout(()=>f.contentWindow.postMessage({tipo:'ritmo-exportar',q:Q,semanasHE:CAL&&Array.isArray(CAL.semanas)?CAL.semanas:undefined},location.origin),400)}
     else if(d.tipo==='ritmo-excel'){fin();d.ok?ok({blob:new Blob([d.buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),fn:d.fn}):mal(new Error(d.error))}};
   addEventListener('message',on);f.src='generador.html?visor=1';document.body.appendChild(f)})}
@@ -2427,6 +2432,7 @@ function montarGen(){GENLISTO=false;$('genIni').hidden=true;$('genF').hidden=fal
   $('genF').src='generador.html?ritmo=1&t='+encodeURIComponent(genTienda);ajustarGen()}
 addEventListener('message',async ev=>{
   if(ev.origin!==location.origin||ev.source!==$('genF').contentWindow)return;const d=ev.data||{};
+  if(d.tipo==='ritmo-alto'){if(!document.body.classList.contains('gen-full'))genF.style.height=Math.max(520,Number(d.h)||0)+'px';vistaGen();return}
   if(d.tipo==='ritmo-listo'){$('genF').contentWindow.postMessage({tipo:'ritmo-datos',data:GEN||{},meta:{tienda:genTienda,q:Q,semanasHE:Array.isArray(CAL?.semanas)?CAL.semanas:undefined,nombre:(TIENDAS[0]?.nombre||genTienda).toUpperCase(),plazas:TIENDAS[0]?.plazas??null}},location.origin);setTimeout(()=>{GENLISTO=true;estadoPub()},300)}
   else if(d.tipo==='ritmo-personal-ok'){if(esperaPers){const f=esperaPers;esperaPers=null;f(d)}}
   else if(d.tipo==='ritmo-publicar'){GEN=d.data;guardarMBK(d.mbk);guardarHE(d.he);await publicarGen()}

@@ -219,6 +219,12 @@ tr.sep td span{display:inline-flex;align-items:center;gap:6px}
 
 /* Picker */
 .backdrop{position:fixed;inset:0;background:rgba(4,10,24,.55);z-index:50;display:grid;place-items:center;padding:16px}
+/* Dentro de RITMO el marco mide lo que mide el horario (la página entera se desplaza, sin barra interna): lo fijo se coloca sobre la parte visible que informa el panel */
+html.emb .backdrop{position:absolute;inset:auto;left:0;right:0;top:var(--vt,0px);height:var(--vh,100vh)}
+html.emb .sheet{max-height:calc(var(--vh,100vh) - 32px)!important}
+html.emb .alerts{max-height:none;overflow:visible}
+html.emb .toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(--vh,100vh) - 72px)}
+html.emb .trash{position:absolute;top:calc(var(--vt,0px) + 74px)}
 .sheet{background:var(--surface);border-radius:14px;width:min(460px,100%);max-height:min(640px,90vh);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);border-top:4px solid var(--orange)}
 .sheet header{padding:14px 16px;border-bottom:1px solid var(--line-2)}
 .sheet header h4{margin:0;font-family:var(--f-display);font-size:18px}
@@ -719,6 +725,8 @@ function hojaAsistencia(wk){
 async function cargar(){
   if(RITMO){
     S.mode="ritmo";
+    document.documentElement.classList.add("emb");
+    {const alto=()=>parent.postMessage({tipo:"ritmo-alto",h:Math.ceil(document.body.getBoundingClientRect().height)},location.origin);new ResizeObserver(alto).observe(document.body);alto()}
     await new Promise(res=>{
       addEventListener("message",e=>{
         if(e.origin!==location.origin)return;const d=e.data;if(!d)return;
@@ -735,6 +743,7 @@ async function cargar(){
           normalizarColores();
           persist("base/agentes");if(S.loaded)render();
           parent.postMessage({tipo:"ritmo-personal-ok",crear:(d.crear||[]).length,vincular:(d.vincular||[]).length,eliminar:del.size,bajas:nb},location.origin)}
+        else if(d.tipo==="ritmo-vista"){const r=document.documentElement.style;r.setProperty("--vt",Math.max(0,d.top||0)+"px");r.setProperty("--vh",Math.max(300,d.h||innerHeight)+"px")}
         else if(d.tipo==="ritmo-estado"){S.pub={ok:!!d.publicado,fecha:d.fecha||"",bloqueada:!!d.bloqueada,cierre:d.cierre||null,q:d.q||""};S.cierres=Array.isArray(d.cierres)?d.cierres:[];if(S.loaded)render()}
         else if(d.tipo==="ritmo-guardado")setSave(d.ok?"":"err",d.ok?"Guardado en RITMO":"No se guardó: "+(d.error||"sin conexión"));
       });

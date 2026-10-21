@@ -7,14 +7,14 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
-    id: 46, fecha: "2026-10-20", version: "3.5", tipo: "Nuevo", para: "Gerentes de tienda",
-    titulo: "Importar horarios desde Excel",
-    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO), reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Quien no se pueda vincular se marca en rojo: sin turnos no hay días trabajados ni salario en la planilla. También compara la tabla NOMBRE · TURNOS de tu Excel, crea el horario «RITMO Turno 16 h» cuando una celda trae horas anotadas, y los turnos de 24 h quedan con la alerta «¡Turno de 24 hrs!». Los avisos de la carga quedan en la semana y en la campanita hasta que los corrijas."
-  },
-  {
-    id: 47, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: "Gerentes de tienda",
+    id: 47, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
     titulo: "Liquidación a la par del horario, celular y tutoriales nuevos",
     detalle: "La Liquidación semana ahora es una tabla como la de tu Excel (Nombre, Turnos, Horas, H.E. y Feriado, con el total) y va a la par del horario en pantallas grandes. En el celular, Mi horario se abre a pantalla completa y, en vertical, te sugiere girar el teléfono sin bloquearte. Los tutoriales y el asistente de ayuda ya explican todo esto, con un recorrido nuevo: «Importar horarios desde Excel»."
+  },
+  {
+    id: 46, fecha: "2026-10-20", version: "3.5", tipo: "Nuevo", para: ["Editor","Superusuario"],
+    titulo: "Importar horarios desde Excel",
+    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO), reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Quien no se pueda vincular se marca en rojo: sin turnos no hay días trabajados ni salario en la planilla. También compara la tabla NOMBRE · TURNOS de tu Excel, crea el horario «RITMO Turno 16 h» cuando una celda trae horas anotadas, y los turnos de 24 h quedan con la alerta «¡Turno de 24 hrs!». Los avisos de la carga quedan en la semana y en la campanita hasta que los corrijas."
   },
   {
     id: 45, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "Todos",
@@ -22,47 +22,47 @@ export const NOVEDADES = [
     detalle: "La campanita de arriba reúne lo que te falta por hacer según tu rol: entregas pendientes, aprobaciones, altas y bajas por confirmar, vacantes y más. Los avisos se calculan solos, se marcan como leídos y cada uno trae un botón para ir a resolverlo. Todo lo que ya existía se conserva."
   },
   {
-    id: 44, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "GZ, GD, GO y planilla",
+    id: 44, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: ["Visualizar","Descargar","Superusuario"],
     titulo: "Seguimiento: horas extra, semáforo, recordatorio y Excel",
     detalle: "Cada tienda muestra sus horas extra y feriadas de las semanas marcadas para pago, y un semáforo de planilla, horas extra, MBK y plazas. Arriba hay una tarjeta con el total. El botón Recordatorio arma un mensaje de WhatsApp con las tiendas a las que les falta algo, y Excel descarga lo que ves. Las tarjetas ahora dicen de qué quincena son."
   },
   {
-    id: 43, fecha: "2026-10-19", version: "3.4", tipo: "Mejora", para: "GZ, GD y GO",
+    id: 43, fecha: "2026-10-19", version: "3.4", tipo: "Mejora", para: ["Visualizar","Descargar","Superusuario"],
     titulo: "Planilla MBK: varias semanas y filtros compartidos",
     detalle: "Puedes elegir varias semanas a la vez; el GZ aprueba su selección completa. Los filtros de Seguimiento ahora también filtran la tabla de MBK, y hay una alerta cuando una tienda entregó planilla y no solicitó MBK. GD y GO solo consultan. Ver como ahora incluye a cada auxiliar de planilla."
   },
   {
-    id: 42, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "RRHH y Superusuario",
+    id: 42, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: ["RRHH","Superusuario"],
     titulo: "Rotación, Excel de personal y registro de auditoría",
     detalle: "RRHH ve las bajas de los últimos 6 meses por mes y por zona, con rotación y antigüedad al salir, y puede descargar el personal en Excel (sin cédulas). El superusuario tiene un registro de auditoría con quién aprobó horas extra y MBK, y quién abrió o reabrió quincenas."
   },
   {
-    id: 40, fecha: "2026-10-18", version: "3.3", tipo: "Nuevo", para: "GZ, GD y GO",
+    id: 40, fecha: "2026-10-18", version: "3.3", tipo: "Nuevo", para: ["Visualizar","Descargar","Superusuario"],
     titulo: "Planilla MBK: resumen a solicitar",
     detalle: "En Seguimiento, debajo del detalle por tienda, hay un cuadro con el monto de MBK que solicita cada tienda por semana, con observaciones: qué semana pide, si una tienda pide otra semana distinta a las demás o si cambió el horario después de solicitar. El GZ marca Aprobado y puede descargar la imagen; GD y GO lo consultan."
   },
   {
-    id: 41, fecha: "2026-10-18", version: "3.3", tipo: "Mejora", para: "Reclutamiento y RRHH",
+    id: 41, fecha: "2026-10-18", version: "3.3", tipo: "Mejora", para: ["RRHH","Encargado de Reclutamiento","Auxiliar de Reclutamiento","Superusuario"],
     titulo: "Reclutamiento y RRHH más completos",
     detalle: "Los prospectos se pueden editar. Vacantes y plazas por cubrir tienen scroll, se ven por tienda o por zona, y las vacantes abiertas se pueden quitar todas. RRHH muestra cuántas personas faltan y permite editar cargo, categoría, empresa o tienda del personal activo (ascensos y traslados), con historial."
   },
   {
-    id: 39, fecha: "2026-10-18", version: "3.2", tipo: "Mejora", para: "Reclutamiento",
+    id: 39, fecha: "2026-10-18", version: "3.2", tipo: "Mejora", para: ["Encargado de Reclutamiento","Auxiliar de Reclutamiento","Superusuario"],
     titulo: "Reclutamiento: dónde enfocarte",
     detalle: "Reclutamiento abre con las plazas por cubrir de cada tienda (presupuesto menos personal activo), de la más urgente a la menos, con filtro por zona. Quien tiene el permiso de aperturas puede abrir las vacantes de una tienda o de todas con un clic; al contratar o dar de alta a alguien, la vacante se cierra sola."
   },
   {
-    id: 38, fecha: "2026-10-18", version: "3.1", tipo: "Nuevo", para: "Reclutamiento",
+    id: 38, fecha: "2026-10-18", version: "3.1", tipo: "Nuevo", para: ["Encargado de Reclutamiento","Auxiliar de Reclutamiento","Superusuario"],
     titulo: "Prospectos: del candidato a la contratación",
     detalle: "En Reclutamiento hay una lista de prospectos con etapas (nuevo, entrevista, documentos, aceptado por la tienda). Al contratar se pide la cédula y la fecha de ingreso: se crea el alta en RRHH para que la tienda la confirme y se cierra la vacante abierta de ese cargo. Los prospectos no guardan cédula hasta que se contratan."
   },
   {
-    id: 37, fecha: "2026-10-18", version: "3.1", tipo: "Mejora", para: "Recursos Humanos",
+    id: 37, fecha: "2026-10-18", version: "3.1", tipo: "Mejora", para: ["RRHH","Superusuario"],
     titulo: "Doble motivo de baja",
     detalle: "En la ficha de una persona dada de baja se ven dos motivos: el que escribió la tienda y el de RRHH. RRHH puede agregar o editar el suyo sin borrar el de la tienda."
   },
   {
-    id: 36, fecha: "2026-10-18", version: "3.0", tipo: "Nuevo", para: "Recursos Humanos",
+    id: 36, fecha: "2026-10-18", version: "3.0", tipo: "Nuevo", para: ["RRHH","Superusuario"],
     titulo: "Tablero de RRHH: filtros, tarjetas y ficha",
     detalle: "Filtra por región, zona o tienda. Las tarjetas de arriba filtran la lista al tocarlas. El cuadro Estado por tienda muestra activos frente al presupuesto y los días sin completar; toca una tienda para ver solo a su gente. Al tocar el nombre de una persona se abre su ficha."
   },
