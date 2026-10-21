@@ -7,6 +7,11 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 53, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["RRHH","Encargado de Reclutamiento","Auxiliar de Reclutamiento","Superusuario"],
+    titulo: "Al cargar altas, las cédulas repetidas se explican con nombres",
+    detalle: "Si dos personas del Excel traen la misma cédula, RITMO ahora te dice quiénes son y en qué filas (antes solo daba el número de fila) y omite a la segunda. Si una cédula ya está registrada a nombre de otra persona, ya no la sobrescribe: la marca como «Cédula de otra persona» para que corrijas el archivo. Así nadie se queda sin aparecerle a su tienda sin saber por qué."
+  },
+  {
     id: 52, fecha: "2026-10-21", version: "3.5", tipo: "Nuevo", para: "Todos",
     titulo: "Tutoriales para todos los roles y más ayudas",
     detalle: "Ahora hay recorridos guiados en Tutoriales para cada rol: Matriz base y Planilla para gerentes de tienda; Seguimiento y Calendario para GZ, GD, GO y planilla; Recursos Humanos y Reclutamiento; y Administración para el superusuario. El asistente de ayuda suma 40 respuestas nuevas, por ejemplo cómo duplicar o limpiar una semana, deshacer, enviar el horario por WhatsApp, entender el semáforo, aprobar el MBK, publicar altas o ver la auditoría. Escribe lo que quieres hacer y te lleva paso a paso."

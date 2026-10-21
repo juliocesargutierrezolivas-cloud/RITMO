@@ -1125,19 +1125,22 @@ $('fileH').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
     const r=RH.parsearAltas(aoa,porNum);
     if(!PERSOK)await cargarPersonal();
     const ids=await Promise.all(r.registros.map(x=>RH.idPersonal(x.cedula))),mapa=new Map(PERS.map(p=>[p.id,p]));
-    const nuevos=[],cambian=[],confirma=[],iguales=[];
+    const nuevos=[],cambian=[],confirma=[],iguales=[],conflictos=[];
+    // Misma cédula, otro nombre: casi siempre es una cédula mal escrita en el archivo. No se pisa a la persona ya registrada.
+    const mismaPersona=(a,b)=>{const ta=new Set(RH.normNombre(a).split(' ').filter(w=>w.length>2));return RH.normNombre(b).split(' ').filter(w=>w.length>2&&ta.has(w)).length>=2};
     r.registros.forEach((x,i)=>{const id=ids[i],ex=mapa.get(id);
       if(!ex){nuevos.push({id,x});return}
+      if(ex.nombre&&!mismaPersona(ex.nombre,x.nombre)){conflictos.push({id,x,ex});return}
       const dif=['nombre','cargo','categoria','empresa','tienda','ingreso'].some(k=>(ex[k]||'')!==(x[k]||''));
       if(ex.alta&&ex.alta.origen==='tienda'&&ex.alta.confirmada===false)confirma.push({id,x,ex});
       else if(dif)cambian.push({id,x});else iguales.push(id)});
-    ALTASP={nuevos,cambian,confirma,iguales,r};
+    ALTASP={nuevos,cambian,confirma,iguales,conflictos,r};
     const E=r.errores,fl=a=>a.slice(0,8).join(', ')+(a.length>8?'…':'');
     $('rhSum').hidden=false;
-    $('rhSum').innerHTML=[[r.registros.length,'Personas válidas'],[nuevos.length,'Nuevas (se cargan)'],[confirma.length,'Confirman lo que ya registró la tienda'],[cambian.length,'Con datos distintos (se actualizan)'],[iguales.length,'Ya registradas, sin cambios'],[E.sinTienda.length,'Sin tienda en RITMO'],[E.repetidas.length,'Repetidas en el archivo'],[E.cedulaRevisar.length,'Cédula por revisar']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
-    const av=[E.sinTienda.length?`Sin tienda (filas ${fl(E.sinTienda)}).`:'',E.repetidas.length?`Cédula repetida, se omite la segunda (filas ${fl(E.repetidas)}).`:'',E.cedulaRevisar.length?`Cédula con formato raro (filas ${fl(E.cedulaRevisar)}).`:'',E.sinCedula.length?`Sin cédula (filas ${fl(E.sinCedula)}).`:''].filter(Boolean).join(' ');
+    $('rhSum').innerHTML=[[r.registros.length,'Personas válidas'],[nuevos.length,'Nuevas (se cargan)'],[confirma.length,'Confirman lo que ya registró la tienda'],[cambian.length,'Con datos distintos (se actualizan)'],[iguales.length,'Ya registradas, sin cambios'],[E.sinTienda.length,'Sin tienda en RITMO'],[E.repetidas.length,'Repetidas en el archivo'],[conflictos.length,'Cédula de otra persona'],[E.cedulaRevisar.length,'Cédula por revisar']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
+    const av=[E.sinTienda.length?`Sin tienda (filas ${fl(E.sinTienda)}).`:'',E.repetidas.length?`⚠ Cédula repetida en el archivo: ${E.repetidasDet.slice(0,4).map(d=>`${d.nombre} (fila ${d.fila}) usa la misma que ${d.con} (fila ${d.filaCon})`).join('; ')}${E.repetidasDet.length>4?'…':''}. Se omite la segunda: corrige esa cédula en el archivo.`:'',conflictos.length?`⚠ Misma cédula que otra persona ya registrada, no se actualiza: ${conflictos.slice(0,4).map(c=>`${c.x.nombre} (fila ${c.x.fila}) tiene la cédula de ${c.ex.nombre}`).join('; ')}${conflictos.length>4?'…':''}. Revisa la cédula en el archivo.`:'',E.cedulaRevisar.length?`Cédula con formato raro (filas ${fl(E.cedulaRevisar)}).`:'',E.sinCedula.length?`Sin cédula (filas ${fl(E.sinCedula)}).`:''].filter(Boolean).join(' ');
     const hay=nuevos.length||cambian.length||confirma.length;
-    msg('rhMsg',hay?`Archivo leído. Las personas nuevas quedan “por confirmar” hasta que cada gerente las revise y las incorpore a su horario, sin duplicar a nadie. ${av}`:`No hay cambios que publicar. ${av}`,E.sinTienda.length||E.repetidas.length?'warn':'ok');
+    msg('rhMsg',hay?`Archivo leído. Las personas nuevas quedan “por confirmar” hasta que cada gerente las revise y las incorpore a su horario, sin duplicar a nadie. ${av}`:`No hay cambios que publicar. ${av}`,E.sinTienda.length||E.repetidas.length||conflictos.length?'warn':'ok');
     $('rhPub').disabled=!hay;
   }catch(err){ALTASP=null;$('rhPub').disabled=true;msg('rhMsg','No se pudo leer el archivo: '+err.message,'bad')}
 };

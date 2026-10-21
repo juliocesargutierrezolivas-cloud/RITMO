@@ -479,6 +479,12 @@ export const AYUDA = [
     pasos: c => [
       { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "Las altas se cargan y se publican aquí." },
       { sel: "#rhPub", opcional: true, titulo: "Publicar altas", texto: "Las manda a las tiendas para que las confirmen." }] },
+  { cat: "rrhh", perm: "rrhh_cargar", accion: "Una alta no le aparece a la tienda (cédula repetida o de otra persona)", id: "alta-no-aparece",
+    kw: "alta no aparece tienda gerente no ve persona cedula repetida duplicada misma cedula otra persona conflicto sin tienda omitida cargar altas no llego",
+    texto: "Al cargar el Excel de altas, una persona no llega a la tienda si: (1) su cédula está repetida en el archivo (se omite la segunda), (2) su cédula ya está registrada a nombre de otra persona (no se actualiza para no sobrescribir), (3) la columna Tiendas no trae un número de tienda que exista en RITMO, o (4) falta la cédula. RITMO lo dice con nombres y número de fila: corrige esa cédula en el Excel y vuelve a cargar. Después, «Publicar altas».",
+    pasos: c => [
+      { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "El resumen de la carga aparece al leer el archivo." },
+      { sel: "#rhCarga", opcional: true, titulo: "Cargar altas", texto: "Mira el resumen: «Repetidas en el archivo», «Cédula de otra persona» y «Sin tienda en RITMO» son las que no se publicarán. El mensaje de abajo dice quiénes son." }] },
   { cat: "rrhh", perm: "rrhh_ver", accion: "Ver la rotación y los motivos de baja", id: "rotacion",
     kw: "rotacion bajas motivo renuncia despido salida personal analisis indicadores tienda",
     texto: "«Rotación y bajas» muestra cuántas personas salen y por qué motivo, por tienda, zona o región, para detectar dónde hay más rotación. Al registrar una baja puedes indicar el motivo (con un segundo motivo si aplica).",
