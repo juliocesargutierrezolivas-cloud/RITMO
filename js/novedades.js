@@ -1,11 +1,16 @@
 // RITMO · Versión publicada. Subir este número en CADA publicación: las sesiones abiertas lo comparan con el que está en el
 // sitio y avisan al usuario que hay una versión nueva (se aplica al cerrar sesión y volver a entrar).
-export const VERSION = "3.4";
+export const VERSION = "3.5";
 
 // RITMO · Novedades del desarrollador
 // Agregar cada mejora ARRIBA (la más reciente primero). id único y creciente.
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
+  {
+    id: 46, fecha: "2026-10-20", version: "3.5", tipo: "Nuevo", para: "Gerentes de tienda",
+    titulo: "Importar horarios desde Excel",
+    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO, TURNO 12HRS / 8HRS), empareja los nombres con tu personal ya cargado y arma las semanas. Si algo no se puede cargar (un nombre que no está en la Matriz base, alguien fuera de vigencia o dos turnos el mismo día), RITMO te lo avisa con un informe, un aviso rojo en la semana y la campanita, hasta que lo corrijas. Desde la misma pantalla puedes bajar la plantilla ya con tu personal y las próximas semanas."
+  },
   {
     id: 45, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "Todos",
     titulo: "Bandeja de avisos",

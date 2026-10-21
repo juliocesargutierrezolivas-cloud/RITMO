@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/importar-horarios.js"></script>
 <style>
 /* Layout: tablero día/noche — banda AM (sol, naranja) y banda PM (luna, azul marino) con la liquidación de la semana a la par. */
 :root{
@@ -356,6 +357,7 @@ td.off{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,transp
 .ro label[for="restore"],.ro #restore,.ro [data-delpl],.ro [data-delfi],.ro [data-delag],.ro [data-act="auto"],.ro [data-act="dup"],.ro [data-act="undo"],.ro [data-act="limpiar"],
 .ro [data-addrow],.ro [data-delrow],.ro [data-askdel],.ro [data-act="addag"],.ro [data-act="addpl"],.ro [data-act="addfi"],.ro [data-act="basecero"],.ro [data-act="backup"]{display:none!important}
 .ro [data-cell],.ro [draggable]{cursor:default!important}
+.ro [data-act="impxlsx"]{display:none!important}
 .nodl [data-act="xlsx"],.nodl [data-act="plxlsx"],.nodl [data-act="vtxlsx"],.nodl [data-act="img"],.nodl [data-act="vtimgS"],.nodl [data-act="vtimgD"],.nodl [data-act="wa"],.nodl [data-act="vtwa"],.nodl [data-act="asis"]{display:none!important}
 .ro input:not(#plMes):not(#plQ),.ro select:not(#plMes):not(#plQ){pointer-events:none;opacity:.85}
 </style>
@@ -919,10 +921,12 @@ function renderHorario(){
       <button class="btn" data-act="img">Copiar imagen</button>
       <button class="btn" data-act="asis" title="Imprimir hoja de asistencia de esta semana (carta)">🖨 Hoja de asistencia</button>
       <button class="btn navy" data-act="xlsx">Exportar Excel</button>
+      <button class="btn" data-act="impxlsx" title="Importar horarios desde Excel: la matriz de RITMO o tu hoja manual (LUNES a DOMINGO)">⬆ Importar Excel</button>
       <button class="btn" data-act="undo" ${UNDO.length?"":"disabled"} title="Deshacer (Ctrl+Z) · hasta 3 movimientos">↶ Deshacer${UNDO.length?` (${UNDO.length})`:""}</button>
       <button class="btn ghost" data-act="limpiar">Limpiar</button>
     </div></div>`;
   if(semanaCerrada(k))h+=`<div class="banner"><div>🔒</div><div><b>Semana cerrada.</b> Ya pasó la fecha de entrega de planilla de este período: el horario de esta semana no se puede cambiar. Solo tu GZ puede reabrirla; pídele que abra la quincena o solicita la reapertura en la pestaña <i>Entregar</i> del panel.</div></div>`;
+  h+=ImportarHorarios.banner(k);
   if(ferDias.length)h+=`<div class="banner"><div>🎉</div><div><b>${ferDias.length===1?"Feriado esta semana":"Feriados esta semana"}:</b> ${ferDias.map(x=>DIAS[x.d]+" "+fmtCorta(addDays(lun,x.d))+" · "+esc(x.f.nombre)).join(" · ")}. Quien trabaje ese día cobra <b>pago doble</b> (Arts. 66–68). Evalúa meter refuerzos.</div></div>`;
   const fin=ymd(addDays(lun,6));const altas=S.agentes.filter(a=>a.ingreso&&a.ingreso>=k&&a.ingreso<=fin),bajas=S.agentes.filter(a=>a.baja&&a.baja>=k&&a.baja<=fin);
   if(altas.length||bajas.length)h+=`<div class="banner info"><div>👥</div><div>${altas.length?`<b style="color:var(--ok)">Altas:</b> ${altas.map(a=>esc(a.nombre)+" ingresa "+fmtF(a.ingreso)).join(", ")}. Programa sus 2 turnos de 8 h en Inducción. `:""}${bajas.length?`<b style="color:var(--bad)">Bajas:</b> ${bajas.map(a=>esc(a.nombre)+" (último día "+fmtF(a.baja)+")").join(", ")}. Desde el día siguiente sale del horario; cubre sus posiciones.`:""}</div></div>`;
@@ -1328,6 +1332,7 @@ document.addEventListener("click",e=>{
   else if(a==="cancelrow"){S.addForm=null;render()}
   else if(a==="nodelrow"){S.confirmRow=null;render()}
   else if(a==="xlsx")exportar();
+  else if(a==="impxlsx")ImportarHorarios.abrir();
   else if(a==="limpiar"){const s=semanaDe(S.semana,true);if(!Object.keys(s.asig).length){toast("La semana ya está vacía.");return}
     if(t.dataset.sure){s.asig={};tocarSemana(S.semana);render();toast("Se vaciaron las asignaciones de la semana.")}else{t.dataset.sure="1";t.textContent="¿Confirmar limpiar?";t.classList.add("danger");setTimeout(()=>{if(t.isConnected){delete t.dataset.sure;t.textContent="Limpiar";t.classList.remove("danger")}},4000)}}
   else if(a==="addag"){const id="ag"+Date.now().toString(36);S.agentes.push({id,nombre:"NUEVO",cargos:["Agente SAC"],estudia:[],nuevo:true,color:colorLibre(),salario:null,ingreso:ymd(new Date()),baja:null});persist("base/agentes");render();

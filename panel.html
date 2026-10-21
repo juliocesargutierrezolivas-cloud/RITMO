@@ -578,7 +578,7 @@ async function guardarHE(h){
 function personal(t){
   const p=t.plazas,r=RES[t.codigo];
   if(p==null)return '<span class="sub">Sin presupuesto</span>';
-  if(!r)return `<span class="mono">— / ${p}</span> <span class="st no"><i></i>Sin datos</span>`;
+  if(!r||r.activos==null)return `<span class="mono">— / ${p}</span> <span class="st no"><i></i>Sin datos</span>`;
   const d=r.activos-p;
   const st=d<0?`<span class="st bad"><i></i>Faltan ${-d}</span>`:d>0?`<span class="st late"><i></i>Sobran ${d}</span>`:'<span class="st ok"><i></i>Completo</span>';
   return `<span class="mono" title="Personal activo / plazas presupuestadas, sin gerente de tienda">${r.activos} / ${p}</span> ${st}`;
@@ -749,7 +749,7 @@ function semaforoDe(t){
   const e=ENT[t.codigo],h=heDe(t),r=RES[t.codigo],pasado=CAL?.limite&&(CAL.limite.toDate?CAL.limite.toDate():new Date(CAL.limite))<new Date();
   const mb=(()=>{if(!(r?.mbk>0))return ['gris','Sin agentes MBK'];if(!MBKOK||!MBKSEL.length)return ['gris','MBK sin cargar'];
     const x=mbkResumen(t,MBKSEL);return x.sol.length?(x.cambio?['rojo','MBK cambió tras solicitar']:['verde','Solicitó MBK']):x.sinMarca.length?['ambar','MBK sin marcar como solicitado']:e?['rojo','Entregó planilla y no solicitó MBK']:['gris','MBK sin publicar']})();
-  const faltan=t.plazas!=null&&r?Math.max(0,t.plazas-(r.activos||0)):null;
+  const faltan=t.plazas!=null&&r&&r.activos!=null?Math.max(0,t.plazas-r.activos):null;
   return [['Planilla',e?['verde','Entregó su planilla']:pasado?['rojo','No entregó y ya pasó la fecha límite']:['ambar','Aún no entrega']],
     ['Horas extra',h?(h.faltan?['ambar',`${h.faltan} días sin horario guardado`]:['verde','Horas extra al día']):['gris','Sin horario guardado en esta quincena']],
     ['MBK',mb],['Plazas',faltan==null?['gris','Sin presupuesto']:faltan===0?['verde','Plazas completas']:faltan>=2?['rojo',`Faltan ${faltan}`]:['ambar','Falta 1']]];
@@ -781,7 +781,7 @@ $('recBtn').onclick=async()=>{
 function exportarSeguimiento(){
   if(typeof XLSX==='undefined')return alert('No se pudo cargar la librería de Excel. Revisa tu conexión.');
   const L=filtradas().filter(t=>!t.prueba),wb=XLSX.utils.book_new();
-  const filas=L.map(t=>{const r=RES[t.codigo]||{},h=heDe(t),e=ENT[t.codigo],f=t.plazas!=null?Math.max(0,t.plazas-(r.activos||0)):'';
+  const filas=L.map(t=>{const r=RES[t.codigo]||{},h=heDe(t),e=ENT[t.codigo],f=t.plazas!=null&&r.activos!=null?Math.max(0,t.plazas-r.activos):'';
     return {'Código':t.codigo,'Tienda':t.nombre||'','Zona':t.zona||'','Región':t.region||'','GZ':t.gzNombre||'','Presupuesto de plazas':t.plazas??'','Activos':r.activos??'','Faltan':f,'Entregó planilla':e?'Sí':'No','Fecha de entrega':e?.fecha?fmt(e.fecha):'','Horas extra':h?h.he:'','Horas feriadas':h?h.fer:'','Días sin horario':h?h.faltan:''}});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(filas),'Tiendas');
   if(MBKOK&&MBKSEL.length){const m=L.map(t=>mbkResumen(t,MBKSEL)).filter(r=>r.sol.length).map(r=>({'Código':r.t.codigo,'Tienda':r.t.nombre||'','Zona':r.t.zona||'','Semanas':r.sol.map(x=>semTxt(x.w)).join(' + '),'Días con salida':r.dias,'Monto solicitado':Math.round(r.monto*100)/100,'Aprobado por el GZ':r.apr?'Sí':'No'}));
@@ -794,7 +794,7 @@ function pintar(){
   const ok=TIENDAS.filter(t=>ENT[t.codigo]).length, n=TIENDAS.length, pct=n?Math.round(ok/n*100):0;
   $('kT').textContent=n;$('kE').textContent=ok;$('kP').textContent=n-ok;$('kC').textContent=pct+'%';$('kM').style.width=pct+'%';
   {const qt=quincenaTexto(Q);$('kET').textContent='Entregaron su planilla · '+qt;$('kPT').textContent='Sin entregar su planilla · '+qt;$('kCT').textContent='Cumplimiento de entrega · '+qt}
-  {const pl=TIENDAS.filter(t=>t.plazas!=null&&RES[t.codigo]&&!t.prueba),sp=pl.reduce((s,t)=>s+t.plazas,0),sa=pl.reduce((s,t)=>s+Math.min(RES[t.codigo].activos,t.plazas),0),pc=sp?Math.round(sa/sp*100):0;
+  {const pl=TIENDAS.filter(t=>t.plazas!=null&&RES[t.codigo]&&RES[t.codigo].activos!=null&&!t.prueba),sp=pl.reduce((s,t)=>s+t.plazas,0),sa=pl.reduce((s,t)=>s+Math.min(RES[t.codigo].activos,t.plazas),0),pc=sp?Math.round(sa/sp*100):0;
     pintarAlertasJefe();
     $('kPl').textContent=sp?pc+'%':'—';$('kPlM').style.width=pc+'%';$('kPlT').textContent=sp?`Plazas cubiertas · ${sa} de ${sp}`:'Plazas cubiertas · sin datos'}
   {const rep=TIENDAS.filter(t=>!t.prueba&&heDe(t)),he=rep.reduce((s,t)=>s+heDe(t).he,0),fer=rep.reduce((s,t)=>s+heDe(t).fer,0),tt=TIENDAS.filter(t=>!t.prueba).length;
@@ -1678,6 +1678,10 @@ function avisosDe(){
     if(!e&&lim){if(pasado)add('lim:'+Q+':p','⏰','La fecha límite de la planilla ya pasó',`Entrega ${qt} lo antes posible.`,'mia',true);
       else if(lim-ahora<48*36e5)add('lim:'+Q,'⏰',`La planilla vence ${fmt(lim)}`,`Entrega ${qt} antes de esa hora.`,'mia')}
     if(e?.bloqueada)add('he:'+Q,'🔒','Horas extra aprobadas',`Tu GZ aprobó ${qt}; la planilla quedó bloqueada.`,'mia');
+    // Conflictos que dejó la importación de horarios desde Excel (celdas vacías por nombres sin emparejar, dobles turnos)
+    {let gp=0;for(const s of Object.values(GEN?.semanas||{}))for(const p of (s.importPend||[])){
+      if(p.m==='doble'){if(Object.keys(s.asig||{}).filter(x=>x.endsWith('|'+p.d)&&s.asig[x]===p.aid).length>=2)gp++}else if(!(s.asig||{})[p.fid+'|'+p.d])gp++}
+      if(gp)add('imp:'+gp,'📥',`${gp} ${pl(gp,'conflicto','conflictos')} de la importación de horarios`,'Corrígelos en Mi horario: nombres sin emparejar o turnos dobles.','gen',true)}
     const r=e?.reapertura;if(r&&['aprobada','rechazada'].includes(r.estado)&&r.resueltaFecha)add('reap:'+(r.resueltaFecha.seconds||String(r.resueltaFecha)),'↩',`Reapertura ${r.estado}`,r.nota||'Tu GZ respondió tu solicitud.','mia')}
   else if(TIENDAS.length&&(esSuper()||['Visualizar','Descargar'].includes(ME.rol)||tiene('seguimiento'))){
     const T=TIENDAS.filter(t=>!t.prueba),sin=T.filter(t=>!ENT[t.codigo]);
@@ -1688,7 +1692,7 @@ function avisosDe(){
     if(heP.length)add('hep:'+Q+':'+heP.length,'✔',`${heP.length} ${pl(heP.length,'entrega espera','entregas esperan')} tu aprobación de horas extra`,'Apruébalas para bloquear la planilla.','seg');
     if(MBKOK&&MBKSEL.length){const pend=T.filter(t=>{const r=mbkResumen(t,MBKSEL);return r.sol.length&&!r.apr&&puedeAprobarMBK(t)}).length;
       if(pend)add('mbk:'+MBKSEL.join(',')+':'+pend,'🚌',`${pend} ${pl(pend,'tienda con MBK por aprobar','tiendas con MBK por aprobar')}`,'Revisa y aprueba tu selección en Planilla MBK.','seg')}
-    const falta=T.reduce((s,t)=>s+(t.plazas!=null&&RES[t.codigo]?Math.max(0,t.plazas-(RES[t.codigo].activos||0)):0),0);
+    const falta=T.reduce((s,t)=>s+(t.plazas!=null&&RES[t.codigo]&&RES[t.codigo].activos!=null?Math.max(0,t.plazas-RES[t.codigo].activos):0),0);
     if(falta)add('plz:'+falta,'🧩',`${falta} ${pl(falta,'plaza por cubrir','plazas por cubrir')}`,'Según el presupuesto y el personal activo.','seg')}
   if(PERSOK&&(esSuper()||tiene('rrhh_ver'))&&!esEditor()){const p=RH.pendientes(PERS),atr=p.filter(x=>x.atrasado);
     if(atr.length)add('rhatr:'+atr.length,'⚠️',`${atr.length} ${pl(atr.length,'movimiento de personal atrasado','movimientos de personal atrasados')}`,`Llevan ${RH.DIAS_ALERTA}+ días sin confirmar.`,'rrh',true);
@@ -2408,7 +2412,7 @@ addEventListener('message',async ev=>{
     try{
       if(C)await C.F.setDoc(genRef(),{contenido:txt,tienda:genTienda,bytes:txt.length,por:REAL.correo,actualizado:C.F.serverTimestamp()});
       else localStorage.setItem('ritmo-demo-trabajo-'+genTienda,txt);
-      $('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:true},location.origin);guardarResumen(GEN);sincronizarPersonal(GEN);
+      $('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:true},location.origin);guardarResumen(GEN);sincronizarPersonal(GEN);pintarBandeja();
       $('genSt').textContent='Guardado en RITMO · '+new Date().toLocaleTimeString('es-NI',{hour:'numeric',minute:'2-digit'});estadoPub();
     }catch(e){$('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:false,error:e.code||e.message},location.origin);$('genSt').textContent='⚠ No se guardó: revisa tu conexión.'}
   }
