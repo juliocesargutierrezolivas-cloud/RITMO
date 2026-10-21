@@ -55,6 +55,36 @@ export const AYUDA = [
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las horas extra se permiten por semana." },
       { frame: F, antes: () => c.gen("horario"), sel: ".toolbar .switch", opcional: true, titulo: "Horas extra esta semana", texto: "Enciéndelo cuando la semana lo requiera. Después, en Planilla, marcas qué semanas se pagan." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Importar mi horario desde Excel", id: "importar-horario",
+    kw: "importar excel horario subir cargar archivo hoja manual plantilla vincular nombres primera vez semanas anteriores planilla",
+    texto: "En Mi horario toca ⬆ Importar Excel y elige tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. RITMO reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Revisa el informe y corrige lo que te avise.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "La importación se hace en el horario de tu tienda. Tu personal ya debe estar en la Matriz base." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="impxlsx"]', opcional: true, titulo: "⬆ Importar Excel", texto: "Aquí bajas la plantilla con tu personal o eliges tu archivo. Antes de importar verás una vista previa para revisar y corregir." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Una persona quedó «sin vincular» al importar", id: "importar-sin-vincular",
+    kw: "sin vincular no coincidio recursos humanos rrhh sin salario sin dias trabajados nombre no aparece persona importar vinculo emparejar",
+    texto: "Significa que ese nombre del Excel no coincidió con el personal que cargó RRHH. El horario es lo que alimenta la planilla: sin turnos no hay días trabajados ni salario. En la vista previa, elige a su persona en el selector (queda recordado para la próxima). Si no está en tu Matriz base, confírmala o dala de alta primero.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los avisos de la importación quedan en la semana hasta que los corrijas." },
+      { frame: F, antes: () => c.gen("matriz"), sel: '[data-act="addag"]', opcional: true, titulo: "Matriz base", texto: "Si la persona no está aquí, no se puede vincular. Confírmala o dala de alta y vuelve a importar." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Turno de 24 horas", id: "turno-24",
+    kw: "turno 24 horas veinticuatro doble turno am pm 12 falta de personal seguido continuo",
+    texto: "Un turno de 24 h (AM 12 h + PM 12 h el mismo día) solo se asigna a mano, por falta de personal; el autollenado nunca lo propone. RITMO lo marca con la alerta «¡Turno de 24 hrs!» para que quede a la vista, y también aparece así si lo traes de un Excel.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Si asignas un segundo turno continuo a la misma persona, RITMO lo avisa." },
+      { frame: F, antes: () => c.gen("horario"), sel: "aside.side", opcional: true, titulo: "Alertas", texto: "Aquí aparece «¡Turno de 24 hrs!» con el día y la persona." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Horas anotadas en el Excel (ej. «Paola 16hrs»)", id: "importar-horas",
+    kw: "16hrs 16 horas anotadas nota excel importar horas trabajadas ritmo turno horario creado",
+    texto: "Si en una celda de tu Excel escribes el nombre con sus horas (por ejemplo «Paola 16hrs»), RITMO las toma como horas trabajadas y crea el horario «RITMO Turno 16 h» en tu tienda. Lo ves y lo puedes editar en Configuración.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El horario creado queda en la Configuración de tu tienda." },
+      { frame: F, antes: () => c.gen("config"), sel: "#view-config", opcional: true, titulo: "Horarios de tu tienda", texto: "Busca «RITMO Turno … h»: lo creó la importación. Puedes renombrarlo o borrarlo." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Liquidación de la semana junto al horario", id: "liquidacion",
+    kw: "liquidacion semana tabla turnos horas extra feriado he nombre total alertas a la par lado",
+    texto: "A la derecha del horario (en pantallas grandes) está la tabla Liquidación semana: Nombre, Turnos, Horas, H.E. y Feriado de cada persona, con el total, como la tabla que usabas en Excel. Debajo están las alertas. Con «Ocultar liquidación y alertas» ganas espacio.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "La liquidación está junto al horario de la semana." },
+      { frame: F, antes: () => c.gen("horario"), sel: "aside.side", opcional: true, titulo: "Liquidación semana", texto: "Turnos, horas, horas extra y horas en feriado de cada persona, con el total y las alertas." }] },
 
   /* ---------- Mi personal ---------- */
   { cat: "personal", perm: "mi_horario", accion: "Dar de alta a un colaborador", id: "alta",
@@ -206,6 +236,10 @@ export const AYUDA = [
     kw: "contrasena clave password cambiar olvide seguridad 60 dias llave",
     texto: "Toca el botón 🔑 arriba. RITMO te pide cambiarla cada 60 días y te avisa 7 días antes. Si la olvidaste, usa ¿Olvidaste tu contraseña? en la pantalla de inicio.",
     pasos: c => [{ sel: "#pwB", titulo: "Cambiar contraseña", texto: "Desde aquí la cambias cuando quieras." }] },
+  { cat: "cuenta", perm: "todos", accion: "Usar RITMO en el celular", id: "celular",
+    kw: "celular telefono movil girar pantalla horizontal vertical rotar completa tablet",
+    texto: "En el teléfono, Mi horario se abre a pantalla completa. En vertical verás un aviso para girar el teléfono y ver los 7 días completos; es solo una sugerencia, puedes tocar «Entendido» y seguir. El botón ⌂ Panel te devuelve al panel para entregar la quincena. En una computadora o tableta grande se ve todo junto.",
+    pasos: c => [{ sel: "#tabs", titulo: "Módulos", texto: "Desde aquí entras a Mi horario; en el teléfono se abre a pantalla completa." }] },
   { cat: "cuenta", perm: "todos", accion: "Ver los tutoriales de mi rol", id: "tutoriales",
     kw: "tutorial tutoriales recorrido guia aprender ayuda curso como se usa",
     texto: "La pestaña Tutoriales tiene los recorridos de tu rol, con voz opcional. El botón ❓ de arriba te lleva allí.",
