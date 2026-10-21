@@ -1678,6 +1678,10 @@ function avisosDe(){
     if(!e&&lim){if(pasado)add('lim:'+Q+':p','⏰','La fecha límite de la planilla ya pasó',`Entrega ${qt} lo antes posible.`,'mia',true);
       else if(lim-ahora<48*36e5)add('lim:'+Q,'⏰',`La planilla vence ${fmt(lim)}`,`Entrega ${qt} antes de esa hora.`,'mia')}
     if(e?.bloqueada)add('he:'+Q,'🔒','Horas extra aprobadas',`Tu GZ aprobó ${qt}; la planilla quedó bloqueada.`,'mia');
+    // Conflictos que dejó la importación de horarios desde Excel (celdas vacías por nombres sin emparejar, dobles turnos)
+    {let gp=0;for(const s of Object.values(GEN?.semanas||{}))for(const p of (s.importPend||[])){
+      if(p.m==='doble'){if(Object.keys(s.asig||{}).filter(x=>x.endsWith('|'+p.d)&&s.asig[x]===p.aid).length>=2)gp++}else if(!(s.asig||{})[p.fid+'|'+p.d])gp++}
+      if(gp)add('imp:'+gp,'📥',`${gp} ${pl(gp,'conflicto','conflictos')} de la importación de horarios`,'Corrígelos en Mi horario: nombres sin emparejar o turnos dobles.','gen',true)}
     const r=e?.reapertura;if(r&&['aprobada','rechazada'].includes(r.estado)&&r.resueltaFecha)add('reap:'+(r.resueltaFecha.seconds||String(r.resueltaFecha)),'↩',`Reapertura ${r.estado}`,r.nota||'Tu GZ respondió tu solicitud.','mia')}
   else if(TIENDAS.length&&(esSuper()||['Visualizar','Descargar'].includes(ME.rol)||tiene('seguimiento'))){
     const T=TIENDAS.filter(t=>!t.prueba),sin=T.filter(t=>!ENT[t.codigo]);
@@ -2408,7 +2412,7 @@ addEventListener('message',async ev=>{
     try{
       if(C)await C.F.setDoc(genRef(),{contenido:txt,tienda:genTienda,bytes:txt.length,por:REAL.correo,actualizado:C.F.serverTimestamp()});
       else localStorage.setItem('ritmo-demo-trabajo-'+genTienda,txt);
-      $('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:true},location.origin);guardarResumen(GEN);sincronizarPersonal(GEN);
+      $('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:true},location.origin);guardarResumen(GEN);sincronizarPersonal(GEN);pintarBandeja();
       $('genSt').textContent='Guardado en RITMO · '+new Date().toLocaleTimeString('es-NI',{hour:'numeric',minute:'2-digit'});estadoPub();
     }catch(e){$('genF').contentWindow.postMessage({tipo:'ritmo-guardado',ok:false,error:e.code||e.message},location.origin);$('genSt').textContent='⚠ No se guardó: revisa tu conexión.'}
   }

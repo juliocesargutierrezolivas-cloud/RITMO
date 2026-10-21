@@ -2,12 +2,12 @@
 // No guarda datos de Firebase (horarios, personal, entregas): esos siempre van a la red. Sin internet, RITMO muestra la
 // interfaz guardada y el asistente funciona; los datos reales vuelven al recuperar la conexión.
 // Para publicar una versión nueva de este archivo, cambia VERSION (se borran las copias anteriores).
-const VERSION = "ritmo-v2";
+const VERSION = "ritmo-v3";
 
 const CASCARON = [
   "./", "index.html", "panel.html", "visor.html", "generador.html",
   "js/nube.js", "js/firebase-config.js", "js/local.js", "js/novedades.js", "js/tutorial.js", "js/rrhh.js", "js/roles.js", "js/asistente.js",
-  "js/beta-demo.js", "js/vendor/qrcode.min.js", "js/a11y.js", "css/ritmo-a11y.css",
+  "js/beta-demo.js", "js/vendor/qrcode.min.js", "js/a11y.js", "js/importar-horarios.js", "css/ritmo-a11y.css",
   "assets/logo-ampm.png", "assets/logo-mbk.png", "assets/og-ritmo.png"
 ];
 // Servicios externos de los que depende la interfaz (SDK de Firebase, SheetJS y tipografías): se guardan al usarlos.
