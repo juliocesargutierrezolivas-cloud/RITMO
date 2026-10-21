@@ -57,13 +57,13 @@ export const AYUDA = [
       { frame: F, antes: () => c.gen("horario"), sel: ".toolbar .switch", opcional: true, titulo: "Horas extra esta semana", texto: "Enciéndelo cuando la semana lo requiera. Después, en Planilla, marcas qué semanas se pagan." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Importar mi horario desde Excel", id: "importar-horario",
     kw: "importar excel horario subir cargar archivo hoja manual plantilla vincular nombres primera vez semanas anteriores planilla",
-    texto: "En Mi horario toca ⬆ Importar Excel y elige tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. RITMO reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Revisa el informe y corrige lo que te avise.",
+    texto: "En Mi horario toca ⬆ Importar Excel y elige tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. RITMO reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Si tu Excel trae la hoja PLANILLA, también puede completar cédula, nombre, ingreso y salario que falten en tu Matriz base y Planilla (solo campos vacíos). Revisa el informe y corrige lo que te avise.",
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "La importación se hace en el horario de tu tienda. Tu personal ya debe estar en la Matriz base." },
       { frame: F, antes: () => c.gen("horario"), sel: '[data-act="impxlsx"]', opcional: true, titulo: "⬆ Importar Excel", texto: "Aquí bajas la plantilla con tu personal o eliges tu archivo. Antes de importar verás una vista previa para revisar y corregir." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Una persona quedó «sin vincular» al importar", id: "importar-sin-vincular",
     kw: "sin vincular no coincidio recursos humanos rrhh sin salario sin dias trabajados nombre no aparece persona importar vinculo emparejar",
-    texto: "Significa que ese nombre del Excel no coincidió con el personal que cargó RRHH. El horario es lo que alimenta la planilla: sin turnos no hay días trabajados ni salario. En la vista previa, elige a su persona en el selector (queda recordado para la próxima). Si no está en tu Matriz base, confírmala o dala de alta primero.",
+    texto: "Significa que ese nombre del Excel no coincidió con el personal que cargó RRHH. El horario es lo que alimenta la planilla: sin turnos la planilla no cuenta sus horas extra, feriados ni novedades (sus días se calculan desde su ingreso). En la vista previa, elige a su persona en el selector (queda recordado para la próxima). Si no está en tu Matriz base, confírmala o dala de alta primero.",
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los avisos de la importación quedan en la semana hasta que los corrijas." },
       { frame: F, antes: () => c.gen("matriz"), sel: '[data-act="addag"]', opcional: true, titulo: "Matriz base", texto: "Si la persona no está aquí, no se puede vincular. Confírmala o dala de alta y vuelve a importar." }] },

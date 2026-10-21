@@ -14,7 +14,7 @@ export const NOVEDADES = [
   {
     id: 46, fecha: "2026-10-20", version: "3.5", tipo: "Nuevo", para: ["Editor","Superusuario"],
     titulo: "Importar horarios desde Excel",
-    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO), reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Quien no se pueda vincular se marca en rojo: sin turnos no hay días trabajados ni salario en la planilla. También compara la tabla NOMBRE · TURNOS de tu Excel, crea el horario «RITMO Turno 16 h» cuando una celda trae horas anotadas, y los turnos de 24 h quedan con la alerta «¡Turno de 24 hrs!». Los avisos de la carga quedan en la semana y en la campanita hasta que los corrijas."
+    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO), reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Quien no se pueda vincular se marca en rojo: sin turnos la planilla no le cuenta horas extra, feriados ni novedades (sus días se calculan desde su ingreso). También compara la tabla NOMBRE · TURNOS de tu Excel, crea el horario «RITMO Turno 16 h» cuando una celda trae horas anotadas, y los turnos de 24 h quedan con la alerta «¡Turno de 24 hrs!». Los avisos de la carga quedan en la semana y en la campanita hasta que los corrijas."
   },
   {
     id: 45, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "Todos",
