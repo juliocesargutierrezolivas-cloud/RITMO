@@ -80,8 +80,8 @@ export const AYUDA = [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El horario creado queda en la Configuración de tu tienda." },
       { frame: F, antes: () => c.gen("config"), sel: "#view-config", opcional: true, titulo: "Horarios de tu tienda", texto: "Busca «RITMO Turno … h»: lo creó la importación. Puedes renombrarlo o borrarlo." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Viático MBK por persona y solicitud con la planilla", id: "viatico-mbk",
-    kw: "viatico viaticos mbk transporte semanal monto cada persona gasta solicitud automatica publicar planilla solicitado transportarse",
-    texto: "En Planilla › Datos del personal escribe el viático semanal MBK de cada agente (lo que gasta en transportarse). RITMO paga ese monto ÷ 7 por cada día que sale a las 8 pm o 10 pm. Al publicar la planilla, el viático de las mismas semanas de pago se solicita solo; en Planilla MBK queda la tabla para observarla.",
+    kw: "viatico viaticos mbk transporte semanal monto cada persona gasta solicitud automatica publicar planilla solicitado transportarse pauta real diferencia lista aviso",
+    texto: "En Planilla › Datos del personal escribe el viático semanal MBK de cada agente (lo que gasta en transportarse). RITMO paga ese monto ÷ 7 por cada día que sale a las 8 pm o 10 pm. En Planilla MBK escribes la pauta semanal de la tienda y ves la pauta contra lo real, con su diferencia. Al publicar la planilla, el viático de las mismas semanas de pago se solicita solo y RITMO te avisa «Tu Planilla MBK está lista»; la tabla queda para observarla.",
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El viático MBK vive en el Generador." },
       { frame: F, antes: () => c.gen("planilla"), sel: '[data-pf="viatico"]', opcional: true, titulo: "Viático semanal MBK", texto: "Escribe aquí lo que cada persona gasta en transporte por semana. Se deja en blanco a quien no lo necesite." },

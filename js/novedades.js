@@ -9,7 +9,7 @@ export const NOVEDADES = [
   {
     id: 48, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
     titulo: "Viático MBK por persona y solicitud automática con la planilla",
-    detalle: "En Planilla › Datos del personal hay una columna nueva, Viático semanal MBK: escribe lo que cada persona gasta en transportarse. El viático se calcula con ese monto ÷ 7 por cada día con salida de 8 pm o 10 pm; quien no lo tiene sigue compartiendo el presupuesto de la tienda. Además, al publicar la planilla el viático de las mismas semanas de pago se solicita solo, y a las tiendas que ya publicaron se les aplicó igual al abrir Mi horario. La tabla de Planilla MBK queda para observar."
+    detalle: "En Planilla › Datos del personal hay una columna nueva, Viático semanal MBK: escribe lo que cada persona gasta en transportarse. El viático se calcula con ese monto ÷ 7 por cada día con salida de 8 pm o 10 pm; quien no lo tiene sigue compartiendo el presupuesto de la tienda. Además, al publicar la planilla el viático de las mismas semanas de pago se solicita solo, y a las tiendas que ya publicaron se les aplicó igual al abrir Mi horario. La tabla de Planilla MBK queda para observar y compara la pauta semanal con lo real. Al publicar, RITMO te avisa «Tu Planilla MBK está lista»."
   },
   {
     id: 47, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
