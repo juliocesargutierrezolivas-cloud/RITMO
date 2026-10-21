@@ -294,14 +294,14 @@ const L_EDITOR_IMPORTAR = {
 
 const L_EDITOR_MBK = {
   id: "mbk", icono: "🚌", titulo: "Planilla MBK: viático por persona",
-  desc: "Escribe el viático semanal de cada agente MBK, compara la pauta con lo real y entiende qué pasa al publicar tu planilla.",
+  desc: "Escribe el viático por día de cada agente MBK, compara el presupuesto con lo real y entiende qué pasa al publicar tu planilla.",
   pasos: ctx => [
     { antes: () => { ctx.ir("gen"); ctx.gen("planilla"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El viático MBK se prepara en el Generador y se solicita solo cuando publicas tu planilla." },
-    { frame: F, sel: '[data-pf="viatico"]', opcional: true, titulo: "1 · Viático semanal MBK", texto: "En Planilla › Datos del personal, escribe lo que cada persona gasta en transportarse por semana. Déjalo en blanco a quien no lo necesite. RITMO paga ese monto ÷ 7 por cada día que sale a las 8 pm o 10 pm." },
-    { frame: F, antes: () => ctx.gen("mbk"), sel: "#vtPres", opcional: true, titulo: "2 · La pauta semanal", texto: "Escribe aquí lo que la tienda debería gastar en transporte por semana. Es la pauta con la que se compara lo real. Quien no tiene viático propio comparte esta pauta ÷ 7." },
-    { frame: F, sel: "#view-mbk .kpis", opcional: true, titulo: "3 · Pauta contra real", texto: "Arriba ves la pauta, los días con salida, lo real a solicitar y la diferencia: en verde si estás por debajo de la pauta y en rojo si la pasas." },
+    { frame: F, sel: '[data-pf="viatico"]', opcional: true, titulo: "1 · Viático por día MBK", texto: "En Planilla › Datos del personal, escribe lo que se le paga a cada persona por cada día que sale a las 8 pm o 10 pm (por ejemplo, C$ 50). Déjalo en blanco a quien no lo necesite. RITMO lo multiplica por sus días con salida." },
+    { frame: F, antes: () => ctx.gen("mbk"), sel: "#vtPres", opcional: true, titulo: "2 · El presupuesto semanal", texto: "Escribe aquí lo que la tienda debería gastar en transporte por semana. Es el presupuesto con el que se compara lo real. Quien no tiene viático propio comparte este presupuesto ÷ 7." },
+    { frame: F, sel: "#view-mbk .kpis", opcional: true, titulo: "3 · Presupuesto contra real", texto: "Arriba ves el presupuesto, los días con salida, lo real a solicitar y la diferencia: en verde si estás por debajo del presupuesto y en rojo si la pasas." },
     { frame: F, sel: "#view-mbk table.vt", opcional: true, titulo: "4 · Detalle por persona", texto: "Aquí está a quién se paga, cuánto y por qué día. Imprímelo o copia la imagen para la firma de recibido." },
-    { frame: F, sel: "#view-mbk .panel:last-child", opcional: true, titulo: "5 · Resumen para solicitud", texto: "Queda para observar cada semana: pauta, real, diferencia y estado. Ya no tienes que marcarla a mano: al publicar tu planilla, RITMO solicita el viático de las mismas semanas de pago." },
+    { frame: F, sel: "#view-mbk .panel:last-child", opcional: true, titulo: "5 · Resumen para solicitud", texto: "Queda para observar cada semana: presupuesto, real, diferencia y estado. Ya no tienes que marcarla a mano: al publicar tu planilla, RITMO solicita el viático de las mismas semanas de pago." },
     { titulo: "Al publicar tu planilla", texto: "Cuando publicas, RITMO te avisa «Tu Planilla MBK está lista» con las semanas y el total, y puedes revisarla desde ahí. Si falta el viático de alguien, te dice quién. Si la planilla no se pudo publicar, el viático no queda solicitado." }
   ]
 };
