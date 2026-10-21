@@ -302,7 +302,7 @@ const L_EDITOR_MBK = {
     { frame: F, sel: "#view-mbk .kpis", opcional: true, titulo: "3 · Presupuesto contra real", texto: "Arriba ves el presupuesto, los días con salida, lo real a solicitar y la diferencia: en verde si estás por debajo del presupuesto y en rojo si la pasas." },
     { frame: F, sel: "#view-mbk table.vt", opcional: true, titulo: "4 · Detalle por persona", texto: "Aquí está a quién se paga, cuánto y por qué día. Imprímelo o copia la imagen para la firma de recibido." },
     { frame: F, sel: "#view-mbk .panel:last-child", opcional: true, titulo: "5 · Resumen para solicitud", texto: "Queda para observar cada semana: presupuesto, real, diferencia y estado. Ya no tienes que marcarla a mano: al publicar tu planilla, RITMO solicita el viático de las mismas semanas de pago." },
-    { titulo: "Al publicar tu planilla", texto: "Cuando publicas, RITMO te avisa «Tu Planilla MBK está lista» con las semanas y el total, y puedes revisarla desde ahí. Si falta el viático de alguien, te dice quién. Si la planilla no se pudo publicar, el viático no queda solicitado." }
+    { titulo: "Al publicar tu planilla", texto: "Cuando publicas, RITMO te avisa «Tu Planilla MBK está lista» con las semanas y el total, y puedes revisarla desde ahí. Si falta el viático de alguien, te dice quién. Si la planilla no se pudo publicar, el viático no queda solicitado. Si luego cambias un viático o el horario, el monto solicitado se actualiza solo y tu GZ verá el aviso para aprobar de nuevo." }
   ]
 };
 

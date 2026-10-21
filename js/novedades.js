@@ -7,6 +7,11 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 50, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Visualizar","Descargar","Superusuario"],
+    titulo: "El monto del MBK solicitado se mantiene al día",
+    detalle: "Si una tienda cambia un viático o su horario después de solicitar el MBK, el monto solicitado se actualiza solo en cada guardado (y al volver a publicar la planilla), así la vista del GZ muestra siempre lo vigente. Si el GZ ya había aprobado otro monto, la tienda sale marcada para aprobar de nuevo. En Planilla MBK también hay un botón para actualizar la solicitud al instante."
+  },
+  {
     id: 49, fecha: "2026-10-21", version: "3.5", tipo: "Corrección", para: ["Editor","Superusuario"],
     titulo: "El viático MBK de cada persona es por día, no semanal",
     detalle: "En Planilla › Datos del personal la columna ahora se llama Viático por día MBK: el monto que escribes es lo que se le paga a esa persona por cada día con salida de 8 pm o 10 pm (por ejemplo, 50 por día) y ya no se divide entre 7. Si ya habías escrito montos, ahora se leen por día. El presupuesto semanal de la tienda sigue igual y se compara con lo real."
