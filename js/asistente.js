@@ -57,13 +57,13 @@ export const AYUDA = [
       { frame: F, antes: () => c.gen("horario"), sel: ".toolbar .switch", opcional: true, titulo: "Horas extra esta semana", texto: "Enciéndelo cuando la semana lo requiera. Después, en Planilla, marcas qué semanas se pagan." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Importar mi horario desde Excel", id: "importar-horario",
     kw: "importar excel horario subir cargar archivo hoja manual plantilla vincular nombres primera vez semanas anteriores planilla",
-    texto: "En Mi horario toca ⬆ Importar Excel y elige tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. RITMO reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Revisa el informe y corrige lo que te avise.",
+    texto: "En Mi horario toca ⬆ Importar Excel y elige tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. RITMO reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Si tu Excel trae la hoja PLANILLA, también puede completar cédula, nombre, ingreso y salario que falten en tu Matriz base y Planilla (solo campos vacíos). Revisa el informe y corrige lo que te avise.",
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "La importación se hace en el horario de tu tienda. Tu personal ya debe estar en la Matriz base." },
       { frame: F, antes: () => c.gen("horario"), sel: '[data-act="impxlsx"]', opcional: true, titulo: "⬆ Importar Excel", texto: "Aquí bajas la plantilla con tu personal o eliges tu archivo. Antes de importar verás una vista previa para revisar y corregir." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Una persona quedó «sin vincular» al importar", id: "importar-sin-vincular",
     kw: "sin vincular no coincidio recursos humanos rrhh sin salario sin dias trabajados nombre no aparece persona importar vinculo emparejar",
-    texto: "Significa que ese nombre del Excel no coincidió con el personal que cargó RRHH. El horario es lo que alimenta la planilla: sin turnos no hay días trabajados ni salario. En la vista previa, elige a su persona en el selector (queda recordado para la próxima). Si no está en tu Matriz base, confírmala o dala de alta primero.",
+    texto: "Significa que ese nombre del Excel no coincidió con el personal que cargó RRHH. El horario es lo que alimenta la planilla: sin turnos la planilla no cuenta sus horas extra, feriados ni novedades (sus días se calculan desde su ingreso). En la vista previa, elige a su persona en el selector (queda recordado para la próxima). Si no está en tu Matriz base, confírmala o dala de alta primero.",
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los avisos de la importación quedan en la semana hasta que los corrijas." },
       { frame: F, antes: () => c.gen("matriz"), sel: '[data-act="addag"]', opcional: true, titulo: "Matriz base", texto: "Si la persona no está aquí, no se puede vincular. Confírmala o dala de alta y vuelve a importar." }] },
@@ -79,6 +79,13 @@ export const AYUDA = [
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El horario creado queda en la Configuración de tu tienda." },
       { frame: F, antes: () => c.gen("config"), sel: "#view-config", opcional: true, titulo: "Horarios de tu tienda", texto: "Busca «RITMO Turno … h»: lo creó la importación. Puedes renombrarlo o borrarlo." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Viático MBK por persona y solicitud con la planilla", id: "viatico-mbk",
+    kw: "viatico viaticos mbk transporte semanal monto cada persona gasta solicitud automatica publicar planilla solicitado transportarse pauta real diferencia lista aviso",
+    texto: "En Planilla › Datos del personal escribe el viático semanal MBK de cada agente (lo que gasta en transportarse). RITMO paga ese monto ÷ 7 por cada día que sale a las 8 pm o 10 pm. En Planilla MBK escribes la pauta semanal de la tienda y ves la pauta contra lo real, con su diferencia. Al publicar la planilla, el viático de las mismas semanas de pago se solicita solo y RITMO te avisa «Tu Planilla MBK está lista»; la tabla queda para observarla.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El viático MBK vive en el Generador." },
+      { frame: F, antes: () => c.gen("planilla"), sel: '[data-pf="viatico"]', opcional: true, titulo: "Viático semanal MBK", texto: "Escribe aquí lo que cada persona gasta en transporte por semana. Se deja en blanco a quien no lo necesite." },
+      { frame: F, antes: () => c.gen("mbk"), sel: "#view-mbk .panel", opcional: true, titulo: "Planilla MBK", texto: "Aquí ves a quién se paga, cuánto y por qué día. Con la planilla publicada, las semanas de pago ya quedan solicitadas." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Liquidación de la semana junto al horario", id: "liquidacion",
     kw: "liquidacion semana tabla turnos horas extra feriado he nombre total alertas a la par lado",
     texto: "A la derecha del horario (en pantallas grandes) está la tabla Liquidación semana: Nombre, Turnos, Horas, H.E. y Feriado de cada persona, con el total, como la tabla que usabas en Excel. Debajo están las alertas. Con «Ocultar liquidación y alertas» ganas espacio.",

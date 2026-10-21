@@ -7,6 +7,11 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 48, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
+    titulo: "Viático MBK por persona y solicitud automática con la planilla",
+    detalle: "En Planilla › Datos del personal hay una columna nueva, Viático semanal MBK: escribe lo que cada persona gasta en transportarse. El viático se calcula con ese monto ÷ 7 por cada día con salida de 8 pm o 10 pm; quien no lo tiene sigue compartiendo el presupuesto de la tienda. Además, al publicar la planilla el viático de las mismas semanas de pago se solicita solo, y a las tiendas que ya publicaron se les aplicó igual al abrir Mi horario. La tabla de Planilla MBK queda para observar y compara la pauta semanal con lo real. Al publicar, RITMO te avisa «Tu Planilla MBK está lista»."
+  },
+  {
     id: 47, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
     titulo: "Liquidación a la par del horario, celular y tutoriales nuevos",
     detalle: "La Liquidación semana ahora es una tabla como la de tu Excel (Nombre, Turnos, Horas, H.E. y Feriado, con el total) y va a la par del horario en pantallas grandes. En el celular, Mi horario se abre a pantalla completa y, en vertical, te sugiere girar el teléfono sin bloquearte. Los tutoriales y el asistente de ayuda ya explican todo esto, con un recorrido nuevo: «Importar horarios desde Excel»."
@@ -14,7 +19,7 @@ export const NOVEDADES = [
   {
     id: 46, fecha: "2026-10-20", version: "3.5", tipo: "Nuevo", para: ["Editor","Superusuario"],
     titulo: "Importar horarios desde Excel",
-    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO), reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Quien no se pueda vincular se marca en rojo: sin turnos no hay días trabajados ni salario en la planilla. También compara la tabla NOMBRE · TURNOS de tu Excel, crea el horario «RITMO Turno 16 h» cuando una celda trae horas anotadas, y los turnos de 24 h quedan con la alerta «¡Turno de 24 hrs!». Los avisos de la carga quedan en la semana y en la campanita hasta que los corrijas."
+    detalle: "En Mi horario hay un botón Importar Excel. Lee la plantilla de RITMO o tu hoja manual de siempre (LUNES a DOMINGO), reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Quien no se pueda vincular se marca en rojo: sin turnos la planilla no le cuenta horas extra, feriados ni novedades (sus días se calculan desde su ingreso). También compara la tabla NOMBRE · TURNOS de tu Excel, crea el horario «RITMO Turno 16 h» cuando una celda trae horas anotadas, y los turnos de 24 h quedan con la alerta «¡Turno de 24 hrs!». Los avisos de la carga quedan en la semana y en la campanita hasta que los corrijas."
   },
   {
     id: 45, fecha: "2026-10-19", version: "3.4", tipo: "Nuevo", para: "Todos",

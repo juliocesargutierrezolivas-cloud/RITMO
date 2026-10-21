@@ -422,11 +422,11 @@ td.off{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,transp
     <li><b>Autollenar.</b> Indica presupuesto y horas extra; elige <i>Generar horario base</i> o <i>Solo llenar vacíos</i>. El sistema respeta todas las reglas y te dice qué no pudo cubrir.</li>
     <li><b>Ajuste del gerente.</b> Arrastra nombres para mover o intercambiar; arrástralos fuera de la tabla (o tecla Supr) para quitarlos. Lo manual es libre: lo que rompa una regla queda en rojo. <i>Deshacer</i> (o Ctrl+Z) revierte los últimos 3 movimientos.</li>
     <li><b>Novedades.</b> Marca por día vacaciones, subsidio médico, extraordinario (fuerza mayor) o ausencia de 8 h / 12 h (se descuenta en planilla junto con el séptimo día de esa semana). En planilla: vacaciones al 100 %, subsidio al 40 % a cargo de la empresa, extraordinario al 100 % (ajustable). Los días de clase se marcan solos desde la matriz.</li>
-    <li><b>Importar Excel.</b> En <i>Horario</i>, <i>⬆ Importar Excel</i> carga tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. Vincula a cada persona por la cédula de la hoja PLANILLA o por su nombre; quien quede <b>sin vincular</b> no tendrá días trabajados ni salario, así que empareja su nombre en la vista previa. Si una celda trae horas anotadas («Paola 16hrs») se crea el horario «RITMO Turno 16 h». Los avisos de la carga quedan en la semana hasta que los corrijas.</li>
+    <li><b>Importar Excel.</b> En <i>Horario</i>, <i>⬆ Importar Excel</i> carga tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. Vincula a cada persona por la cédula de la hoja PLANILLA o por su nombre; quien quede <b>sin vincular</b> no tendrá turnos y la planilla no le contará horas extra, feriados ni novedades, así que empareja su nombre en la vista previa. Si una celda trae horas anotadas («Paola 16hrs») se crea el horario «RITMO Turno 16 h». Si el Excel trae la hoja PLANILLA, también completa cédula, nombre, ingreso y salario vacíos en la Matriz base y la Planilla. Los avisos de la carga quedan en la semana hasta que los corrijas.</li>
     <li><b>Liquidación y alertas.</b> A la par del horario, la tabla <i>Liquidación semana</i> muestra Turnos, Horas, H.E. y Feriado por persona (mínimo 48 h) y su total; debajo están las alertas de reglas y cobertura. Un turno de 24 h (AM 12 h + PM 12 h) solo se asigna a mano y queda con la alerta «¡Turno de 24 hrs!».</li>
     <li><b>Compartir.</b> <i>Mensaje por persona</i> para WhatsApp, <i>Copiar imagen</i> de la tabla o <i>Exportar Excel</i>.</li>
     <li><b>Planilla.</b> Elige mes y quincena y marca las semanas cumplidas de horas extra a pagar: H.E, feriados, días y comentarios salen solos de los horarios guardados. Completa cédula, nombre, ingreso y salario una vez y descarga el Excel con el formato de la planilla.</li>
-    <li><b>Planilla MBK.</b> Escribe el presupuesto semanal de transporte: se divide entre 7 días y se paga a los agentes MBK que salen a las 8 pm o 10 pm. Copia la imagen o el mensaje de la solicitud y marca la semana como solicitada.</li>
+    <li><b>Planilla MBK.</b> En <i>Planilla › Datos del personal</i> escribe el <b>viático semanal MBK</b> de cada agente (lo que gasta en transportarse): se divide entre 7 y se paga por cada día que sale a las 8 pm o 10 pm. Quien no lo tenga comparte la pauta semanal de la tienda (lo que se debería gastar), y la tabla compara la pauta con lo real. Al <b>publicar la planilla</b>, el viático de esas mismas semanas se solicita solo; la tabla «Resumen para solicitud» queda para observarla (pauta vs real), y puedes copiar la imagen o el mensaje. Al publicar, RITMO te avisa que tu Planilla MBK está lista.</li>
     <li><b>Historial y versiones.</b> Cada cambio se guarda solo, en orden cronológico. Con <i>Descargar respaldo</i> y <i>Restaurar respaldo</i> (en Historial o Configuración) llevas tus datos a otra PC o a una versión nueva del generador.</li>
   </ol>
   <p class="rules"><b>Reglas que aplica:</b> 2 personas de noche en Compras siempre · 1 de día solo de lunes a miércoles · máximo 2 noches por persona · PM no entra AM al día siguiente · estudiantes: en día de clase solo turno PM y sin noche la víspera · máximo 6 días · mínimo 48 h por persona · gerente en entrenamiento de mañana · administrativos sin domingo · feriados a pago doble (Código del Trabajo, Ley 185 y Ley 1272).</p>
@@ -744,8 +744,12 @@ async function cargar(){
           persist("base/agentes");if(S.loaded)render();
           parent.postMessage({tipo:"ritmo-personal-ok",crear:(d.crear||[]).length,vincular:(d.vincular||[]).length,eliminar:del.size,bajas:nb},location.origin)}
         else if(d.tipo==="ritmo-vista"){const r=document.documentElement.style;r.setProperty("--vt",Math.max(0,d.top||0)+"px");r.setProperty("--vh",Math.max(300,d.h||innerHeight)+"px")}
-        else if(d.tipo==="ritmo-estado"){S.pub={ok:!!d.publicado,fecha:d.fecha||"",bloqueada:!!d.bloqueada,cierre:d.cierre||null,q:d.q||""};S.cierres=Array.isArray(d.cierres)?d.cierres:[];if(S.loaded)render()}
-        else if(d.tipo==="ritmo-guardado")setSave(d.ok?"":"err",d.ok?"Guardado en RITMO":"No se guardó: "+(d.error||"sin conexión"));
+        else if(d.tipo==="ritmo-estado"){S.pub={ok:!!d.publicado,fecha:d.fecha||"",bloqueada:!!d.bloqueada,cierre:d.cierre||null,q:d.q||""};S.cierres=Array.isArray(d.cierres)?d.cierres:[];
+          // A quien ya publicó su planilla se le aplica lo mismo: su viático MBK queda solicitado con esa planilla (una sola vez por quincena)
+          if(S.loaded&&S.pub.ok&&S.pub.q){const vc=vtCfg();vc.autoQ=vc.autoQ||{};if(!vc.autoQ[S.pub.q]){vc.autoQ[S.pub.q]=1;const mm=solicitarMBKconPlanilla(S.pub.q,ymd(new Date()));persist("base/config");S.pub.ok=true;/* guardar marca la planilla como "cambiada"; marcar el viático no cambia lo publicado */if(mm.length)toast("Tu Planilla MBK ya quedó solicitada con tu planilla publicada: "+mm.map(fmtRango).join(" · ")+".")}}
+          if(S.loaded)render();
+          if(S.esperaPub&&S.pub.ok){const x=S.esperaPub;S.esperaPub=null;S.marcadasPub=null;if(x.length)avisoMBK(x)}}
+        else if(d.tipo==="ritmo-guardado"){if(!d.ok&&S.esperaPub){S.esperaPub=null;deshacerSolicitudMBK(S.marcadasPub);S.marcadasPub=null;if(S.loaded)render()}setSave(d.ok?"":"err",d.ok?"Guardado en RITMO":"No se guardó: "+(d.error||"sin conexión"));}
       });
       parent.postMessage({tipo:"ritmo-listo"},location.origin);
     });
@@ -1342,7 +1346,7 @@ document.addEventListener("click",e=>{
   else if(a==="auto")autollenar();
   else if(a==="undo")deshacer();
   else if(a==="plxlsx")descargarPlanilla();
-  else if(a==="publicar"&&RITMO){clearTimeout(tRITMO);parent.postMessage({tipo:"ritmo-publicar",data:paqueteRITMO(),mbk:resumenMBK(),he:resumenHE()},location.origin);setSave("busy","Publicando…")}
+  else if(a==="publicar"&&RITMO){clearTimeout(tRITMO);S.marcadasPub=solicitarMBKconPlanilla(S.qPanel,ymd(new Date()));S.esperaPub=infoMBKpublicar(S.qPanel)||[];parent.postMessage({tipo:"ritmo-publicar",data:paqueteRITMO(),mbk:resumenMBK(),he:resumenHE()},location.origin);setSave("busy","Publicando…")}
   else if(a==="vtprev"||a==="vtnext"){S.vtSem=wkShift(S.vtSem||S.semana,a==="vtprev"?-1:1);render()}
   else if(a==="vtwa")mostrarTexto("Solicitud de viático · WhatsApp",textoViatico(S.vtSem||S.semana));
   else if(a==="vtimgS"||a==="vtimgD"){const k=S.vtSem||S.semana;copiarLienzo(lienzoViatico(k,a==="vtimgD"?"D":"S"),`Viatico_MBK_${a==="vtimgD"?"detalle":"solicitud"}_${k}.png`,a==="vtimgD"?"Imagen del detalle copiada. Pégala en WhatsApp.":"Imagen de la solicitud copiada. Pégala en WhatsApp.")}
@@ -1649,7 +1653,9 @@ function renderPlanilla(){
     <span class="note" style="margin:0">${esc(T.tit)} · ${esc(T.per)}</span></div>`;
   h+=bannerBloqueo()+bannerPersonal();
   if(C.faltan.length)h+=`<div class="banner"><div>⚠️</div><div><b>${C.faltan.length} día${C.faltan.length>1?"s":""} del período sin horario guardado</b> (${C.faltan.map(d=>fmtCorta(d)).join(", ")}). Las horas extra y feriados de esos días no se cuentan. Genera o guarda esas semanas en Horario.</div></div>`;
-  if(falt.length)h+=`<div class="banner info"><div>🪪</div><div>Completa los datos de planilla de: <b>${falt.map(p=>esc(p.ag.nombre)).join(", ")}</b> (cédula, nombre y apellido, ingreso o salario) en la tabla de abajo.</div></div>`;
+  if(falt.length){const que=p=>[!p.ag.cedula&&"cédula",!p.ag.nombreCompleto&&"nombre y apellido",!p.ag.ingreso&&"ingreso",!p.salario&&"salario"].filter(Boolean);
+    const soloSal=falt.every(p=>{const q=que(p);return q.length===1&&q[0]==="salario"});
+    h+=`<div class="banner info"><div>🪪</div><div>${soloSal?`<b>RRHH ya trajo la cédula, el nombre y el ingreso.</b> Solo falta el <b>salario</b> (RRHH no lo guarda) de: <b>${falt.map(p=>esc(p.ag.nombre)).join(", ")}</b>. Escríbelo en la tabla de abajo.`:`Completa los datos de planilla en la tabla de abajo: ${falt.map(p=>`<b>${esc(p.ag.nombre)}</b> (${que(p).join(", ")})`).join(" · ")}.`}</div></div>`}
   h+=`<div class="panel"><div class="panel-h"><h3>${esc((S.cfg.tienda||"Tienda AMPM").toUpperCase())}</h3><p>Semanas tomadas del historial: ${C.semanas.length?C.semanas.map(fmtRango).join(" · "):"ninguna"}</p></div>
   <div class="kpis kp4"><div class="kpi"><b>${C.filas.length}</b><span>Colaboradores</span></div><div class="kpi"><b style="font-size:19px">${money2(tot.q)}</b><span>Total quincenal</span></div><div class="kpi ${tot.he?"hot":""}"><b>${tot.he}</b><span>Horas extra</span></div><div class="kpi ${tot.f?"hot":""}"><b>${tot.f}</b><span>Horas feriado</span></div></div>
   <div class="scroll"><table class="pltable"><thead><tr><th>N°</th><th>Cédula</th><th>Nombre y apellido</th><th>Cargo</th><th>Ingreso</th><th>Días</th><th>Salario</th><th>Quincenal</th><th>H.E</th><th>Feriado</th><th>Comentarios</th><th>Nota adicional</th></tr></thead><tbody>
@@ -1673,13 +1679,14 @@ function renderPlanilla(){
   const sems=semanasPeriodo(P.ini,P.fin);
   h+=`<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Detalle semanal</h3><p>Resumen que va en Hoja1 del Excel</p></div>${sems.length?`<div class="wkgrid">${sems.map(k=>`<div class="wkcard"><h5>${fmtRango(k)}</h5><table class="mini"><thead><tr><th>Nombre</th><th>Turnos</th><th>Extras</th><th>Capac.</th><th>Feriados</th><th>Comentario</th></tr></thead><tbody>${resumenSemanaPl(k).map(q=>`<tr><td><span class="swatch" style="background:${esc(q.ag.color)}"></span>${esc(q.ag.nombre)}</td><td class="num">${q.turnos}</td><td class="num">${q.extra||""}</td><td class="num">${q.capac||""}</td><td class="num">${q.ferH||""}</td><td>${esc(q.coment)}</td></tr>`).join("")}</tbody></table></div>`).join("")}</div>`:'<div class="empty">No hay semanas guardadas en este período.</div>'}</div>`;
   // datos del personal
-  h+=`<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Datos del personal para planilla</h3><p>Se guardan en este navegador y en tu respaldo</p></div><div class="scroll"><table class="formtable" style="min-width:980px"><thead><tr><th>Nombre corto</th><th>Nombre y apellido</th><th>Cédula</th><th>Cargo en planilla</th><th>Fecha de ingreso</th><th>Salario mensual C$</th></tr></thead><tbody>
+  h+=`<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Datos del personal para planilla</h3><p>Se guardan en este navegador y en tu respaldo</p></div><div class="scroll"><table class="formtable" style="min-width:980px"><thead><tr><th>Nombre corto</th><th>Nombre y apellido</th><th>Cédula</th><th>Cargo en planilla</th><th>Fecha de ingreso</th><th>Salario mensual C$</th><th title="Lo que gasta esta persona en transportarse en una semana. Con él se calcula su viático MBK (÷ 7 por cada día con salida de 8 pm o 10 pm)">Viático semanal MBK C$</th></tr></thead><tbody>
   ${S.agentes.map((a,i)=>`<tr><td><span class="swatch" style="background:${esc(a.color)}"></span><b>${esc(a.nombre)}</b></td>
     <td><input class="in" id="pf-nc-${a.id}" data-pi="${i}" data-pf="nombreCompleto" value="${esc(a.nombreCompleto||"")}" placeholder="Nombre completo"></td>
     <td><input class="in num" id="pf-ce-${a.id}" data-pi="${i}" data-pf="cedula" value="${esc(a.cedula||"")}" placeholder="000-000000-0000X"></td>
     <td><input class="in" id="pf-cp-${a.id}" data-pi="${i}" data-pf="cargoPlanilla" value="${esc(a.cargoPlanilla||"")}" placeholder="${esc(cargoPlanilla(Object.assign({},a,{cargoPlanilla:""})))}"></td>
     <td><input class="in num" type="date" id="pf-in-${a.id}" data-pi="${i}" data-pf="ingreso" value="${a.ingreso||""}"></td>
-    <td><input class="in num" type="number" min="0" step="1" id="pf-sa-${a.id}" data-pi="${i}" data-pf="salario" value="${a.salario??""}"></td></tr>`).join("")}</tbody></table></div>
+    <td><input class="in num" type="number" min="0" step="1" id="pf-sa-${a.id}" data-pi="${i}" data-pf="salario" value="${a.salario??""}"></td>
+    <td><input class="in num" type="number" min="0" step="1" id="pf-vt-${a.id}" data-pi="${i}" data-pf="viatico" value="${a.viatico??""}" placeholder="${(a.cargos||[]).includes("Agente SAC MBK")||(a.cargos||[])[0]==="Agente SAC MBK"?"Monto":"—"}" aria-label="Viático semanal MBK"></td></tr>`).join("")}</tbody></table></div>
   <div class="pad" style="border-top:1px solid var(--line-2);display:flex;gap:16px;flex-wrap:wrap;align-items:end">
     <label>Horas por feriado trabajado<br><input class="in num" type="number" min="0" max="24" id="plHF" value="${cfg.horasFeriado}" style="width:90px"></label>
     <label>Días por quincena<br><input class="in num" type="number" min="1" max="16" id="plDQ" value="${cfg.diasQuincena}" style="width:90px"></label>
@@ -1701,7 +1708,7 @@ document.addEventListener("change",e=>{const el=e.target;if(S.tab!=="planilla"&&
   if(el.id==="plDQ"){plCfg().diasQuincena=Math.max(1,Number(el.value)||15);persist("base/config");render();return}
   if(el.dataset.pf){const a=S.agentes[Number(el.dataset.pi)],f=el.dataset.pf;if(!a)return;
     if(f==="ingreso"&&!fechaValida(el.value))return;
-    a[f]=f==="salario"?(el.value===""?null:Math.max(0,Number(el.value))):f==="ingreso"?(el.value||null):el.value.trim();if(f==="cedula")a.cedula=a.cedula.toUpperCase();
+    a[f]=f==="salario"||f==="viatico"?(el.value===""?null:Math.max(0,Number(el.value))):f==="ingreso"?(el.value||null):el.value.trim();if(f==="cedula")a.cedula=a.cedula.toUpperCase();
     persist("base/agentes");renderConFoco();return}
   if(el.dataset.hesem){const key=S.pl.ini+"_"+S.pl.fin,cur=new Set(semanasHE(key,S.pl.fin));if(el.checked)cur.add(el.dataset.hesem);else cur.delete(el.dataset.hesem);
     S.cfg.plHE[key]=[...cur].sort();persist("base/config");render();toast(el.checked?"Semana agregada al pago de horas extra.":"Semana quitada del pago de horas extra.");return}
@@ -1717,14 +1724,39 @@ function presSemana(k){const v=vtCfg(),w=v.semanas[k];return w&&w.pres!=null?Num
 function esSalidaMBK(f){if(f.caja!=="MBK")return false;const p=pl(f.plantilla),fm=mins(p.fin);return !cruzaMedianoche(p)&&fm>=1200}
 function calcViatico(k){
   const s=S.semanas[k],P=presSemana(k),diario=P?r2(P/7):0,lun=parse(k),dias=[],per={};
-  if(!s)return{k,P,diario,dias:[],agentes:[],salidas:0,diasUsados:0,total:0,sinUso:P||0,guardada:false};
+  if(!s)return{k,P,diario,dias:[],agentes:[],salidas:0,diasUsados:0,total:0,sinUso:P||0,dif:null,guardada:false};
   for(let d=0;d<7;d++){const sal=[];s.filas.forEach(f=>{if(!activo(f,d)||!esSalidaMBK(f))return;const id=s.asig[f.id+"|"+d];if(id&&agente(id))sal.push({id,hora:pl(f.plantilla).fin,f})});
-    const uniq=[...new Map(sal.map(x=>[x.id,x])).values()],c=uniq.length?r2(diario/uniq.length):0;
-    uniq.forEach(x=>{const a=agente(x.id);(per[x.id]=per[x.id]||{ag:a,dias:{},salidas:0,total:0});per[x.id].dias[d]={hora:x.hora,monto:c};per[x.id].salidas++;per[x.id].total=r2(per[x.id].total+c)});
-    dias.push({d,fecha:addDays(lun,d),salidas:uniq.length,monto:uniq.length?diario:0})}
+    const uniq=[...new Map(sal.map(x=>[x.id,x])).values()],propio=x=>Number(agente(x.id).viatico)>0,comun=uniq.filter(x=>!propio(x)),cc=comun.length&&diario?r2(diario/comun.length):0;
+    let suma=0; // quien tiene viático semanal propio cobra su monto ÷ 7 por día con salida; el resto comparte el presupuesto de la tienda
+    uniq.forEach(x=>{const a=agente(x.id),p=propio(x),c=p?r2(Number(a.viatico)/7):cc;suma=r2(suma+c);(per[x.id]=per[x.id]||{ag:a,dias:{},salidas:0,total:0,propio:p});per[x.id].dias[d]={hora:x.hora,monto:c};per[x.id].salidas++;per[x.id].total=r2(per[x.id].total+c)});
+    dias.push({d,fecha:addDays(lun,d),salidas:uniq.length,monto:suma})}
   const agentes=Object.values(per).sort((a,b)=>a.ag.nombre.localeCompare(b.ag.nombre));
   const total=r2(agentes.reduce((x,a)=>x+a.total,0)),diasUsados=dias.filter(x=>x.salidas).length;
-  return{k,P,diario,dias,agentes,salidas:agentes.reduce((x,a)=>x+a.salidas,0),diasUsados,total,sinUso:P?r2(P-total):0,guardada:!s._draft}}
+  return{k,P,diario,dias,agentes,salidas:agentes.reduce((x,a)=>x+a.salidas,0),diasUsados,total,sinUso:P?Math.max(0,r2(P-total)):0,dif:P?r2(total-P):null,guardada:!s._draft}}
+// El viático MBK se solicita con la planilla, de las mismas semanas que el calendario marca para pago. La tabla «Resumen para solicitud» queda para observarla.
+function semanasPagoMBK(q){
+  const m=/^(\d{4})-(\d{2})-Q([12])$/.exec(q||"");let sem=[];
+  if(Array.isArray(S.heSemanas)&&S.heSemanas.length)sem=S.heSemanas.slice();
+  else if(m){const [ini,fin]=rangoQuincena(+m[1],+m[2]-1,+m[3]);sem=semanasHE(ini+"_"+fin,fin)}
+  const con=semanasConMBK();return sem.filter(k=>con.includes(k)).sort()}
+// Lo que se le dice al gerente al publicar: qué semanas de viático quedaron solicitadas y si falta el monto de alguien
+function infoMBKpublicar(q){
+  try{const v=vtCfg(),sem=semanasPagoMBK(q).map(k=>{const V=calcViatico(k),w=v.semanas[k]||{};return{k,total:V.total,sol:!!w.solicitado,sinMonto:V.agentes.filter(a=>!(a.total>0)).map(a=>a.ag.nombre)}});return sem.length?sem:null}catch(e){return null}}
+function avisoMBK(info){
+  const ok=info.filter(x=>x.sol&&x.total>0),pend=info.filter(x=>!(x.sol&&x.total>0)),tot=ok.reduce((s,x)=>s+x.total,0),falta=[...new Set(pend.flatMap(x=>x.sinMonto))];
+  const m=document.getElementById("modal");
+  m.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mbkT" style="width:min(520px,calc(100vw - 16px))"><header><h4 id="mbkT">${ok.length?"✅ Tu Planilla MBK está lista":"⚠️ Tu Planilla MBK necesita un dato"}</h4><p>${ok.length?`Se solicitó con tu planilla el viático de ${ok.map(x=>fmtRango(x.k)).join(" · ")}.`:"Publicaste la planilla, pero el viático MBK no se pudo solicitar todavía."}</p></header>
+    <div class="pad">${ok.length?`<div class="banner info"><div>🚌</div><div><b>Total a solicitar: ${cs2(tot)}</b><br>Puedes revisar el detalle por persona y por día en <b>Planilla MBK</b>.</div></div>`:""}
+    ${falta.length||pend.length?`<div class="banner"><div>💵</div><div>${falta.length?`Falta el <b>viático semanal MBK</b> de: <b>${falta.map(esc).join(", ")}</b> (Planilla › Datos del personal). `:""}${pend.length&&!falta.length?"Revisa que haya salidas MBK de 8 pm o 10 pm y un monto de viático. ":""}Semanas sin solicitar: ${pend.map(x=>fmtRango(x.k)).join(" · ")}.</div></div>`:""}</div>
+    <footer><button class="btn" id="mbkX">Cerrar</button><button class="btn primary" id="mbkV">Revisar Planilla MBK</button></footer></div>`;
+  m.hidden=false;document.getElementById("mbkX").onclick=cerrarModal;
+  document.getElementById("mbkV").onclick=()=>{cerrarModal();S.vtSem=(ok[0]||pend[0]||info[0]).k;document.getElementById("tab-mbk").click()}}
+function solicitarMBKconPlanilla(q,fecha){
+  try{const v=vtCfg(),marc=[];
+    semanasPagoMBK(q).forEach(k=>{const w=v.semanas[k]=v.semanas[k]||{};if(w.solicitado)return;const V=calcViatico(k);if(!(V.total>0))return;w.solicitado=fecha;w.montoSol=V.total;w.auto=true;marc.push(k)});
+    if(marc.length)persist("base/config");return marc}catch(e){return []}}
+// Si la planilla no se pudo publicar (p. ej. falta la hoja de asistencia), el viático que se marcó con ese intento se deshace
+function deshacerSolicitudMBK(marc){try{const v=vtCfg();(marc||[]).forEach(k=>{const w=v.semanas[k];if(w&&w.auto){delete w.solicitado;delete w.montoSol;delete w.auto}});if((marc||[]).length)persist("base/config")}catch(e){}}
 function horaCorta(t){const [h]=t.split(":").map(Number);return (h%12||12)+" "+(h<12?"AM":"PM")}
 // Horas extra y horas feriadas de la quincena del panel, con las semanas que el calendario de planilla marcó para pago.
 // Calcula con la misma planilla que baja a Excel y no deja ningún cambio en la configuración.
@@ -1747,26 +1779,26 @@ function renderMBK(){
   let h=`<div class="weekbar"><div class="weeknav"><img class="mbk-logo" src="${LOGO_MBK}" alt="Mi Ban-Kito" style="height:30px"><h2>Viático de transporte</h2></div>
    <div class="actions"><button class="btn" data-act="vtwa">Mensaje WhatsApp</button><button class="btn" data-act="vtimgS">Copiar imagen de solicitud</button><button class="btn" data-act="vtimgD">Copiar imagen del detalle</button><button class="btn navy" data-act="vtxlsx">Descargar Excel</button></div></div>
   <div class="toolbar"><div class="weeknav"><button class="iconbtn" data-act="vtprev" aria-label="Semana anterior">‹</button><b style="min-width:170px;text-align:center">${fmtRango(k)}</b><button class="iconbtn" data-act="vtnext" aria-label="Semana siguiente">›</button></div>
-   <label style="display:inline-flex;gap:6px;align-items:center;font-weight:600;font-size:13px">Presupuesto semanal de transporte C$ <input class="in num" type="number" min="0" step="0.01" id="vtPres" value="${V.P??""}" placeholder="Ej. 1400" style="width:130px"></label>
-   <span class="note" style="margin:0">Monto diario = presupuesto ÷ 7. Solo se solicita lo de los días con salida MBK de 8 pm o 10 pm.</span></div>`;
+   <label style="display:inline-flex;gap:6px;align-items:center;font-weight:600;font-size:13px">Pauta semanal de transporte C$ <input class="in num" type="number" min="0" step="0.01" id="vtPres" value="${V.P??""}" placeholder="Ej. 1400" style="width:130px" title="Lo que la tienda debería gastar en transporte por semana"></label>
+   <span class="note" style="margin:0">Cada agente cobra su <b>viático semanal ÷ 7</b> por día con salida MBK de 8 pm o 10 pm (se escribe en Planilla › Datos del personal). La <b>pauta semanal</b> es lo que la tienda debería gastar; lo <b>real</b> sale de los viáticos de cada agente y de sus salidas. Quien no tiene viático propio comparte la pauta ÷ 7.</span></div>`;
   if(!S.semanas[k]||S.semanas[k]._draft)h+=`<div class="banner"><div>⚠️</div><div>Esta semana no tiene horario guardado. Créalo en Horario y el viático se calcula solo.</div></div>`;
-  if(!V.P)h+=`<div class="banner info"><div>💵</div><div>Escribe el presupuesto semanal de transporte de la tienda. Se recuerda para las semanas siguientes.</div></div>`;
+  if(!V.P&&!V.agentes.some(a=>a.propio))h+=`<div class="banner info"><div>💵</div><div>Escribe el <b>viático semanal MBK</b> de cada agente en Planilla › Datos del personal, o la pauta semanal de la tienda aquí. Se recuerdan para las semanas siguientes.</div></div>`;
   if(cambio)h+=`<div class="banner"><div>🔒</div><div><b>Esta semana ya se solicitó por ${cs2(w.montoSol)}, pero el horario cambió y hoy da ${cs2(V.total)}.</b> Revisa con quien aprobó el viático.</div></div>`;
-  h+=`<div class="panel"><div class="kpis kp4" style="grid-template-columns:repeat(5,1fr)"><div class="kpi"><b>${V.P?cs2(V.P):"—"}</b><span>Presupuesto semana</span></div><div class="kpi"><b>${V.P?cs2(V.diario):"—"}</b><span>Monto por día (÷7)</span></div>
-   <div class="kpi"><b>${V.diasUsados} / 7</b><span>Días con salida</span></div><div class="kpi hot"><b>${cs2(V.total)}</b><span>A solicitar</span></div><div class="kpi"><b>${cs2(V.sinUso)}</b><span>No se solicita</span></div></div></div>`;
+  h+=`<div class="panel"><div class="kpis kp4" style="grid-template-columns:repeat(4,1fr)"><div class="kpi"><b>${V.P?cs2(V.P):"—"}</b><span>Pauta semanal (lo que se debería gastar)</span></div>
+   <div class="kpi"><b>${V.diasUsados} / 7</b><span>Días con salida</span></div><div class="kpi hot"><b>${cs2(V.total)}</b><span>Real a solicitar</span></div><div class="kpi ${V.dif>0?"alert":""}"><b>${V.dif==null?"—":(V.dif>0?"+":"")+cs2(V.dif)}</b><span>${V.dif==null?"Diferencia vs pauta":V.dif>0?"Sobre la pauta":"Bajo la pauta"}</span></div></div></div>`;
   h+=`<div class="panel"><div class="panel-h"><h3>Detalle semanal · uso del gerente</h3><p>A quién pagar, cuánto y por qué día</p></div><div class="scroll"><table class="pltable vt"><thead><tr><th style="text-align:left">Agente MBK</th>${V.dias.length?V.dias.map(x=>`<th>${DC[x.d]} ${x.fecha.getDate()}</th>`).join(""):DC.map((x,d)=>`<th>${x} ${addDays(lun,d).getDate()}</th>`).join("")}<th>Salidas</th><th>Monto a pagar</th><th>Firma de recibido</th></tr></thead><tbody>
-   ${V.agentes.length?V.agentes.map(a=>`<tr><td style="text-align:left"><span class="swatch" style="background:${esc(a.ag.color)}"></span><b>${esc(a.ag.nombre)}</b></td>${[0,1,2,3,4,5,6].map(d=>{const x=a.dias[d];return `<td>${x?`<span class="vtchip ${x.hora>="21:00"?"c10":"c8"}">${horaCorta(x.hora)}</span><br><span class="num">${r2(x.monto).toFixed(2)}</span>`:"—"}</td>`}).join("")}<td class="num">${a.salidas}</td><td class="num"><b>${cs2(a.total)}</b></td><td class="firma">______________</td></tr>`).join("")
+   ${V.agentes.length?V.agentes.map(a=>`<tr><td style="text-align:left"><span class="swatch" style="background:${esc(a.ag.color)}"></span><b>${esc(a.ag.nombre)}</b>${a.propio?`<br><small style="color:var(--muted)">C$ ${esc(a.ag.viatico)} por semana</small>`:""}</td>${[0,1,2,3,4,5,6].map(d=>{const x=a.dias[d];return `<td>${x?`<span class="vtchip ${x.hora>="21:00"?"c10":"c8"}">${horaCorta(x.hora)}</span><br><span class="num">${r2(x.monto).toFixed(2)}</span>`:"—"}</td>`}).join("")}<td class="num">${a.salidas}</td><td class="num"><b>${cs2(a.total)}</b></td><td class="firma">______________</td></tr>`).join("")
      :`<tr><td colspan="11" class="empty">No hay salidas MBK de 8 pm o 10 pm en esta semana.</td></tr>`}
    ${V.agentes.length?`<tr class="vttot"><td style="text-align:left">Total</td>${V.dias.map(x=>`<td class="num">${x.salidas?cs2(x.monto).replace("C$ ",""):"—"}</td>`).join("")}<td class="num">${V.salidas}</td><td class="num">${cs2(V.total)}</td><td></td></tr>`:""}</tbody></table></div>
-   <div class="legend"><span><span class="vtchip c10">10 PM</span> MBK 2:00 pm – 10:00 pm</span><span><span class="vtchip c8">8 PM</span> MBK 8:00 am – 8:00 pm</span><span>Si dos agentes salen el mismo día, el monto de ese día se reparte en partes iguales.</span><span>El doble turno continuo también cobra: es beneficio por entrar antes.</span></div></div>`;
+   <div class="legend"><span><span class="vtchip c10">10 PM</span> MBK 2:00 pm – 10:00 pm</span><span><span class="vtchip c8">8 PM</span> MBK 8:00 am – 8:00 pm</span><span>Con viático semanal propio: su monto ÷ 7 por cada día con salida. Sin él, los que salen el mismo día reparten en partes iguales la pauta ÷ 7.</span><span>El doble turno continuo también cobra: es beneficio por entrar antes.</span></div></div>`;
   const hist=semanasConMBK().slice(-12);
-  h+=`<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Resumen para solicitud de viático</h3><p>Una fila por semana guardada · orden cronológico</p></div><div class="scroll"><table class="pltable"><thead><tr><th style="text-align:left">Semana</th><th>Presupuesto</th><th>Días con salida</th><th>Salidas</th><th>Agentes</th><th>A solicitar</th><th>No se solicita</th><th>Estado</th><th></th></tr></thead><tbody>
-   ${hist.length?hist.map(x=>{const R=calcViatico(x),ww=vc.semanas[x]||{};return `<tr${x===k?' style="background:var(--am-tint)"':""}><td style="text-align:left"><b>${fmtRango(x)}</b></td><td class="num">${R.P?cs2(R.P):"—"}</td><td>${R.diasUsados}</td><td>${R.salidas}</td><td>${R.agentes.length}</td><td class="num"><b>${cs2(R.total)}</b></td><td class="num">${cs2(R.sinUso)}</td>
-     <td>${ww.solicitado?`<span class="pill" style="background:var(--ok-bg);color:var(--ok)">Solicitado ${fmtDMA(ww.solicitado)}</span>`:'<span class="pill x">Pendiente</span>'}</td>
+  h+=`<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Resumen para solicitud de viático</h3><p>Una fila por semana guardada · orden cronológico</p></div><div class="scroll"><table class="pltable"><thead><tr><th style="text-align:left">Semana</th><th>Pauta semanal</th><th>Días con salida</th><th>Salidas</th><th>Agentes</th><th>Real a solicitar</th><th>Diferencia vs pauta</th><th>Estado</th><th></th></tr></thead><tbody>
+   ${hist.length?hist.map(x=>{const R=calcViatico(x),ww=vc.semanas[x]||{};return `<tr${x===k?' style="background:var(--am-tint)"':""}><td style="text-align:left"><b>${fmtRango(x)}</b></td><td class="num">${R.P?cs2(R.P):"—"}</td><td>${R.diasUsados}</td><td>${R.salidas}</td><td>${R.agentes.length}</td><td class="num"><b>${cs2(R.total)}</b></td><td class="num" style="color:${R.dif>0?"var(--bad)":"var(--ok)"}">${R.dif==null?"—":(R.dif>0?"+":"")+cs2(R.dif)}</td>
+     <td>${ww.solicitado?`<span class="pill" style="background:var(--ok-bg);color:var(--ok)">Solicitado ${fmtDMA(ww.solicitado)}${ww.auto?" · con la planilla":""}</span>`:'<span class="pill x">Pendiente</span>'}</td>
      <td><button class="btn" style="padding:4px 9px;font-size:12px" data-vtsol="${x}">${ww.solicitado?"Quitar marca":"Marcar solicitado"}</button> ${x!==k?`<button class="btn ghost" style="padding:4px 9px;font-size:12px" data-vtopen="${x}">Ver</button>`:""}</td></tr>`}).join(""):'<tr><td colspan="9" class="empty">Aún no hay semanas guardadas con MBK.</td></tr>'}</tbody></table></div></div>`;
   v.innerHTML=h}
 function textoViatico(k){const V=calcViatico(k),t=S.cfg.tienda||"Tienda AMPM";
-  let x=`*Solicitud de viático de transporte MBK*\n${t}\nSemana ${fmtRango(k)}\n\nPresupuesto semanal: ${V.P?cs2(V.P):"—"}\nMonto por día: ${V.P?cs2(V.diario):"—"}\nDías con salida: ${V.diasUsados} de 7\n*Total a solicitar: ${cs2(V.total)}*\n`;
+  let x=`*Solicitud de viático de transporte MBK*\n${t}\nSemana ${fmtRango(k)}\n\nPauta semanal: ${V.P?cs2(V.P):"—"}\nDías con salida: ${V.diasUsados} de 7\n*Total a solicitar (real): ${cs2(V.total)}*\n${V.dif==null?"":`${V.dif>0?"Sobre la pauta":"Bajo la pauta"}: ${cs2(Math.abs(V.dif))}\n`}`;
   if(V.agentes.length){x+=`\n*Detalle por agente*\n`;V.agentes.forEach(a=>{x+=`• ${a.ag.nombre}: ${a.salidas} salida${a.salidas>1?"s":""} (${Object.entries(a.dias).map(([d,y])=>DC[d].charAt(0)+DC[d].slice(1).toLowerCase()+" "+horaCorta(y.hora)).join(", ")}) → ${cs2(a.total)}\n`})}
   return x}
 function lienzoViatico(k,modo){

@@ -285,9 +285,24 @@ const L_EDITOR_IMPORTAR = {
     { frame: F, antes: async () => { ctx.genAct("impxlsx"); await new Promise(r => setTimeout(r, 500)); }, sel: "#iiP", opcional: true, titulo: "Plantilla con tu personal", texto: "¿Primera vez? Baja la plantilla: ya trae a tu personal y las próximas semanas con sus fechas. También puedes subir tu hoja de siempre (LUNES a DOMINGO con las filas de 12 y 8 horas)." },
     { frame: F, sel: "#iiF", opcional: true, titulo: "Elegir archivo", texto: "Aquí eliges el Excel. Funciona con la hoja manual completa: no hace falta quitarle las tablas de planilla ni de turnos. RITMO usa la hoja PLANILLA (cédulas) para reconocer a cada persona." },
     { antes: () => ctx.genCerrar(), titulo: "1 · ¿A qué fila va cada fila?", texto: "RITMO propone la caja y el horario de cada fila según su título («12 hrs PM», «Turno MBK 6am-2pm»…) y según las personas que la cubren. Revisa la propuesta y corrígela si hace falta; la recordará la próxima vez." },
-    { titulo: "2 · Personal: vinculado o sin vincular", texto: "Cada nombre del Excel aparece como «Vinculado» (con la cédula, el nombre exacto o uno parecido) o «Sin vincular». Quien quede sin vincular no tendrá días trabajados en el horario y, por eso, tampoco salario en la planilla: empareja su nombre a mano con el selector. Si hay un «Paola 16hrs», RITMO crea el horario «RITMO Turno 16 h» para registrar esas horas." },
+    { titulo: "2 · Personal: vinculado o sin vincular", texto: "Cada nombre del Excel aparece como «Vinculado» (con la cédula, el nombre exacto o uno parecido) o «Sin vincular». Quien quede sin vincular no tendrá turnos en el horario, y la planilla no le contará horas extra, feriados ni novedades (sus días se calculan desde su ingreso): empareja su nombre a mano con el selector. Si hay un «Paola 16hrs», RITMO crea el horario «RITMO Turno 16 h» para registrar esas horas." },
     { titulo: "3 y 4 · Tu personal y el control", texto: "RITMO te avisa qué personas de tu Matriz base no aparecen en ningún turno (el gerente también debe estar en el horario, aunque firme la planilla) y compara la tabla NOMBRE · TURNOS de tu Excel con lo que va a cargar. Si algo no cuadra, te dice la posible causa." },
+    { titulo: "5 · Datos de planilla", texto: "Si tu Excel trae la hoja PLANILLA, RITMO puede completar en tu Matriz base y en tu Planilla la cédula, el nombre completo, la fecha de ingreso y el salario que te falten (solo campos vacíos; nunca pisa lo que ya cargaste). Lo único que te queda a mano en la Matriz base son los días que estudia cada persona." },
     { titulo: "Después de importar", texto: "El informe lista lo que debes corregir en la web. Esos avisos quedan en la semana y en la campanita, y se quitan solos cuando lo arreglas. Un turno de 24 horas (AM 12 h + PM 12 h el mismo día) se carga como lo escribiste y queda con el aviso «¡Turno de 24 hrs!»: el generador nunca lo propone, solo tú a mano." }
+  ]
+};
+
+const L_EDITOR_MBK = {
+  id: "mbk", icono: "🚌", titulo: "Planilla MBK: viático por persona",
+  desc: "Escribe el viático semanal de cada agente MBK, compara la pauta con lo real y entiende qué pasa al publicar tu planilla.",
+  pasos: ctx => [
+    { antes: () => { ctx.ir("gen"); ctx.gen("planilla"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El viático MBK se prepara en el Generador y se solicita solo cuando publicas tu planilla." },
+    { frame: F, sel: '[data-pf="viatico"]', opcional: true, titulo: "1 · Viático semanal MBK", texto: "En Planilla › Datos del personal, escribe lo que cada persona gasta en transportarse por semana. Déjalo en blanco a quien no lo necesite. RITMO paga ese monto ÷ 7 por cada día que sale a las 8 pm o 10 pm." },
+    { frame: F, antes: () => ctx.gen("mbk"), sel: "#vtPres", opcional: true, titulo: "2 · La pauta semanal", texto: "Escribe aquí lo que la tienda debería gastar en transporte por semana. Es la pauta con la que se compara lo real. Quien no tiene viático propio comparte esta pauta ÷ 7." },
+    { frame: F, sel: "#view-mbk .kpis", opcional: true, titulo: "3 · Pauta contra real", texto: "Arriba ves la pauta, los días con salida, lo real a solicitar y la diferencia: en verde si estás por debajo de la pauta y en rojo si la pasas." },
+    { frame: F, sel: "#view-mbk table.vt", opcional: true, titulo: "4 · Detalle por persona", texto: "Aquí está a quién se paga, cuánto y por qué día. Imprímelo o copia la imagen para la firma de recibido." },
+    { frame: F, sel: "#view-mbk .panel:last-child", opcional: true, titulo: "5 · Resumen para solicitud", texto: "Queda para observar cada semana: pauta, real, diferencia y estado. Ya no tienes que marcarla a mano: al publicar tu planilla, RITMO solicita el viático de las mismas semanas de pago." },
+    { titulo: "Al publicar tu planilla", texto: "Cuando publicas, RITMO te avisa «Tu Planilla MBK está lista» con las semanas y el total, y puedes revisarla desde ahí. Si falta el viático de alguien, te dice quién. Si la planilla no se pudo publicar, el viático no queda solicitado." }
   ]
 };
 
@@ -321,7 +336,7 @@ const L_PRONTO = {
 };
 
 export const LECCIONES = {
-  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_IMPORTAR, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
+  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_IMPORTAR, L_EDITOR_MBK, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
   RRHH: [L_PANEL, L_PRONTO],
   Visualizar: [L_PANEL, L_PRONTO],
   Descargar: [L_PANEL, L_PRONTO],
