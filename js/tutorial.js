@@ -292,6 +292,23 @@ const L_EDITOR_IMPORTAR = {
   ]
 };
 
+const L_EDITOR_CONFIG = {
+  id: "config", icono: "⚙️", titulo: "Configuración: horarios y reglas de tu tienda",
+  desc: "Cambia las horas de cada turno, crea horarios propios y fija el presupuesto de agentes, el tope semanal, el MBK de 12 h y las festividades.",
+  pasos: ctx => [
+    { antes: () => { ctx.ir("gen"); ctx.gen("config"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario › Configuración", texto: "Aquí se ajusta cómo arma RITMO los horarios de tu tienda. Lo que cambies se aplica a las semanas nuevas y a Autollenar." },
+    { frame: F, sel: "#view-config table.formtable", opcional: true, titulo: "1 · Plantillas de turno", texto: "Cada fila es un horario: AM 12 h, PM 12 h, AM 8 h, PM 8 h, MBK 12 h y Admin 8 h. Cambia la entrada, la salida y las horas si tu tienda trabaja distinto. La columna Jornada te dice si es diurna, mixta o nocturna." },
+    { frame: F, sel: "#view-config .chkgrp", opcional: true, titulo: "2 · Puesto", texto: "Marca en qué puestos puede usarse cada horario (Compras, MBK, Administración, Inducción, Conserjería, Seguridad Interna). Un horario solo se ofrece en los puestos marcados." },
+    { frame: F, sel: '#view-config [data-f="confirmado"]', opcional: true, titulo: "3 · Confirmado", texto: "Marca Confirmado cuando ya verificaste las horas. Mientras un horario no esté confirmado, el Horario te avisa que está «por confirmar»." },
+    { frame: F, sel: '#view-config [data-act="addpl"]', opcional: true, titulo: "4 · Anexar otro horario", texto: "Crea un horario propio (por ejemplo 7:00 am a 3:00 pm) y úsalo con «+ Refuerzo», «+ Turno MBK», «+ Administrativo» o cambiando el horario de una fila. Los horarios que crea la importación de Excel («RITMO Turno 16 h») también aparecen aquí; puedes renombrarlos o borrarlos." },
+    { frame: F, sel: "#view-config #pres", opcional: true, titulo: "5 · Presupuesto de agentes", texto: "Escribe cuántos agentes autoriza tu sucursal (sin contar al gerente de tienda). Cada agente que falte contra el presupuesto autoriza 48 h extra en la semana." },
+    { frame: F, sel: "#view-config #tope", opcional: true, titulo: "6 · Tope semanal", texto: "Después de estas horas (48 por defecto) todo es hora extra con pago doble. Cámbialo solo si tu tienda trabaja con otro tope." },
+    { frame: F, sel: "#view-config .dayck", opcional: true, titulo: "7 · Días del MBK de 12 h", texto: "Marca los días en que el MBK trabaja de 8:00 am a 8:00 pm para dar libres al equipo MBK. Esos días no hay MBK de 8 h." },
+    { frame: F, sel: '#view-config [data-act="addfi"]', opcional: true, titulo: "8 · Feriados y festividad local", texto: "Los feriados nacionales ya vienen cargados y pagan doble si se trabajan. Aquí agregas la festividad local de tu sucursal (día y mes)." },
+    { frame: F, sel: '#view-config [data-act="backup"]', opcional: true, titulo: "9 · Respaldo", texto: "Descargar respaldo guarda tu matriz, configuración e historial en un archivo. Restaurar respaldo los carga de nuevo. Base cero borra todo y es solo para empezar una tienda nueva." }
+  ]
+};
+
 const L_EDITOR_MBK = {
   id: "mbk", icono: "🚌", titulo: "Planilla MBK: viático por persona",
   desc: "Escribe el viático por día de cada agente MBK, compara el presupuesto con lo real y entiende qué pasa al publicar tu planilla.",
@@ -303,6 +320,113 @@ const L_EDITOR_MBK = {
     { frame: F, sel: "#view-mbk table.vt", opcional: true, titulo: "4 · Detalle por persona", texto: "Aquí está a quién se paga, cuánto y por qué día. Imprímelo o copia la imagen para la firma de recibido." },
     { frame: F, sel: "#view-mbk .panel:last-child", opcional: true, titulo: "5 · Resumen para solicitud", texto: "Queda para observar cada semana: presupuesto, real, diferencia y estado. Ya no tienes que marcarla a mano: al publicar tu planilla, RITMO solicita el viático de las mismas semanas de pago." },
     { titulo: "Al publicar tu planilla", texto: "Cuando publicas, RITMO te avisa «Tu Planilla MBK está lista» con las semanas y el total, y puedes revisarla desde ahí. Si falta el viático de alguien, te dice quién. Si la planilla no se pudo publicar, el viático no queda solicitado. Si luego cambias un viático o el horario, el monto solicitado se actualiza solo y tu GZ verá el aviso para aprobar de nuevo." }
+  ]
+};
+
+const L_EDITOR_MATRIZ = {
+  id: "matriz", icono: "👥", titulo: "Matriz base: tu personal",
+  desc: "Da de alta a cada persona, define sus cargos por prioridad, días de clase y nuevo ingreso, y confirma lo que cargó RRHH.",
+  pasos: ctx => [
+    { antes: () => { ctx.ir("gen"); ctx.gen("matriz"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario › Matriz base", texto: "La Matriz base es la lista de las personas de tu tienda. RITMO arma el horario con ella, así que lo primero es tenerla al día." },
+    { sel: "#genPers", opcional: true, titulo: "Lo que cargó RRHH", texto: "Cuando RRHH carga a alguien de tu tienda, aquí te avisa. Revísalo y confírmalo: RITMO trae su cédula, nombre completo, cargo e ingreso y no duplica a nadie." },
+    { frame: F, sel: '[data-act="addag"]', opcional: true, titulo: "1 · Dar de alta", texto: "Si alguien todavía no está, agrégalo a mano con este botón. Escribe su nombre corto (el primer nombre)." },
+    { frame: F, sel: '#view-matriz [data-f="cargo0"]', opcional: true, titulo: "2 · Cargos por prioridad", texto: "Cargo 1 es su puesto base. Los Cargos 2 y 3 son lo que también puede cubrir cuando haga falta. Autollenar los usa en ese orden." },
+    { frame: F, sel: "#view-matriz .dayck", opcional: true, titulo: "3 · Días de clase", texto: "Si la persona estudia, marca sus días de clase: ese día solo puede trabajar turno PM y no puede amanecer la víspera." },
+    { frame: F, sel: '#view-matriz [data-f="nuevo"]', opcional: true, titulo: "4 · Nuevo ingreso", texto: "Marca a quien está en inducción. Solo los nuevos ingresos pueden ir en el puesto de Inducción." },
+    { frame: F, sel: '#view-matriz [data-f="ingreso"]', opcional: true, titulo: "5 · Fecha de alta y baja", texto: "Antes de su fecha de alta o después de su baja, RITMO no programa a la persona. Quien tiene baja se conserva en el historial, sin color y en negrita." },
+    { frame: F, sel: '#view-matriz [data-f="salario"]', opcional: true, titulo: "6 · Salario", texto: "El salario se usa para calcular la planilla y el costo de horas extra. Si el Excel que importaste trae la hoja PLANILLA, RITMO puede completarlo por ti." },
+    { frame: F, sel: "#view-matriz .swbtn", opcional: true, titulo: "7 · Color", texto: "Toca el cuadro de color para cambiarlo. RITMO sugiere azules o rosados según el nombre y nunca repite colores." }
+  ]
+};
+
+const L_EDITOR_PLANILLA = {
+  id: "planilla", icono: "🧾", titulo: "Planilla: de tu horario al pago",
+  desc: "Elige la quincena, marca las semanas de horas extra a pagar, completa los datos y publica la planilla.",
+  pasos: ctx => [
+    { antes: () => { ctx.ir("gen"); ctx.gen("planilla"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario › Planilla", texto: "La Planilla se calcula sola desde los horarios que guardaste: días, horas extra, feriados y novedades." },
+    { frame: F, sel: "#plMes", opcional: true, titulo: "1 · Mes y quincena", texto: "Elige el mes y la quincena (1ra: 1 al 15, 2da: 16 al fin de mes) o un período personalizado. El panel ya te la deja en la quincena actual." },
+    { frame: F, sel: "#view-planilla table.pltable", opcional: true, titulo: "2 · La tabla de la planilla", texto: "Una fila por persona: cédula, nombre, cargo, ingreso, días, salario, quincenal, horas extra, feriado y comentarios. Quien ingresa en la semana del corte se paga en la quincena siguiente." },
+    { frame: F, sel: '#view-planilla [data-hesem]', opcional: true, titulo: "3 · Semanas de horas extra", texto: "Marca las semanas ya cumplidas cuyas horas extra pagas en esta planilla. Una semana pagada en otra planilla queda bloqueada para no pagarla dos veces. Antes de pagar, ajusta en Horario lo que realmente se trabajó." },
+    { frame: F, sel: '#view-planilla [data-plnota]', opcional: true, titulo: "4 · Nota adicional", texto: "Escribe una nota por persona (por ejemplo «cubriendo otra tienda»). Sale en la columna de comentarios del Excel." },
+    { frame: F, sel: '#view-planilla [data-pf="salario"]', opcional: true, titulo: "5 · Datos del personal", texto: "Cédula, nombre, ingreso y cargo ya vienen de RRHH. Lo único que sueles escribir aquí es el salario. Si falta algo, un aviso te dice exactamente qué." },
+    { frame: F, sel: "#plHF", opcional: true, titulo: "6 · Reglas de pago", texto: "Horas por feriado trabajado, días por quincena y el porcentaje que paga la empresa en vacaciones, subsidio y extraordinario. También puedes descontar el séptimo día por ausencia." },
+    { frame: F, sel: '[data-act="plxlsx"]', opcional: true, titulo: "7 · Descargar planilla Excel", texto: "Baja la planilla con el formato oficial, lista para revisar." },
+    { frame: F, sel: '[data-act="publicar"]', opcional: true, titulo: "8 · Publicar planilla", texto: "Publica la planilla a RITMO. Queda en gris cuando está publicada y vuelve a color si haces cambios. Al publicar, tu viático MBK se solicita solo y RITMO te avisa que tu Planilla MBK está lista." }
+  ]
+};
+
+const L_SEGUIMIENTO = {
+  id: "seguimiento", icono: "📊", titulo: "Seguimiento de tus tiendas",
+  desc: "Qué tiendas entregaron, el semáforo de cada una, horas extra, MBK y cómo avisar a quien le falta algo.",
+  pasos: ctx => [
+    { antes: () => ctx.ir("seg"), sel: '#tabs [data-k="seg"]', titulo: "Seguimiento", texto: "Aquí ves, en solo lectura, cómo va cada tienda de tu alcance. Un punto en la pestaña te avisa si hay tiendas con incumplimiento." },
+    { sel: "#alJ", opcional: true, titulo: "1 · Alertas de incumplimiento", texto: "Las tiendas que no cumplen la fecha límite: críticas, vencidas, por vencer, entregas tardías y solicitudes de reapertura. Con «Avisar» abres tu correo con el mensaje listo." },
+    { sel: "#kHES", opcional: true, titulo: "2 · Tarjeta de horas extra", texto: "El total de horas extra y feriadas de las semanas marcadas para pago en la quincena, sumando las tiendas que ves." },
+    { sel: "#fTxt", opcional: true, titulo: "3 · Filtros", texto: "Busca por tienda y filtra por zona o por estado de entrega. Los filtros gobiernan las dos tablas: Detalle por tienda y Planilla MBK." },
+    { sel: "#tb", opcional: true, titulo: "4 · Detalle por tienda y semáforo", texto: "Una fila por tienda: personal contra plazas, horas extra y feriadas, estado y fecha de entrega. El semáforo resume Planilla, Horas extra, MBK y Plazas: verde bien, ámbar por revisar, rojo urgente, gris sin dato." },
+    { sel: "#recBtn", opcional: true, titulo: "5 · Recordatorio", texto: "Arma un mensaje de WhatsApp con las tiendas a las que les falta algo (sin entregar, sin horas extra, sin solicitar MBK). Eliges qué incluir antes de copiarlo." },
+    { sel: "#xlsBtn", opcional: true, titulo: "6 · Excel", texto: "Descarga lo que ves en pantalla, respetando los filtros, con el MBK de las semanas elegidas." },
+    { sel: "#mbkC", opcional: true, titulo: "7 · Planilla MBK: resumen a solicitar", texto: "Lo que pide cada tienda por semana. El gerente alimenta y el GZ aprueba; GD y GO solo consultan. Elige las semanas con el selector y aprueba toda tu selección de una vez." },
+    { sel: "#mbkAp", opcional: true, titulo: "8 · Aprobar mi selección", texto: "Solo el GZ de la tienda (o el superusuario) aprueba. Si una tienda cambia su monto después de aprobar, sale marcada para aprobar de nuevo." },
+    { sel: "#mbkI", opcional: true, titulo: "9 · Descargar imagen", texto: "Baja una imagen del resumen MBK con lo aprobado, lista para compartir." }
+  ]
+};
+
+const L_CALENDARIO = {
+  id: "calendario", icono: "🗓", titulo: "Calendario de planilla",
+  desc: "Publica la fecha límite, las semanas de horas extra a pagar y los requisitos de cada entrega.",
+  pasos: ctx => [
+    { antes: () => ctx.ir("cal"), sel: '#tabs [data-k="cal"]', titulo: "Calendario de planilla", texto: "Aquí defines, para cada quincena, cuándo se entrega y qué semanas de horas extra se pagan. Las tiendas lo ven en su panel." },
+    { sel: "#calL", opcional: true, titulo: "1 · Fecha límite", texto: "Elige la fecha y hora límite de entrega. Pasada la fecha, la entrega se marca como tarde y no se toma en cuenta el pago de horas extra." },
+    { sel: "#calP", opcional: true, titulo: "2 · Fecha de planilla", texto: "La fecha en que se entrega la planilla." },
+    { sel: "#calW", opcional: true, titulo: "3 · Semanas de horas extra", texto: "Marca las semanas cuyas horas extra se pagan en esta quincena. Son las mismas que usan las tiendas y el MBK." },
+    { sel: "#rqA", opcional: true, titulo: "4 · Requisitos", texto: "Pide la hoja de asistencia, la validación del gerente y avisa que entregar tarde pierde el pago de horas extra." },
+    { sel: "#calN", opcional: true, titulo: "5 · Nota", texto: "Un mensaje para las tiendas, por ejemplo «incluir subsidios del período»." },
+    { sel: "#calS", opcional: true, titulo: "6 · Guardar y publicar alerta", texto: "Publica el calendario: cada tienda verá su alerta de entrega con la cuenta regresiva." }
+  ]
+};
+
+const L_RRHH = {
+  id: "rrhh", icono: "🧑‍💼", titulo: "Recursos Humanos: altas, bajas y control cruzado",
+  desc: "Filtra el personal, carga altas, confirma lo que registran las tiendas y registra bajas.",
+  pasos: ctx => [
+    { antes: () => ctx.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "El registro central del personal de todas las tiendas: cédula, nombre, cargo, tienda e ingreso. No guarda salario ni fecha de nacimiento." },
+    { sel: "#rhFil", opcional: true, titulo: "1 · Filtros", texto: "Filtra por región, zona o tienda. Las tarjetas de arriba también filtran la lista al tocarlas." },
+    { sel: "#rhTT", opcional: true, titulo: "2 · Estado por tienda", texto: "Activos frente al presupuesto y los días sin completar. Toca una tienda para ver solo a su gente." },
+    { sel: "#rhRotB", opcional: true, titulo: "3 · Rotación y bajas", texto: "Cuántas personas salen y por qué motivo, para detectar dónde hay más rotación." },
+    { sel: "#rhCarga", opcional: true, titulo: "4 · Cargar altas", texto: "Sube el Excel de altas. RITMO revisa cédulas y tiendas y te dice qué filas corregir. Después, «Publicar altas» las manda a las tiendas para que las confirmen." },
+    { sel: "#rhPend", opcional: true, titulo: "5 · Control cruzado", texto: "Lo que registró la tienda (altas y bajas) lo confirmas tú, y lo que registras tú lo confirma la tienda. Cada pendiente indica cuántos días lleva sin confirmar." },
+    { sel: "#rhBuscaB", opcional: true, titulo: "6 · Registrar una baja", texto: "Busca a la persona, elige la fecha y el motivo. La tienda debe confirmarla o disputarla; solo entonces se aplica en su horario." },
+    { sel: "#rhTb", opcional: true, titulo: "7 · Personal registrado", texto: "Busca por nombre o cédula y filtra por estado. Toca el nombre de una persona para abrir su ficha. «Mostrar cédulas» las deja a la vista." },
+    { sel: "#rhXls", opcional: true, titulo: "8 · Excel", texto: "Descarga el personal que ves, respetando los filtros." }
+  ]
+};
+
+const L_RECLUTAMIENTO = {
+  id: "reclutamiento", icono: "🔎", titulo: "Reclutamiento: vacantes y prospectos",
+  desc: "Dónde enfocarte, vacantes por tienda y el camino de un prospecto hasta la contratación.",
+  pasos: ctx => [
+    { antes: () => ctx.ir("rec"), sel: '#tabs [data-k="rec"]', titulo: "Reclutamiento", texto: "Las plazas por cubrir de todas las tiendas y los candidatos para llenarlas." },
+    { sel: "#rcFoco", opcional: true, titulo: "1 · Dónde enfocarte", texto: "Las tiendas con más plazas por cubrir, para que sepas por dónde empezar." },
+    { sel: "#rcTxt", opcional: true, titulo: "2 · Vacantes", texto: "Busca por tienda o puesto y filtra por estado. Las vacantes salen del presupuesto de plazas y del personal activo." },
+    { sel: "#rcNT", opcional: true, titulo: "3 · Nueva tienda y nuevo puesto", texto: "El encargado abre tiendas nuevas y agrega puestos. También puede abrir las vacantes de todas las tiendas o quitar las abiertas." },
+    { sel: "#pcNew", opcional: true, titulo: "4 · Prospectos", texto: "Registra a un candidato y llévalo por etapas: nuevo, entrevista, documentos y aceptado por la tienda. Los prospectos no guardan cédula hasta que se contratan." },
+    { sel: "#pcTb", opcional: true, titulo: "5 · Contratar", texto: "Al contratar se pide la cédula y la fecha de ingreso: se crea el alta en RRHH para que la tienda la confirme y se cierra la vacante abierta de ese cargo." }
+  ]
+};
+
+const L_ADMIN = {
+  id: "admin", icono: "⚙️", titulo: "Administración de RITMO",
+  desc: "Roles, usuarios, accesos, presupuesto de plazas, auditoría y respaldo.",
+  pasos: ctx => [
+    { antes: () => ctx.ir("adm"), sel: '#tabs [data-k="adm"]', titulo: "Administración", texto: "Solo el superusuario ve esta pestaña. Aquí se configura quién entra a RITMO y qué puede hacer." },
+    { sel: "#admEst", opcional: true, titulo: "1 · Estado de roles y accesos", texto: "Un resumen de cuántos usuarios, roles y tiendas hay cargados y publicados." },
+    { sel: "#rlNew", opcional: true, titulo: "2 · Roles y permisos", texto: "Los roles de RITMO vienen creados; aquí puedes crear otros y elegir sus permisos y alcance." },
+    { sel: "#usNew", opcional: true, titulo: "3 · Usuarios", texto: "Crea un usuario o cambia su rol. Cada persona entra con su correo y recibe un enlace para crear su contraseña." },
+    { sel: "#qrBox", opcional: true, titulo: "4 · Compartir RITMO", texto: "El código QR y el mensaje de WhatsApp para invitar a las tiendas." },
+    { sel: "#pub", opcional: true, titulo: "5 · Importar y publicar", texto: "Carga el Excel de roles, publica tiendas y usuarios, crea los accesos y publica el presupuesto de plazas. Se cargan una vez y alimentan a todos los usuarios." },
+    { sel: "#audTb", opcional: true, titulo: "6 · Registro de auditoría", texto: "Quién aprobó horas extra y MBK y quién abrió o reabrió quincenas. Filtra por tipo o busca una tienda." },
+    { sel: "#rspBaja", opcional: true, titulo: "7 · Respaldo y reinicio", texto: "Descarga un respaldo de lo que la app guarda. El reinicio borra datos con confirmación y es solo para emergencias." }
   ]
 };
 
@@ -336,10 +460,12 @@ const L_PRONTO = {
 };
 
 export const LECCIONES = {
-  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_IMPORTAR, L_EDITOR_MBK, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
-  RRHH: [L_PANEL, L_PRONTO],
-  Visualizar: [L_PANEL, L_PRONTO],
-  Descargar: [L_PANEL, L_PRONTO],
-  Superusuario: [L_PANEL, L_PRONTO] // para ver las lecciones de otro rol: "Ver como"
+  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_MATRIZ, L_EDITOR_CONFIG, L_EDITOR_PLANILLA, L_EDITOR_IMPORTAR, L_EDITOR_MBK, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
+  RRHH: [L_PANEL, L_RRHH, L_RECLUTAMIENTO],
+  "Encargado de Reclutamiento": [L_PANEL, L_RRHH, L_RECLUTAMIENTO],
+  "Auxiliar de Reclutamiento": [L_PANEL, L_RRHH, L_RECLUTAMIENTO],
+  Visualizar: [L_PANEL, L_SEGUIMIENTO],
+  Descargar: [L_PANEL, L_SEGUIMIENTO, L_CALENDARIO],
+  Superusuario: [L_PANEL, L_SEGUIMIENTO, L_CALENDARIO, L_RRHH, L_RECLUTAMIENTO, L_ADMIN] // para ver las lecciones de otro rol: "Ver como"
 };
 export const leccionesPara = rol => LECCIONES[rol] || [L_PANEL];

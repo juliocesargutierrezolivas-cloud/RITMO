@@ -7,6 +7,16 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 52, fecha: "2026-10-21", version: "3.5", tipo: "Nuevo", para: "Todos",
+    titulo: "Tutoriales para todos los roles y más ayudas",
+    detalle: "Ahora hay recorridos guiados en Tutoriales para cada rol: Matriz base y Planilla para gerentes de tienda; Seguimiento y Calendario para GZ, GD, GO y planilla; Recursos Humanos y Reclutamiento; y Administración para el superusuario. El asistente de ayuda suma 40 respuestas nuevas, por ejemplo cómo duplicar o limpiar una semana, deshacer, enviar el horario por WhatsApp, entender el semáforo, aprobar el MBK, publicar altas o ver la auditoría. Escribe lo que quieres hacer y te lleva paso a paso."
+  },
+  {
+    id: 51, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
+    titulo: "Guía de la Configuración de tu tienda",
+    detalle: "Ya hay un recorrido «Configuración: horarios y reglas de tu tienda» en Tutoriales y ayudas en el asistente para cambiar la entrada y salida de un turno, crear un horario nuevo, fijar el presupuesto de agentes y el tope semanal, elegir los días del MBK de 12 h y agregar la festividad local."
+  },
+  {
     id: 50, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Visualizar","Descargar","Superusuario"],
     titulo: "El monto del MBK solicitado se mantiene al día",
     detalle: "Si una tienda cambia un viático o su horario después de solicitar el MBK, el monto solicitado se actualiza solo en cada guardado (y al volver a publicar la planilla), así la vista del GZ muestra siempre lo vigente. Si el GZ ya había aprobado otro monto, la tienda sale marcada para aprobar de nuevo. En Planilla MBK también hay un botón para actualizar la solicitud al instante."
