@@ -55,9 +55,17 @@ const CSS = `
 .tr-flecha{position:absolute;left:var(--fx,50%);width:14px;height:14px;background:#fff;transform:translateX(-50%) rotate(45deg);animation:trRebote 1s ease-in-out infinite}
 .tr-flecha.abajo{top:-7px}.tr-flecha.arriba{bottom:-7px}
 @keyframes trRebote{0%,100%{margin-top:0}50%{margin-top:-5px}}
-.tr-oferta{position:fixed;right:16px;bottom:16px;z-index:9980;max-width:330px;background:#04003f;color:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 14px 40px rgba(0,0,0,.4);animation:trEntra .3s ease both}
-.tr-oferta b{display:block;font-size:15px;margin-bottom:4px}.tr-oferta p{margin:0 0 10px;font-size:13.5px;color:#d6ddea}
-.tr-oferta .tr-b{padding:7px 12px}
+.tr-oferta{position:fixed;inset:0;z-index:9980;display:grid;place-items:center;padding:16px;background:rgba(4,0,63,.62);animation:trEntra .3s ease both}
+.tr-of-card{width:min(540px,100%);background:#04003f;color:#fff;border-radius:22px;padding:34px 30px 24px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.55);border:3px solid #ff8200}
+.tr-of-ic{font-size:64px;line-height:1;margin-bottom:8px;animation:trRebote 1.6s ease-in-out infinite}
+.tr-of-card h3{margin:0 0 10px;font-size:28px;line-height:1.15}
+.tr-of-card p{margin:0 0 22px;font-size:17px;line-height:1.45;color:#d6ddea}
+.tr-of-b{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.tr-of-card .tr-b{padding:13px 22px;font-size:16px;border-radius:12px}
+.tr-of-card .tr-b.pri{font-size:19px;padding:15px 30px;box-shadow:0 0 0 0 rgba(255,130,0,.7);animation:trPulso 1.8s ease-out infinite}
+.tr-of-card small{display:block;margin-top:16px;font-size:13px;color:#9fb0cc}
+@keyframes trPulso{0%{box-shadow:0 0 0 0 rgba(255,130,0,.65)}70%{box-shadow:0 0 0 16px rgba(255,130,0,0)}100%{box-shadow:0 0 0 0 rgba(255,130,0,0)}}
+@media (max-width:480px){.tr-of-card{padding:26px 18px 18px}.tr-of-card h3{font-size:23px}.tr-of-card p{font-size:15.5px}.tr-of-ic{font-size:52px}}
 @media (prefers-reduced-motion:reduce){.tr-foco,.tr-tip,.tr-oferta{transition:none;animation:none}.tr-foco::after,.tr-flecha{animation:none}}
 `;
 function estilos() {
@@ -223,14 +231,16 @@ export function ofrecerRecorrido({ correo, id, titulo, texto, onEmpezar }) {
   const kOf = `ritmo-tour-oferta:${String(correo || "").toLowerCase()}:${id}`;
   if (lsGet(kOf) === "1" || esVisto(correo, id) || document.querySelector(".tr-oferta")) return;
   estilos();
-  const d = document.createElement("div"); d.className = "tr-oferta"; d.setAttribute("role", "region"); d.setAttribute("aria-label", "Recorrido guiado");
-  d.innerHTML = `<b>👋 ${titulo}</b><p>${texto}</p><div style="display:flex;gap:8px"><button class="tr-b pri" data-a="si" type="button">Empezar</button><button class="tr-b" data-a="no" type="button">Ahora no</button></div>`;
+  // Centrada, grande y con el fondo atenuado: la primera visita no debe pasar desapercibida.
+  const d = document.createElement("div"); d.className = "tr-oferta"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-labelledby", "tr-of-t");
+  d.innerHTML = `<div class="tr-of-card"><div class="tr-of-ic" aria-hidden="true">👋</div><h3 id="tr-of-t">${titulo}</h3><p>${texto}</p><div class="tr-of-b"><button class="tr-b pri" data-a="si" type="button">▶ Empezar el recorrido</button><button class="tr-b" data-a="no" type="button">Ahora no</button></div><small>Lo puedes repetir cuando quieras en la pestaña Tutoriales.</small></div>`;
   d.addEventListener("click", e => {
     const b = e.target.closest("[data-a]"); if (!b) return;
     lsSet(kOf, "1"); d.remove();
     if (b.dataset.a === "si") onEmpezar();
   });
   document.body.appendChild(d);
+  const si = d.querySelector('[data-a="si"]'); if (si) si.focus();
 }
 
 /* =====================================================================================
@@ -417,7 +427,7 @@ const L_RECLUTAMIENTO = {
 
 const L_ADMIN = {
   id: "admin", icono: "⚙️", titulo: "Administración de RITMO",
-  desc: "Roles, usuarios, accesos, presupuesto de plazas, auditoría y respaldo.",
+  desc: "Roles, usuarios, accesos, presupuesto de plazas, periodos, auditoría y respaldo.",
   pasos: ctx => [
     { antes: () => ctx.ir("adm"), sel: '#tabs [data-k="adm"]', titulo: "Administración", texto: "Solo el superusuario ve esta pestaña. Aquí se configura quién entra a RITMO y qué puede hacer." },
     { sel: "#admEst", opcional: true, titulo: "1 · Estado de roles y accesos", texto: "Un resumen de cuántos usuarios, roles y tiendas hay cargados y publicados." },
@@ -425,8 +435,9 @@ const L_ADMIN = {
     { sel: "#usNew", opcional: true, titulo: "3 · Usuarios", texto: "Crea un usuario o cambia su rol. Cada persona entra con su correo y recibe un enlace para crear su contraseña." },
     { sel: "#qrBox", opcional: true, titulo: "4 · Compartir RITMO", texto: "El código QR y el mensaje de WhatsApp para invitar a las tiendas." },
     { sel: "#pub", opcional: true, titulo: "5 · Importar y publicar", texto: "Carga el Excel de roles, publica tiendas y usuarios, crea los accesos y publica el presupuesto de plazas. Se cargan una vez y alimentan a todos los usuarios." },
-    { sel: "#audTb", opcional: true, titulo: "6 · Registro de auditoría", texto: "Quién aprobó horas extra y MBK y quién abrió o reabrió quincenas. Filtra por tipo o busca una tienda." },
-    { sel: "#rspBaja", opcional: true, titulo: "7 · Respaldo y reinicio", texto: "Descarga un respaldo de lo que la app guarda. El reinicio borra datos con confirmación y es solo para emergencias." }
+    { antes: () => ctx.ir("per"), sel: "#perB", opcional: true, titulo: "6 · Periodos: abrir y cerrar quincenas", texto: "En la pestaña Periodos ves todas las tiendas y las últimas 6 quincenas. Casilla marcada = abierta: el gerente puede importar horarios, cambiar y publicar. Desmarcada = cerrada. Para abrir de una vez los periodos atrasados usa el botón «Abrir septiembre y octubre» o la casilla «Todas» de cada columna. Luego cada GZ los cierra con «Aprobar HE»." },
+    { antes: () => ctx.ir("adm"), sel: "#audTb", opcional: true, titulo: "7 · Registro de auditoría", texto: "Quién aprobó horas extra y MBK y quién abrió o reabrió quincenas. Filtra por tipo o busca una tienda." },
+    { sel: "#rspBaja", opcional: true, titulo: "8 · Respaldo y reinicio", texto: "Descarga un respaldo de lo que la app guarda. El reinicio borra datos con confirmación y es solo para emergencias." }
   ]
 };
 

@@ -7,6 +7,16 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 55, fecha: "2026-10-21", version: "3.5", tipo: "Nuevo", para: ["Superusuario"],
+    titulo: "Periodos: abrir y cerrar quincenas de todas las tiendas",
+    detalle: "Hay una pestaña nueva, Periodos, junto a Administración: una matriz con todas las tiendas y las últimas 6 quincenas. Casilla marcada = abierta (el gerente puede importar horarios, cambiar y publicar); desmarcada = cerrada. Con «Abrir septiembre y octubre» o la casilla de cada columna abres de una vez los periodos atrasados para que las tiendas importen sus horarios; luego cada GZ los cierra con «Aprobar HE». Cada apertura y cierre queda en la auditoría."
+  },
+  {
+    id: 54, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: "Todos",
+    titulo: "Pantallas más legibles y recorrido de bienvenida más visible",
+    detalle: "El diálogo de Importar Excel ya no esconde columnas: a pantallas medianas cada fila se muestra completa. Configuración, Matriz base y Seguimiento aprovechan todo el ancho y la columna de acciones del Seguimiento (Ver, Planilla Excel, Aprobar HE, Abrir quincena) queda a la vista. La invitación al recorrido de la primera visita ahora aparece al centro, grande y con el fondo atenuado."
+  },
+  {
     id: 53, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["RRHH","Encargado de Reclutamiento","Auxiliar de Reclutamiento","Superusuario"],
     titulo: "Al cargar altas, las cédulas repetidas se explican con nombres",
     detalle: "Si dos personas del Excel traen la misma cédula, RITMO ahora te dice quiénes son y en qué filas (antes solo daba el número de fila) y omite a la segunda. Si una cédula ya está registrada a nombre de otra persona, ya no la sobrescribe: la marca como «Cédula de otra persona» para que corrijas el archivo. Así nadie se queda sin aparecerle a su tienda sin saber por qué."

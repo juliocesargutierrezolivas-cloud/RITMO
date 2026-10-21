@@ -511,6 +511,18 @@ export const AYUDA = [
       { sel: "#rcFoco", opcional: true, titulo: "Dónde enfocarte", texto: "Las tiendas con más plazas por cubrir." }] },
 
   /* ---------- Administración ---------- */
+  { cat: "admin", perm: "administracion", accion: "Abrir o cerrar periodos (quincenas) de todas las tiendas", id: "periodos",
+    kw: "periodos periodo abrir cerrar quincena quincenas septiembre octubre agosto tiendas checklist matriz cerrada abierta importar horarios atrasados abrir todas lote",
+    texto: "En la pestaña Periodos (junto a Administración) hay una matriz con todas las tiendas y las últimas 6 quincenas. Casilla marcada = abierta: el gerente puede importar horarios, cambiar y publicar. Desmarcada = cerrada. «Abrir septiembre y octubre» (o la casilla «Todas» de cada columna) abre en un solo paso las tiendas que ves; después cada GZ cierra con «Aprobar HE». Para cerrar una quincena sin entrega, ya debe haber pasado su fecha de planilla.",
+    pasos: c => [
+      { antes: () => c.ir("per"), sel: '#tabs [data-k="per"]', titulo: "Periodos", texto: "La matriz de tiendas y quincenas está en esta pestaña." },
+      { sel: "#perMes", opcional: true, titulo: "Abrir periodos atrasados", texto: "Abre de una vez el mes anterior y el actual para las tiendas que ves." },
+      { sel: "#perB", opcional: true, titulo: "Casillas por tienda", texto: "Marca o desmarca una casilla para abrir o cerrar esa quincena en esa tienda." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "El importador omitió una semana porque está cerrada", id: "importar-semana-cerrada",
+    kw: "importar semana cerrada no se importo omitio periodo cerrado quincena cerrada abrir periodo reabrir gz administrador no cargo horario septiembre",
+    texto: "El importador no toca las semanas de una quincena cerrada (pasó la fecha de planilla o tu GZ aprobó las horas extra). El informe las lista como «Semanas cerradas». Pídele a tu GZ que abra la quincena (🔓 Abrir quincena) o al administrador de RITMO que la abra en Periodos, y vuelve a importar.",
+    pasos: c => [
+      { antes: () => c.ir("mia"), sel: '#tabs [data-k="mia"]', titulo: "Entregar", texto: "Aquí ves si tu quincena está cerrada y puedes solicitar la reapertura." }] },
   { cat: "admin", perm: "administracion", accion: "Consultar el registro de auditoría", id: "auditoria",
     kw: "auditoria registro quien aprobo horas extra mbk abrio reabrio quincena reinicio historial control",
     texto: "En Administración, «Registro de auditoría» muestra quién aprobó horas extra y MBK, y quién abrió o reabrió quincenas, con fecha y hora. Filtra por tipo (horas extra, MBK, aperturas, reaperturas, reinicios) o busca una tienda o persona.",
