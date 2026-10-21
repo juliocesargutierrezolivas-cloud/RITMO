@@ -286,7 +286,269 @@ export const AYUDA = [
       { antes: () => c.ir("tut"), sel: "#tutL", titulo: "Tus recorridos", texto: "Cada lección te guía paso a paso en la pantalla." }] },
   { cat: "cuenta", perm: "todos", accion: "¿Qué significa el candado 🔒?", id: "candados",
     kw: "candado cerrado bloqueada bloqueo significa que es horas aprobadas fecha pago",
-    texto: "🔒 HE aprobadas: tu GZ aprobó las horas extra y la planilla quedó bloqueada. 🔒 Cerrada por fecha: pasó la fecha de entrega de planilla. En ambos casos solo el GZ puede reabrir; pídele la reapertura en Entregar." }
+    texto: "🔒 HE aprobadas: tu GZ aprobó las horas extra y la planilla quedó bloqueada. 🔒 Cerrada por fecha: pasó la fecha de entrega de planilla. En ambos casos solo el GZ puede reabrir; pídele la reapertura en Entregar." },
+
+  /* ---------- Más ayudas del Editor: horario ---------- */
+  { cat: "horarios", perm: "mi_horario", accion: "Duplicar la semana anterior", id: "duplicar-semana",
+    kw: "duplicar copiar semana anterior repetir mismo horario partir de",
+    texto: "En Horario toca «Duplicar semana anterior»: copia los turnos de la semana pasada a la que estás viendo, y desde ahí ajustas lo que cambió. Respeta las novedades y las altas y bajas de esta semana.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Colócate en la semana que quieres llenar." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="dup"]', opcional: true, titulo: "Duplicar semana anterior", texto: "Copia la semana anterior a esta. Luego mueve o quita lo que haga falta." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Limpiar una semana", id: "limpiar-semana",
+    kw: "limpiar borrar vaciar semana empezar de nuevo quitar todos los turnos",
+    texto: "En Horario toca «Limpiar» para vaciar todos los turnos de la semana que ves. Si te equivocas, «Deshacer» (o Ctrl+Z) lo revierte. Una semana cerrada no se puede limpiar.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Limpiar actúa solo sobre la semana que estás viendo." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="limpiar"]', opcional: true, titulo: "Limpiar", texto: "Vacía los turnos de esta semana. Después puedes usar Autollenar o importar desde Excel." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Deshacer un cambio", id: "deshacer",
+    kw: "deshacer revertir error equivocado ctrl z volver atras ultimo cambio",
+    texto: "El botón «Deshacer» (o Ctrl+Z) revierte tus últimos 3 movimientos en el horario: mover, intercambiar, quitar, Autollenar o importar. El número entre paréntesis dice cuántos puedes deshacer.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Deshacer está en la barra de acciones del Horario." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="undo"]', opcional: true, titulo: "Deshacer", texto: "Revierte el último cambio. Puedes repetirlo hasta 3 veces." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Enviar el horario por WhatsApp a cada persona", id: "mensaje-persona",
+    kw: "whatsapp mensaje por persona enviar compartir horario cada colaborador copiar mensaje texto",
+    texto: "En Horario toca «Mensaje por persona»: arma un mensaje con los turnos de cada colaborador. Con «Copiar mensaje» lo copias y lo pegas en WhatsApp.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los mensajes salen del horario de la semana." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="wa"]', opcional: true, titulo: "Mensaje por persona", texto: "Elige a la persona y copia su mensaje." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Copiar la imagen del horario", id: "copiar-imagen",
+    kw: "imagen foto copiar horario compartir pegar whatsapp captura tabla",
+    texto: "En Horario toca «Copiar imagen»: copia una imagen de la tabla de la semana, con el nombre de tu tienda, lista para pegarla en WhatsApp o en un correo.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "La imagen es de la semana que estás viendo." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="img"]', opcional: true, titulo: "Copiar imagen", texto: "Copia la tabla del horario como imagen." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Exportar el horario a Excel", id: "exportar-horario",
+    kw: "exportar excel horario descargar xlsx tabla semana liquidacion alertas hoja",
+    texto: "En Horario toca «Exportar Excel»: baja un archivo con tres hojas: Horario, Liquidación y Alertas de la semana. Es la misma tabla que luego puedes volver a importar.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Se exporta la semana que estás viendo." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="xlsx"]', opcional: true, titulo: "Exportar Excel", texto: "Descarga el horario, la liquidación y las alertas." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Desactivar una posición un día", id: "posicion-desactivar",
+    kw: "desactivar posicion dia no aplica activar puesto cerrado no hay turno ese dia celda",
+    texto: "Si un puesto no se cubre un día (por ejemplo, un administrativo en domingo), toca la celda y elige «No aplica este día». Para volver a usarla, elige «Activar esta posición». Las posiciones desactivadas no cuentan como vacías.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las posiciones se desactivan en la tabla del horario." },
+      { frame: F, antes: () => c.gen("horario"), sel: ".board", opcional: true, titulo: "Toca la celda", texto: "En el menú de la celda verás «No aplica este día» y «Activar esta posición»." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Agregar refuerzos, turno MBK o administrativo", id: "refuerzos",
+    kw: "refuerzo agregar fila turno extra mbk administrativo induccion anexar puesto posicion mas personal",
+    texto: "En cada bloque del Horario hay botones para sumar filas: «+ Refuerzo» (una persona más en Compras), «+ Turno MBK», «+ Administrativo» e «+ Inducción». Cada fila usa un horario de Configuración, que puedes cambiar desde la misma fila.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las filas extra se agregan en el bloque donde las necesitas." },
+      { frame: F, antes: () => c.gen("horario"), sel: ".blk .panel-h", opcional: true, titulo: "Botones del bloque", texto: "Arriba a la derecha de cada bloque están «+ Refuerzo», «+ Inducción» y los demás." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Autollenar: generar base o solo llenar vacíos", id: "autollenar-opciones",
+    kw: "autollenar generar horario base solo llenar vacios presupuesto horas extra opciones automatico",
+    texto: "⚡ Autollenar te pide el presupuesto y si permites horas extra. «Generar horario base» arma la semana desde cero; «Solo llenar vacíos» respeta lo que ya pusiste y completa lo que falta. Siempre respeta la ley y las reglas de tu tienda y te dice qué no pudo cubrir.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Autollenar trabaja sobre la semana que ves." },
+      { frame: F, antes: () => c.gen("horario"), sel: '[data-act="auto"]', opcional: true, titulo: "⚡ Autollenar", texto: "Elige entre generar el horario base o solo llenar vacíos." }] },
+
+  /* ---------- Más ayudas del Editor: personal ---------- */
+  { cat: "personal", perm: "mi_horario", accion: "Cargos por prioridad (Cargo 1, 2 y 3)", id: "cargos-prioridad",
+    kw: "cargo cargos prioridad cargo 1 base cargo 2 cargo 3 cubrir puesto agente mbk gerente conserje seguridad matriz",
+    texto: "En Matriz base, el Cargo 1 es el puesto base de la persona; los Cargos 2 y 3 son lo que también puede cubrir. Autollenar la asigna primero a su cargo base y, si hace falta, usa sus otros cargos. Una persona no puede ir en un puesto que su cargo no cubre.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los cargos se definen en la Matriz base." },
+      { frame: F, antes: () => c.gen("matriz"), sel: '#view-matriz [data-f="cargo0"]', opcional: true, titulo: "Cargos por prioridad", texto: "Cargo 1 es el base; Cargos 2 y 3, lo que también cubre." }] },
+  { cat: "personal", perm: "mi_horario", accion: "Marcar los días de clase de un estudiante", id: "dias-clase",
+    kw: "estudia estudiante clase dias de clase universidad turno pm noche vispera estudios matriz",
+    texto: "En Matriz base, marca los días de clase de quien estudia (L, M, X, J, V, S, D). Ese día solo puede trabajar turno PM y no amanece la víspera. En el horario se ve con la marca «CLASE».",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los días de clase están en la Matriz base." },
+      { frame: F, antes: () => c.gen("matriz"), sel: "#view-matriz .dayck", opcional: true, titulo: "Días de clase", texto: "Marca las letras de los días en que estudia la persona." }] },
+  { cat: "personal", perm: "mi_horario", accion: "Marcar a alguien como nuevo ingreso (Inducción)", id: "nuevo-ingreso",
+    kw: "nuevo ingreso induccion capacitacion nuevo colaborador recien ingreso puesto induccion marcar",
+    texto: "En Matriz base marca «Nuevo ingreso» a quien está en inducción. Solo ellos pueden ir en el puesto de Inducción; si no hay nuevos ingresos, ese puesto aparece como «sin nuevos ingresos». RRHH lo marca solo a quien ingresó hace menos de 14 días.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El nuevo ingreso se marca en la Matriz base." },
+      { frame: F, antes: () => c.gen("matriz"), sel: '#view-matriz [data-f="nuevo"]', opcional: true, titulo: "Nuevo ingreso", texto: "Marca la casilla de quien está en inducción." }] },
+  { cat: "personal", perm: "mi_horario", accion: "Empezar una tienda desde cero (Base cero)", id: "base-cero",
+    kw: "base cero borrar todo empezar nueva tienda reiniciar matriz vaciar datos peligro",
+    texto: "«Base cero» (en Matriz base o Configuración) borra tu matriz, horarios y configuración para empezar una tienda nueva. Pide confirmación. Antes de usarla, baja un respaldo en Configuración › Descargar respaldo.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Base cero está en Matriz base y en Configuración." },
+      { frame: F, antes: () => c.gen("config"), sel: '[data-act="backup"]', opcional: true, titulo: "Primero un respaldo", texto: "Descarga un respaldo antes de borrar nada." }] },
+  { cat: "personal", perm: "mi_horario", accion: "Descargar y restaurar un respaldo", id: "respaldo",
+    kw: "respaldo backup restaurar descargar guardar copia seguridad archivo json otra computadora version nueva",
+    texto: "En Configuración, «Descargar respaldo» guarda tu matriz, configuración e historial en un archivo; «Restaurar respaldo» los carga de nuevo, incluso en otra computadora. Como todo se guarda en RITMO, el respaldo es una copia extra de seguridad.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El respaldo está en Configuración." },
+      { frame: F, antes: () => c.gen("config"), sel: '[data-act="backup"]', opcional: true, titulo: "Descargar respaldo", texto: "Baja el archivo con tus datos." }] },
+  { cat: "personal", perm: "mi_horario", accion: "Ver el historial de semanas", id: "historial",
+    kw: "historial semanas guardadas versiones cambios anteriores ver semana pasada eliminar semana cronologico",
+    texto: "En la pestaña Historial ves, en orden cronológico, todas las semanas guardadas. Desde ahí puedes abrir una semana pasada. Cada cambio se guarda solo; no tienes que guardar nada.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El historial es una pestaña del Generador." },
+      { frame: F, antes: () => c.gen("historial"), sel: "#view-historial", opcional: true, titulo: "Historial", texto: "Las semanas guardadas, de la más antigua a la más reciente." }] },
+
+  /* ---------- Más ayudas del Editor: planilla ---------- */
+  { cat: "planilla", perm: "mi_horario", accion: "Elegir la quincena de la planilla", id: "planilla-quincena",
+    kw: "quincena mes periodo planilla elegir primera segunda 1ra 2da personalizada fecha cambiar periodo",
+    texto: "En Planilla elige el mes y la quincena (1ra: del 1 al 15; 2da: del 16 al fin de mes) o un período personalizado con fechas. El panel ya te la deja en la quincena actual.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "La planilla es una pestaña del Generador." },
+      { frame: F, antes: () => c.gen("planilla"), sel: "#plMes", opcional: true, titulo: "Mes y quincena", texto: "Elige el período de la planilla." }] },
+  { cat: "planilla", perm: "mi_horario", accion: "Marcar las semanas de horas extra a pagar", id: "semanas-he",
+    kw: "semanas horas extra pagar marcar pagadas bloqueada seleccion calendario doble pago semana cumplida",
+    texto: "En Planilla, «Semanas de horas extra a pagar» lista las semanas cumplidas. Marca las que pagas en esta planilla. Una semana ya pagada en otra planilla queda bloqueada para no pagarla dos veces. Antes de pagar, ajusta en Horario lo que realmente se trabajó.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las semanas de pago se marcan en la Planilla." },
+      { frame: F, antes: () => c.gen("planilla"), sel: "#view-planilla [data-hesem]", opcional: true, titulo: "Semanas de horas extra", texto: "Marca la casilla de cada semana que se paga." }] },
+  { cat: "planilla", perm: "mi_horario", accion: "Completar la cédula, el nombre y el salario en la planilla", id: "datos-planilla",
+    kw: "datos personal planilla cedula nombre apellido salario ingreso cargo falta completar rrhh viatico",
+    texto: "En Planilla › Datos del personal están la cédula, el nombre, el cargo, el ingreso, el salario y el viático MBK de cada persona. Cédula, nombre, cargo e ingreso ya vienen de RRHH al confirmar; normalmente solo escribes el salario. Un aviso te dice exactamente qué falta de cada persona.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los datos del personal están en la Planilla." },
+      { frame: F, antes: () => c.gen("planilla"), sel: '#view-planilla [data-pf="salario"]', opcional: true, titulo: "Salario", texto: "Escribe el salario mensual de cada persona." }] },
+  { cat: "planilla", perm: "mi_horario", accion: "Agregar una nota a una persona en la planilla", id: "nota-planilla",
+    kw: "nota adicional comentario planilla persona cubriendo otra tienda observacion escribir",
+    texto: "En la tabla de la planilla, la columna «Nota adicional» te deja escribir una nota por persona (por ejemplo «cubriendo otra tienda»). Se une a los comentarios automáticos (horas extra, ingreso, baja) y sale en el Excel.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las notas se escriben en la Planilla." },
+      { frame: F, antes: () => c.gen("planilla"), sel: "#view-planilla [data-plnota]", opcional: true, titulo: "Nota adicional", texto: "Escribe aquí la nota de esa persona." }] },
+  { cat: "planilla", perm: "mi_horario", accion: "Cambiar las reglas de pago (vacaciones, subsidio, séptimo día)", id: "reglas-planilla",
+    kw: "reglas pago porcentaje vacaciones subsidio extraordinario septimo dia horas feriado dias quincena empresa descuento ausencia",
+    texto: "Al final de Planilla puedes cambiar las horas por feriado trabajado, los días por quincena, el porcentaje que paga la empresa en vacaciones, subsidio y extraordinario, y si se descuenta el séptimo día por ausencia. Vienen con los valores de ley; cámbialos solo si tu empresa lo indica.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las reglas de pago están al final de la Planilla." },
+      { frame: F, antes: () => c.gen("planilla"), sel: "#plHF", opcional: true, titulo: "Reglas de pago", texto: "Horas por feriado, días por quincena y porcentajes." }] },
+  { cat: "planilla", perm: "mi_horario", accion: "Publicar la planilla", id: "publicar-planilla",
+    kw: "publicar planilla boton gris color entregar diferencia publicada cambios republicar",
+    texto: "«Publicar planilla» (en la pestaña Planilla) entrega la planilla del Generador a RITMO. El botón queda en gris cuando está publicada y vuelve a color si haces cambios, para que la publiques de nuevo. Al publicar, tu viático MBK se solicita solo y RITMO te avisa que tu Planilla MBK está lista. «Entregar quincena» (en Entregar) completa la entrega con la hoja de asistencia y la validación.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Primero se publica la planilla desde el Generador." },
+      { frame: F, antes: () => c.gen("planilla"), sel: '[data-act="publicar"]', opcional: true, titulo: "Publicar planilla", texto: "Publica la planilla a RITMO." }] },
+  { cat: "planilla", perm: "mi_horario", accion: "Copiar la imagen o el mensaje de la solicitud MBK", id: "solicitud-mbk-imagen",
+    kw: "mbk solicitud imagen whatsapp mensaje detalle descargar excel transporte copiar viatico compartir firma recibido",
+    texto: "En Planilla MBK hay cuatro botones: «Mensaje WhatsApp» (la solicitud en texto), «Copiar imagen de solicitud» (resumen para quien aprueba), «Copiar imagen del detalle» (a quién se paga y cuánto, con firma de recibido) y «Descargar Excel».",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "La solicitud MBK sale de la Planilla MBK." },
+      { frame: F, antes: () => c.gen("mbk"), sel: '[data-act="vtimgS"]', opcional: true, titulo: "Imagen de solicitud", texto: "Copia el resumen de la solicitud." },
+      { frame: F, sel: '[data-act="vtimgD"]', opcional: true, titulo: "Imagen del detalle", texto: "Copia el detalle por persona, con firma de recibido." }] },
+
+  /* ---------- Seguimiento ---------- */
+  { cat: "seguimiento", perm: "seguimiento", accion: "Qué significa el semáforo de cada tienda", id: "semaforo",
+    kw: "semaforo verde ambar rojo gris planilla horas extra mbk plazas tienda significado colores indicador",
+    texto: "Cada tienda tiene un semáforo con cuatro puntos: Planilla, Horas extra, MBK y Plazas. Verde: bien. Ámbar: por revisar. Rojo: urgente (por ejemplo, entregó planilla y no solicitó MBK, o faltan 2 o más plazas). Gris: sin dato. Pasa el mouse sobre un punto para ver el detalle.",
+    pasos: c => [
+      { antes: () => c.ir("seg"), sel: '#tabs [data-k="seg"]', titulo: "Seguimiento", texto: "El semáforo está en la tabla Detalle por tienda." },
+      { sel: "#tb", opcional: true, titulo: "Semáforo", texto: "Cuatro puntos por tienda: Planilla, Horas extra, MBK y Plazas." }] },
+  { cat: "seguimiento", perm: "seguimiento", accion: "Enviar un recordatorio por WhatsApp a las tiendas pendientes", id: "recordatorio",
+    kw: "recordatorio whatsapp mensaje tiendas pendientes sin entregar sin mbk sin horas extra avisar masivo",
+    texto: "El botón «📋 Recordatorio» arma un mensaje con las tiendas a las que les falta algo: sin entregar planilla, sin horas extra o que entregaron y no solicitaron MBK. Eliges qué incluir y lo copias para WhatsApp.",
+    pasos: c => [
+      { antes: () => c.ir("seg"), sel: '#tabs [data-k="seg"]', titulo: "Seguimiento", texto: "El recordatorio sale de la lista de tiendas que ves." },
+      { sel: "#recBtn", opcional: true, titulo: "📋 Recordatorio", texto: "Elige qué incluir y copia el mensaje." }] },
+  { cat: "seguimiento", perm: "seguimiento", accion: "Filtrar las tiendas por zona, estado o nombre", id: "filtros-seguimiento",
+    kw: "filtrar filtro buscar tienda zona estado entrega nombre codigo seguimiento lista",
+    texto: "Arriba del Detalle por tienda puedes buscar por código o nombre y filtrar por zona o por estado de entrega. Los mismos filtros se aplican a la tabla de Planilla MBK, al Excel y al recordatorio.",
+    pasos: c => [
+      { antes: () => c.ir("seg"), sel: '#tabs [data-k="seg"]', titulo: "Seguimiento", texto: "Los filtros gobiernan todo lo que ves en esta pestaña." },
+      { sel: "#fTxt", opcional: true, titulo: "Buscar y filtrar", texto: "Escribe una tienda o elige zona y estado." }] },
+  { cat: "seguimiento", perm: "seguimiento", accion: "Descargar el Excel de seguimiento", id: "excel-seguimiento",
+    kw: "excel descargar seguimiento tiendas horas extra plazas mbk exportar lo que veo",
+    texto: "El botón «⬇ Excel» descarga lo que ves en pantalla, respetando los filtros: tiendas con horas extra y plazas, y el MBK de las semanas elegidas.",
+    pasos: c => [
+      { antes: () => c.ir("seg"), sel: '#tabs [data-k="seg"]', titulo: "Seguimiento", texto: "El Excel respeta los filtros activos." },
+      { sel: "#xlsBtn", opcional: true, titulo: "⬇ Excel", texto: "Descarga la tabla con lo que ves." }] },
+  { cat: "seguimiento", perm: "seguimiento", accion: "Aprobar el MBK de mi selección (GZ)", id: "aprobar-mbk",
+    kw: "aprobar mbk viatico transporte gz seleccion semanas tienda monto cambio aprobado aprobar de nuevo imagen resumen",
+    texto: "En Planilla MBK · resumen a solicitar, elige las semanas con el selector y toca «Aprobar mi selección»: el GZ aprueba de una vez todas las tiendas de su zona que solicitaron esas semanas (o marca tienda por tienda). Si una tienda cambia su monto después de aprobar, sale marcada para aprobar de nuevo. GD y GO solo consultan. «Descargar imagen» baja el resumen.",
+    pasos: c => [
+      { antes: () => c.ir("seg"), sel: '#tabs [data-k="seg"]', titulo: "Seguimiento", texto: "El MBK se aprueba en la segunda tabla." },
+      { sel: "#mbkC", opcional: true, titulo: "Planilla MBK", texto: "Lo que pide cada tienda por semana." },
+      { sel: "#mbkAp", opcional: true, titulo: "Aprobar mi selección", texto: "Aprueba las tiendas de tu zona con las semanas elegidas." }] },
+  { cat: "seguimiento", perm: "seguimiento", accion: "Ver el horario de una tienda (solo lectura)", id: "ver-horario-tienda",
+    kw: "ver horario tienda solo lectura visor ojo planilla mbk consultar revisar tienda detalle",
+    texto: "En el Detalle por tienda, el botón «👁 Ver» abre el horario, la planilla y el MBK de esa tienda en solo lectura, para revisarlos sin tocar nada.",
+    pasos: c => [
+      { antes: () => c.ir("seg"), sel: '#tabs [data-k="seg"]', titulo: "Seguimiento", texto: "Cada fila de tienda tiene su botón Ver." },
+      { sel: "#tb", opcional: true, titulo: "👁 Ver", texto: "Abre el horario de la tienda en solo lectura." }] },
+
+  /* ---------- Recursos Humanos y Reclutamiento ---------- */
+  { cat: "rrhh", perm: "rrhh_ver", accion: "Filtrar el personal por región, zona o tienda", id: "filtros-rrhh",
+    kw: "filtrar personal region zona tienda tarjetas estado por tienda activos presupuesto dias sin completar excel",
+    texto: "En Recursos Humanos filtra por región, zona o tienda. Las tarjetas de arriba filtran la lista al tocarlas, y «Estado por tienda» muestra activos frente al presupuesto y los días sin completar: toca una tienda para ver solo a su gente. «⬇ Excel» descarga lo que ves.",
+    pasos: c => [
+      { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "Los filtros están arriba." },
+      { sel: "#rhFil", opcional: true, titulo: "Filtros", texto: "Región, zona y tienda." }] },
+  { cat: "rrhh", perm: "rrhh_cargar", accion: "Publicar las altas para que las tiendas las confirmen", id: "publicar-altas",
+    kw: "publicar altas confirmar tienda cargar excel altas pendiente enviar tiendas nuevo personal",
+    texto: "Después de cargar el Excel de altas, «Publicar altas» las manda a las tiendas: cada gerente las ve en Mi horario y las confirma. Hasta que la tienda confirma, la alta queda como pendiente en el control cruzado.",
+    pasos: c => [
+      { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "Las altas se cargan y se publican aquí." },
+      { sel: "#rhPub", opcional: true, titulo: "Publicar altas", texto: "Las manda a las tiendas para que las confirmen." }] },
+  { cat: "rrhh", perm: "rrhh_ver", accion: "Ver la rotación y los motivos de baja", id: "rotacion",
+    kw: "rotacion bajas motivo renuncia despido salida personal analisis indicadores tienda",
+    texto: "«Rotación y bajas» muestra cuántas personas salen y por qué motivo, por tienda, zona o región, para detectar dónde hay más rotación. Al registrar una baja puedes indicar el motivo (con un segundo motivo si aplica).",
+    pasos: c => [
+      { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "La rotación está debajo de «Estado por tienda»." },
+      { sel: "#rhRotB", opcional: true, titulo: "Rotación y bajas", texto: "Cantidad y motivo de las bajas." }] },
+  { cat: "rrhh", perm: "rrhh_ver", accion: "Ver la ficha de una persona y las cédulas", id: "ficha-persona",
+    kw: "ficha persona cedula mostrar cedulas buscar nombre personal registrado detalle datos",
+    texto: "En «Personal registrado» busca por nombre o cédula y filtra por estado. Toca el nombre de una persona para abrir su ficha. Las cédulas están ocultas por privacidad: «Mostrar cédulas» las deja a la vista mientras trabajas.",
+    pasos: c => [
+      { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "El registro de personal está al final." },
+      { sel: "#rhTxt", opcional: true, titulo: "Buscar personal", texto: "Por nombre o por cédula." }] },
+  { cat: "reclutamiento", perm: "reclutamiento", accion: "Registrar un prospecto y contratarlo", id: "prospectos",
+    kw: "prospecto candidato entrevista documentos aceptado contratar cedula ingreso etapas nuevo prospecto reclutar",
+    texto: "En Reclutamiento › Prospectos toca «+ Nuevo prospecto» y llévalo por etapas: nuevo, entrevista, documentos y aceptado por la tienda. Los prospectos no guardan cédula. Al contratar se pide la cédula y la fecha de ingreso: se crea el alta en RRHH para que la tienda la confirme y se cierra la vacante abierta de ese cargo.",
+    pasos: c => [
+      { antes: () => c.ir("rec"), sel: '#tabs [data-k="rec"]', titulo: "Reclutamiento", texto: "Los prospectos están al final de la pestaña." },
+      { sel: "#pcNew", opcional: true, titulo: "+ Nuevo prospecto", texto: "Registra al candidato y avánzalo por etapas." }] },
+  { cat: "reclutamiento", perm: "aperturas", accion: "Abrir o quitar las vacantes de todas las tiendas", id: "abrir-vacantes",
+    kw: "abrir vacantes todas tiendas quitar vacantes abiertas plazas presupuesto masivo",
+    texto: "«Abrir vacantes de todas» crea una vacante por cada plaza que le falta a cada tienda contra su presupuesto. «Quitar vacantes abiertas» las cierra. También puedes ver «Dónde enfocarte» para saber qué tiendas tienen más plazas por cubrir.",
+    pasos: c => [
+      { antes: () => c.ir("rec"), sel: '#tabs [data-k="rec"]', titulo: "Reclutamiento", texto: "Las vacantes salen del presupuesto de plazas." },
+      { sel: "#rcFoco", opcional: true, titulo: "Dónde enfocarte", texto: "Las tiendas con más plazas por cubrir." }] },
+
+  /* ---------- Administración ---------- */
+  { cat: "admin", perm: "administracion", accion: "Consultar el registro de auditoría", id: "auditoria",
+    kw: "auditoria registro quien aprobo horas extra mbk abrio reabrio quincena reinicio historial control",
+    texto: "En Administración, «Registro de auditoría» muestra quién aprobó horas extra y MBK, y quién abrió o reabrió quincenas, con fecha y hora. Filtra por tipo (horas extra, MBK, aperturas, reaperturas, reinicios) o busca una tienda o persona.",
+    pasos: c => [
+      { antes: () => c.ir("adm"), sel: '#tabs [data-k="adm"]', titulo: "Administración", texto: "La auditoría está en esta pestaña." },
+      { sel: "#audTb", opcional: true, titulo: "Registro de auditoría", texto: "Quién hizo qué y cuándo." }] },
+  { cat: "admin", perm: "administracion", accion: "Descargar un respaldo y reiniciar datos", id: "respaldo-admin",
+    kw: "respaldo descargar reiniciar reinicio borrar datos personal vacantes presupuesto emergencia restaurar",
+    texto: "En Administración, «Descargar respaldo» guarda un archivo con lo que la app maneja. «Reiniciar…» borra, con confirmación, los datos que elijas (personal, vacantes o presupuesto de plazas) y queda registrado en la auditoría. Úsalo solo en emergencias y con respaldo.",
+    pasos: c => [
+      { antes: () => c.ir("adm"), sel: '#tabs [data-k="adm"]', titulo: "Administración", texto: "El respaldo y el reinicio están al final." },
+      { sel: "#rspBaja", opcional: true, titulo: "Descargar respaldo", texto: "Guarda un archivo antes de cualquier reinicio." }] },
+  { cat: "admin", perm: "administracion", accion: "Compartir RITMO con las tiendas (QR y mensaje)", id: "compartir-acceso",
+    kw: "compartir invitar qr codigo mensaje whatsapp enlace url acceso tiendas dar acceso link",
+    texto: "En Administración › Compartir RITMO hay un código QR descargable y un mensaje listo para copiar o enviar por WhatsApp, con el enlace para entrar.",
+    pasos: c => [
+      { antes: () => c.ir("adm"), sel: '#tabs [data-k="adm"]', titulo: "Administración", texto: "Compartir RITMO está a mitad de la pestaña." },
+      { sel: "#qrBox", opcional: true, titulo: "Código QR", texto: "Descárgalo o copia el mensaje." }] },
+  { cat: "admin", perm: "administracion", accion: "Crear los accesos de los usuarios", id: "crear-accesos",
+    kw: "crear accesos usuarios correo contrasena enlace restablecer acceso masivo uno por uno tiendas publicar",
+    texto: "En Administración › «2 · Crear accesos» eliges a un usuario o a todos y RITMO crea su acceso: cada persona recibe un enlace para crear su contraseña. Se hace después de importar y publicar los roles.",
+    pasos: c => [
+      { antes: () => c.ir("adm"), sel: '#tabs [data-k="adm"]', titulo: "Administración", texto: "Los accesos se crean después de importar los roles." },
+      { sel: "#acc", opcional: true, titulo: "Crear accesos", texto: "Uno o todos los usuarios." }] },
+  { cat: "admin", perm: "administracion", accion: "Ver RITMO como otro rol («Ver como»)", id: "ver-como",
+    kw: "ver como otro rol simular probar usuario permisos gerente tienda gz perspectiva vista previa",
+    texto: "La barra morada «Ver como» (arriba, solo para el superusuario) te deja ver RITMO exactamente como lo ve otro rol o una tienda, sin cambiar tus permisos reales. Sirve para probar permisos y para ver los tutoriales de otro rol.",
+    pasos: c => [{ sel: "#vcSel", opcional: true, titulo: "Ver como", texto: "Elige el rol o la tienda que quieres ver." }] },
+
+  /* ---------- Cuenta ---------- */
+  { cat: "cuenta", perm: "todos", accion: "La campanita: qué avisos me llegan", id: "campanita",
+    kw: "campanita avisos notificaciones bandeja pendientes leido marcar todo por hacer alertas automaticas",
+    texto: "La campanita 🔔 de arriba reúne lo que te falta por hacer según tu rol: entregas pendientes, aprobaciones, altas y bajas por confirmar, vacantes, conflictos de la importación y más. Los avisos se calculan solos; cada uno trae un botón para ir a resolverlo y puedes «Marcar todo como leído».",
+    pasos: c => [{ sel: "#bellB", titulo: "La campanita", texto: "Toca para ver tus avisos pendientes." }] },
+  { cat: "cuenta", perm: "todos", accion: "Cambiar el tamaño de letra, el tema o la luz nocturna", id: "accesibilidad",
+    kw: "accesibilidad tamano letra tema oscuro claro luz nocturna contraste aa leer mejor vista cansada",
+    texto: "El botón «Aa» de arriba abre Accesibilidad: elige tema claro u oscuro, el tamaño de la letra y la luz nocturna. Se recuerda en tu navegador. «Restablecer» deja todo como venía.",
+    pasos: c => [{ sel: "#a11yB", titulo: "Accesibilidad", texto: "Tema, tamaño de letra y luz nocturna." }] },
+  { cat: "cuenta", perm: "todos", accion: "«Guardados aquí»: copias en este navegador", id: "guardados-aqui",
+    kw: "guardados aqui copias navegador local disquete borrar todo privacidad computadora compartida datos personal",
+    texto: "La pestaña «Guardados aquí» lista las copias que guardaste con el botón de disquete: quedan solo en este navegador, no en la nube. Úsalas únicamente en tu computadora y bórralas si es compartida, porque contienen datos del personal.",
+    pasos: c => [
+      { antes: () => c.ir("loc"), sel: '#tabs [data-k="loc"]', titulo: "Guardados aquí", texto: "Las copias de este navegador." },
+      { sel: "#locDel", opcional: true, titulo: "Borrar todo", texto: "Elimina las copias guardadas aquí." }] }
 ];
 
 /* ---------- Búsqueda por palabras clave (sin IA) ---------- */
