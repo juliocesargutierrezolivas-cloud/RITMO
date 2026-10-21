@@ -7,6 +7,11 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 48, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
+    titulo: "Viático MBK por persona y solicitud automática con la planilla",
+    detalle: "En Planilla › Datos del personal hay una columna nueva, Viático semanal MBK: escribe lo que cada persona gasta en transportarse. El viático se calcula con ese monto ÷ 7 por cada día con salida de 8 pm o 10 pm; quien no lo tiene sigue compartiendo el presupuesto de la tienda. Además, al publicar la planilla el viático de las mismas semanas de pago se solicita solo, y a las tiendas que ya publicaron se les aplicó igual al abrir Mi horario. La tabla de Planilla MBK queda para observar."
+  },
+  {
     id: 47, fecha: "2026-10-21", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
     titulo: "Liquidación a la par del horario, celular y tutoriales nuevos",
     detalle: "La Liquidación semana ahora es una tabla como la de tu Excel (Nombre, Turnos, Horas, H.E. y Feriado, con el total) y va a la par del horario en pantallas grandes. En el celular, Mi horario se abre a pantalla completa y, en vertical, te sugiere girar el teléfono sin bloquearte. Los tutoriales y el asistente de ayuda ya explican todo esto, con un recorrido nuevo: «Importar horarios desde Excel»."
