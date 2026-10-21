@@ -292,6 +292,23 @@ const L_EDITOR_IMPORTAR = {
   ]
 };
 
+const L_EDITOR_CONFIG = {
+  id: "config", icono: "⚙️", titulo: "Configuración: horarios y reglas de tu tienda",
+  desc: "Cambia las horas de cada turno, crea horarios propios y fija el presupuesto de agentes, el tope semanal, el MBK de 12 h y las festividades.",
+  pasos: ctx => [
+    { antes: () => { ctx.ir("gen"); ctx.gen("config"); }, sel: '#tabs [data-k="gen"]', titulo: "Mi horario › Configuración", texto: "Aquí se ajusta cómo arma RITMO los horarios de tu tienda. Lo que cambies se aplica a las semanas nuevas y a Autollenar." },
+    { frame: F, sel: "#view-config table.formtable", opcional: true, titulo: "1 · Plantillas de turno", texto: "Cada fila es un horario: AM 12 h, PM 12 h, AM 8 h, PM 8 h, MBK 12 h y Admin 8 h. Cambia la entrada, la salida y las horas si tu tienda trabaja distinto. La columna Jornada te dice si es diurna, mixta o nocturna." },
+    { frame: F, sel: "#view-config .chkgrp", opcional: true, titulo: "2 · Puesto", texto: "Marca en qué puestos puede usarse cada horario (Compras, MBK, Administración, Inducción, Conserjería, Seguridad Interna). Un horario solo se ofrece en los puestos marcados." },
+    { frame: F, sel: '#view-config [data-f="confirmado"]', opcional: true, titulo: "3 · Confirmado", texto: "Marca Confirmado cuando ya verificaste las horas. Mientras un horario no esté confirmado, el Horario te avisa que está «por confirmar»." },
+    { frame: F, sel: '#view-config [data-act="addpl"]', opcional: true, titulo: "4 · Anexar otro horario", texto: "Crea un horario propio (por ejemplo 7:00 am a 3:00 pm) y úsalo con «+ Refuerzo», «+ Turno MBK», «+ Administrativo» o cambiando el horario de una fila. Los horarios que crea la importación de Excel («RITMO Turno 16 h») también aparecen aquí; puedes renombrarlos o borrarlos." },
+    { frame: F, sel: "#view-config #pres", opcional: true, titulo: "5 · Presupuesto de agentes", texto: "Escribe cuántos agentes autoriza tu sucursal (sin contar al gerente de tienda). Cada agente que falte contra el presupuesto autoriza 48 h extra en la semana." },
+    { frame: F, sel: "#view-config #tope", opcional: true, titulo: "6 · Tope semanal", texto: "Después de estas horas (48 por defecto) todo es hora extra con pago doble. Cámbialo solo si tu tienda trabaja con otro tope." },
+    { frame: F, sel: "#view-config .dayck", opcional: true, titulo: "7 · Días del MBK de 12 h", texto: "Marca los días en que el MBK trabaja de 8:00 am a 8:00 pm para dar libres al equipo MBK. Esos días no hay MBK de 8 h." },
+    { frame: F, sel: '#view-config [data-act="addfi"]', opcional: true, titulo: "8 · Feriados y festividad local", texto: "Los feriados nacionales ya vienen cargados y pagan doble si se trabajan. Aquí agregas la festividad local de tu sucursal (día y mes)." },
+    { frame: F, sel: '#view-config [data-act="backup"]', opcional: true, titulo: "9 · Respaldo", texto: "Descargar respaldo guarda tu matriz, configuración e historial en un archivo. Restaurar respaldo los carga de nuevo. Base cero borra todo y es solo para empezar una tienda nueva." }
+  ]
+};
+
 const L_EDITOR_MBK = {
   id: "mbk", icono: "🚌", titulo: "Planilla MBK: viático por persona",
   desc: "Escribe el viático por día de cada agente MBK, compara el presupuesto con lo real y entiende qué pasa al publicar tu planilla.",
@@ -336,7 +353,7 @@ const L_PRONTO = {
 };
 
 export const LECCIONES = {
-  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_IMPORTAR, L_EDITOR_MBK, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
+  Editor: [L_PANEL, L_EDITOR_HORARIO, L_EDITOR_CONFIG, L_EDITOR_IMPORTAR, L_EDITOR_MBK, L_EDITOR_ENTREGA, L_EDITOR_NOVEDADES],
   RRHH: [L_PANEL, L_PRONTO],
   Visualizar: [L_PANEL, L_PRONTO],
   Descargar: [L_PANEL, L_PRONTO],

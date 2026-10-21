@@ -55,6 +55,37 @@ export const AYUDA = [
     pasos: c => [
       { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las horas extra se permiten por semana." },
       { frame: F, antes: () => c.gen("horario"), sel: ".toolbar .switch", opcional: true, titulo: "Horas extra esta semana", texto: "Enciéndelo cuando la semana lo requiera. Después, en Planilla, marcas qué semanas se pagan." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Cambiar la hora de entrada o salida de un turno", id: "config-horarios",
+    kw: "configuracion plantillas turno horario entrada salida horas cambiar hora am pm 12 8 jornada confirmado por confirmar puesto",
+    texto: "En Mi horario › Configuración, la tabla Plantillas de turno tiene una fila por horario (AM 12 h, PM 12 h, AM 8 h, PM 8 h, MBK 12 h, Admin 8 h). Cambia la entrada, la salida y las horas, marca en qué puestos se usa y activa Confirmado. Se aplica a las semanas nuevas y a Autollenar.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los horarios de turno se ajustan en la pestaña Configuración." },
+      { frame: F, antes: () => c.gen("config"), sel: "#view-config table.formtable", opcional: true, titulo: "Plantillas de turno", texto: "Cambia entrada, salida y horas de cada horario. En Puesto marcas dónde se puede usar." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Crear un horario nuevo (ej. 7:00 a 3:00)", id: "horario-nuevo",
+    kw: "crear nuevo horario anexar otro horario personalizado turno propio 7 3 refuerzo administrativo agregar plantilla",
+    texto: "En Configuración toca «+ Anexar otro horario», ponle nombre, banda, puestos, entrada y salida. Después úsalo con «+ Refuerzo», «+ Turno MBK», «+ Administrativo» o cambiando el horario de una fila. Los creados por la importación de Excel («RITMO Turno 16 h») también se editan o borran aquí.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los horarios propios se crean en Configuración." },
+      { frame: F, antes: () => c.gen("config"), sel: '#view-config [data-act="addpl"]', opcional: true, titulo: "+ Anexar otro horario", texto: "Crea el horario y luego úsalo en cualquier bloque del Horario." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Presupuesto de agentes y tope semanal", id: "presupuesto-tope",
+    kw: "presupuesto agentes plantilla autorizada tope semanal 48 horas extra vacante falta agente gerente no cuenta",
+    texto: "En Configuración escribe el presupuesto de agentes de tu sucursal (sin contar al gerente de tienda): cada agente que falte autoriza 48 h extra en la semana. El tope semanal (48 h por defecto) marca desde dónde todo es hora extra con pago doble.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Estas reglas están en Configuración." },
+      { frame: F, antes: () => c.gen("config"), sel: "#view-config #pres", opcional: true, titulo: "Presupuesto de agentes", texto: "Cuántos agentes autoriza tu sucursal." },
+      { frame: F, sel: "#view-config #tope", opcional: true, titulo: "Tope semanal", texto: "Horas a partir de las cuales todo es extra." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Días del MBK de 12 horas", id: "mbk-12",
+    kw: "mbk 12 horas dias libres equipo mbk 8 am 8 pm configurar dia sabado viernes",
+    texto: "En Configuración, «Días del MBK de 12 h» marca los días en que el MBK trabaja de 8:00 am a 8:00 pm para dar libres al equipo MBK. Esos días no hay MBK de 8 h. Se aplica a semanas nuevas y a Autollenar.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Los días del MBK de 12 h se eligen en Configuración." },
+      { frame: F, antes: () => c.gen("config"), sel: "#view-config .dayck", opcional: true, titulo: "Días del MBK de 12 h", texto: "Marca los días en que el MBK trabaja de 8:00 am a 8:00 pm." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "Agregar la festividad local de mi sucursal", id: "festividad",
+    kw: "festividad local fiesta patronal feriado sucursal dia doble pago agregar fecha",
+    texto: "En Configuración, debajo de los feriados del año, toca «+ Agregar festividad local», escribe el nombre y la fecha (dd/mm). Quien trabaje ese día cobra pago doble, igual que un feriado nacional.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "Las festividades se agregan en Configuración." },
+      { frame: F, antes: () => c.gen("config"), sel: '#view-config [data-act="addfi"]', opcional: true, titulo: "+ Agregar festividad local", texto: "Escribe el nombre y la fecha (día/mes)." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Importar mi horario desde Excel", id: "importar-horario",
     kw: "importar excel horario subir cargar archivo hoja manual plantilla vincular nombres primera vez semanas anteriores planilla",
     texto: "En Mi horario toca ⬆ Importar Excel y elige tu hoja manual (LUNES a DOMINGO) o la plantilla de RITMO. RITMO reconoce a cada persona por la cédula de la hoja PLANILLA o por su nombre, propone la caja y el horario de cada fila y arma las semanas. Si tu Excel trae la hoja PLANILLA, también puede completar cédula, nombre, ingreso y salario que falten en tu Matriz base y Planilla (solo campos vacíos). Revisa el informe y corrige lo que te avise.",
