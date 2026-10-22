@@ -52,14 +52,14 @@ export function cargoGenerador(raw) {
 /* ---------- Lectura del Excel de altas ---------- */
 // aoa: filas del Excel como matriz (primera hoja). porNumero: Map(número de tienda → ficha de tienda).
 export function parsearAltas(aoa, porNumero) {
-  const err = { sinTienda: [], sinCedula: [], repetidas: [], cedulaRevisar: [] };
+  const err = { sinTienda: [], sinCedula: [], repetidas: [], repetidasDet: [], cedulaRevisar: [] };
   const hi = aoa.slice(0, 8).findIndex(r => r.some(c => /^nombre/i.test(limpiar(c))) && r.some(c => /^c[eé]dula/i.test(limpiar(c))));
   if (hi < 0) throw new Error('No encuentro las columnas "Nombre" y "Cédula" en las primeras filas');
   const cab = aoa[hi].map(c => sinTildes(limpiar(c)).toLowerCase());
   const col = pref => cab.findIndex(c => c.startsWith(pref));
   const cN = col("nombre"), cC = col("cargo"), cT = col("tienda"), cCe = col("cedula"), cI = col("fecha de ingreso"), cK = col("categoriz"), cP = col("planilla");
   if (cT < 0) throw new Error('Falta la columna "Tiendas"');
-  const registros = [], vistos = new Set();
+  const registros = [], vistos = new Map();
   aoa.slice(hi + 1).forEach((r, i) => {
     const fila = hi + 2 + i, nombre = limpiar(r[cN]);
     if (!nombre && !limpiar(r[cCe])) return; // fila vacía
@@ -67,8 +67,8 @@ export function parsearAltas(aoa, porNumero) {
     if (!ced) { err.sinCedula.push(fila); return; }
     const m = /(\d+)\s*$/.exec(limpiar(r[cT])), t = m ? porNumero.get(Number(m[1])) : null;
     if (!t) { err.sinTienda.push(fila); return; }
-    if (vistos.has(ced)) { err.repetidas.push(fila); return; }
-    vistos.add(ced);
+    if (vistos.has(ced)) { const prev = vistos.get(ced); err.repetidas.push(fila); err.repetidasDet.push({ fila, nombre, con: prev.nombre, filaCon: prev.fila }); return; }
+    vistos.set(ced, { nombre, fila });
     const revisar = !cedulaEstricta(ced);
     if (!cedulaAceptable(ced)) { err.cedulaRevisar.push(fila); return; }
     if (revisar) err.cedulaRevisar.push(fila);

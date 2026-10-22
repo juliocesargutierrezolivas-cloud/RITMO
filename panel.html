@@ -173,6 +173,11 @@ html.gen-lock,html.gen-lock body{overflow:hidden}
 .rh-tag.ok{background:var(--ok-bg,#e4f4ea);color:var(--ok,#1d7f48)}.rh-tag.warn{background:#fff2d6;color:#8a5200}.rh-tag.bad{background:var(--bad-bg,#fde8e6);color:var(--bad,#b3261e)}
 body.gen-on .hello{display:none}
 body.gen-on main,body.gen-on .hin{max-width:1800px}
+body.wide main,body.wide .hin{max-width:1800px}
+.perT th.perq{text-align:center;vertical-align:top}.perT th.perq b{display:block;font-size:12px;letter-spacing:.02em}.perT th.perq .sub{display:block;font-weight:400;text-transform:none;letter-spacing:0;margin:2px 0 4px}.perT th .chk{display:flex;gap:4px;justify-content:center;text-transform:none;letter-spacing:0;font-weight:600;font-size:11px;cursor:pointer}
+.percel label{display:flex;gap:6px;align-items:center;cursor:pointer;white-space:nowrap;font-size:12.5px}.percel.ab{background:rgba(20,150,70,.07)}.percel.cer{background:rgba(190,40,30,.07)}
+.acc{white-space:normal;min-width:200px;max-width:330px;line-height:2.1}.acc .btn{margin:0 4px 4px 0}
+#v-seg td,#v-seg th{padding-left:8px;padding-right:8px}
 body.gen-full #genF{position:fixed;inset:0;z-index:60;width:100%;height:100dvh!important;min-height:0}
 body.gen-full.gen-rot #genF{top:48px;height:calc(100dvh - 48px)!important}
 #genRot{position:fixed;top:0;left:0;right:0;z-index:72;min-height:48px;padding:6px 10px;display:flex;gap:10px;align-items:center;justify-content:space-between;background:#fff3e0;border-bottom:2px solid #ff8200;color:#5a3300;font-size:12.5px;line-height:1.25}
@@ -256,7 +261,7 @@ button.drop{width:100%;background:#fff;font:inherit}
         <select class="in" id="fEst"><option value="">Todos los estados</option><option value="ok">Entregadas</option><option value="no">Pendientes</option></select>
         <button class="btn" id="recBtn" title="Mensaje listo para WhatsApp con las tiendas que les falta algo">📋 Recordatorio</button>
         <button class="btn" id="xlsBtn" title="Descargar en Excel lo que se ve en pantalla">⬇ Excel</button></div></div>
-      <div class="scroll"><table><thead><tr><th>Código</th><th>Tienda</th><th>Zona</th><th>GZ</th><th title="Personal activo / plazas presupuestadas, sin gerente de tienda">Personal</th><th title="Horas extra y horas feriadas de las semanas marcadas para pago en esta quincena">HE / Feriadas</th><th title="Planilla · Horas extra · MBK · Plazas">Semáforo</th><th>Estado</th><th>Entregó</th><th>Fecha</th><th id="thAcc">Acción</th></tr></thead><tbody id="tb"></tbody></table></div>
+      <div class="scroll"><table><thead><tr><th>Código</th><th>Tienda</th><th>Zona</th><th>GZ</th><th title="Personal activo / plazas presupuestadas, sin gerente de tienda">Personal</th><th title="Horas extra y horas feriadas de las semanas marcadas para pago en esta quincena">HE / Feriadas</th><th title="Planilla · Horas extra · MBK · Plazas">Semáforo</th><th>Estado</th><th>Entregó</th><th id="thAcc">Acción</th></tr></thead><tbody id="tb"></tbody></table></div>
     </div>
     <div class="card" id="mbkC" hidden><div class="ch"><h3>Planilla MBK · resumen a solicitar</h3><span class="sub">Lo que pide cada tienda por semana. Respeta los filtros de arriba. El gerente alimenta, el GZ aprueba; GD y GO solo consultan.</span>
         <div class="bar"><select class="in" id="mbkE" aria-label="Estado de la solicitud"><option value="">Todas las solicitudes</option><option value="sol">Solicitan MBK</option><option value="sin">Sin MBK publicado</option><option value="falta">Entregó planilla y no pidió MBK</option><option value="apr">Aprobadas</option><option value="pend">Sin aprobar</option></select><details class="mbk-sd" id="mbkSD"></details><button class="btn pri" id="mbkAp" hidden>Aprobar mi selección</button><button class="btn" id="mbkR" title="Volver a leer">↻</button><button class="btn" id="mbkI">🖼 Descargar imagen</button></div></div>
@@ -413,6 +418,15 @@ button.drop{width:100%;background:#fff;font:inherit}
       <div id="locL"></div></div>
   </section>
 
+  <!-- Periodos (Superusuario): abrir y cerrar quincenas de todas las tiendas -->
+  <section id="v-per" hidden>
+    <div class="card"><div class="ch"><h3>Periodos · abrir y cerrar quincenas</h3><span class="sub">Casilla marcada = abierta para esa tienda: el gerente puede importar, cambiar y publicar</span>
+        <div class="bar"><input class="in" id="perTxt" placeholder="Buscar tienda, zona o GZ" autocomplete="off"><select class="in" id="perZona" aria-label="Zona"></select><button class="btn pri" id="perMes">🔓 Abrir periodos</button><button class="btn" id="perRef" title="Volver a leer">↻</button></div></div>
+      <div class="pad sub" style="padding-bottom:0">Abre aquí los periodos atrasados para que las tiendas puedan importar sus horarios. Después, cada GZ los cierra con «Aprobar HE»; tú también puedes cerrarlos desmarcando la casilla. La casilla de cada columna abre o cierra todas las tiendas que ves.</div>
+      <div class="scroll"><table class="perT"><thead id="perH"></thead><tbody id="perB"></tbody></table></div>
+      <div class="pad sub" id="perPie"></div></div>
+  </section>
+
   <!-- Administración (Superusuario) -->
   <section id="v-adm" hidden>
     <div class="card"><div class="ch"><h3>Estado de roles y accesos</h3><span class="sub">Leído de la nube; no se borra al usar “Ver como”</span></div>
@@ -463,7 +477,7 @@ button.drop{width:100%;background:#fff;font:inherit}
         <div class="bar" style="margin-top:12px"><button class="btn nav" id="pubP" disabled>Publicar presupuesto</button></div>
       </div></div>
     <div class="card"><div class="ch"><h3>Registro de auditoría</h3><span class="sub">Quién aprobó horas extra y MBK, y quién abrió o reabrió quincenas</span>
-        <div class="bar"><select class="in" id="audF" aria-label="Tipo"><option value="">Todo</option><option value="he">Horas extra aprobadas</option><option value="mbk">MBK</option><option value="apertura">Aperturas</option><option value="reapertura">Reaperturas</option><option value="reinicio">Reinicios</option></select><input class="in" id="audQ" placeholder="Buscar tienda o persona" autocomplete="off"><button class="btn" id="audR" title="Volver a leer">↻</button></div></div>
+        <div class="bar"><select class="in" id="audF" aria-label="Tipo"><option value="">Todo</option><option value="he">Horas extra aprobadas</option><option value="mbk">MBK</option><option value="apertura">Aperturas</option><option value="cierre">Cierres</option><option value="reapertura">Reaperturas</option><option value="reinicio">Reinicios</option></select><input class="in" id="audQ" placeholder="Buscar tienda o persona" autocomplete="off"><button class="btn" id="audR" title="Volver a leer">↻</button></div></div>
       <div class="scroll" style="max-height:340px;overflow-y:auto"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Tienda</th><th>Quién</th><th>Detalle</th></tr></thead><tbody id="audTb"></tbody></table></div></div>
     <div class="card"><div class="ch"><h3>4 · Respaldo y reinicio</h3><span class="sub">Solo para una caída o un mal manejo: vuelve a empezar con los Excel</span></div>
       <div class="pad">
@@ -627,7 +641,7 @@ function armar(){
   T.push(['nov','Novedades']);
   if((esEditor()||esSuper()||tiene('descargas'))&&LOC.disponible()) T.push(['loc','Guardados aquí']);
   T.push(['tut','Tutoriales']);
-  if(esSuper()) T.push(['adm','Administración']);
+  if(esSuper()) T.push(['adm','Administración'],['per','Periodos']);
   $('tabs').innerHTML=T.map(([k,t],i)=>`<button class="tab" role="tab" data-k="${k}" aria-selected="${i===0}">${t}${k==='nov'?'<span class="dot" id="novDot" hidden></span>':''}${k==='seg'?'<span class="dot" id="alDot" hidden title="Tiendas con incumplimiento"></span>':''}</button>`).join('');
   $('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;[...$('tabs').children].forEach(x=>x.setAttribute('aria-selected',x===b));ver(b.dataset.k)};
   $('thAcc').hidden=false;
@@ -756,8 +770,8 @@ function ofertaTour(){
   if(REAL&&REAL.rol!==ME.rol)return; // no se ofrece mientras el superusuario usa "Ver como"
   ofrecerRecorrido({correo:correoTour(),id:'panel',titulo:'¿Un recorrido de 1 minuto?',texto:'Te muestro lo esencial de RITMO, paso a paso, con voz si quieres.',onEmpezar:()=>lanzarLeccion('panel')});
 }
-function ver(k){if(k==='loc')pintarLoc();if(k==='adm'){pintarAuditoria();estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
-  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];
+function ver(k){document.body.classList.toggle('wide',['seg','per'].includes(k));if(k==='loc')pintarLoc();if(k==='adm'){pintarAuditoria();estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='per')pintarPer(true);if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','per','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
+  $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',per:'Periodos',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];
   // La quincena y la alerta de planilla solo importan donde se trabaja con quincenas; RRHH y Reclutamiento no las necesitan
   $('qSel').closest('label').style.display=['seg','mia','cal','gen'].includes(k)?'':'none';$('alerta').style.display=['rrh','rec'].includes(k)?'none':'';
   ajustarGen();}
@@ -837,9 +851,9 @@ function pintar(){
     <td class="mono" style="white-space:nowrap">${heCelda(t)}</td>
     <td style="white-space:nowrap">${semaforo(t)}</td>
     <td>${estado(e)}${insigniaHE(e,t.codigo)}</td>
-    <td>${esc(e?.porNombre||e?.por||'')}</td><td class="mono">${e?.fecha?fmt(e.fecha):''}</td>
-    ${canDl?`<td style="white-space:nowrap">${e?`${ver(t.codigo)} <button class="btn" data-xl="${esc(t.codigo)}" title="Descargar la planilla en Excel">⬇ Planilla Excel</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar la planilla Excel en este navegador">💾</button>`:''}${accionesGZ(t,e)}</td>`:`<td>${e?ver(t.codigo):''}${accionesGZ(t,e)}</td>`}</tr>`}).join('')
-    :`<tr><td colspan="11" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
+    <td>${esc(e?.porNombre||e?.por||'')}${e?.fecha?`<br><span class="mono sub">${fmt(e.fecha)}</span>`:''}</td>
+    ${canDl?`<td class="acc">${e?`${ver(t.codigo)} <button class="btn" data-xl="${esc(t.codigo)}" title="Descargar la planilla en Excel">⬇ Planilla Excel</button>${e.asistencia?` <button class="btn" data-as="${esc(t.codigo)}" title="Descargar hoja de asistencia">⬇ Asistencia</button>`:''} <button class="btn" data-sv="${esc(t.codigo)}" title="Guardar la planilla Excel en este navegador">💾</button>`:''}${accionesGZ(t,e)}</td>`:`<td class="acc">${e?ver(t.codigo):''}${accionesGZ(t,e)}</td>`}</tr>`}).join('')
+    :`<tr><td colspan="10" class="empty">${n?'Sin resultados con esos filtros.':'Aún no hay tiendas asignadas.'}</td></tr>`;
   if(esEditor()){const e=TIENDAS[0]&&ENT[TIENDAS[0].codigo];
     $('miaSt').innerHTML=estado(e)+insigniaHE(e,TIENDAS[0]?.codigo)+(e?` <span class="sub">${fmt(e.fecha)}</span> <a class="btn" href="visor.html?t=${encodeURIComponent(TIENDAS[0].codigo)}&q=${encodeURIComponent(Q)}${REAL&&REAL.rol!==ME.rol?'&como=Editor':''}">👁 Ver mi entrega</a>`:'');}
   pintarBloqueo();pintarMBK();pintarBandeja();
@@ -1125,19 +1139,22 @@ $('fileH').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
     const r=RH.parsearAltas(aoa,porNum);
     if(!PERSOK)await cargarPersonal();
     const ids=await Promise.all(r.registros.map(x=>RH.idPersonal(x.cedula))),mapa=new Map(PERS.map(p=>[p.id,p]));
-    const nuevos=[],cambian=[],confirma=[],iguales=[];
+    const nuevos=[],cambian=[],confirma=[],iguales=[],conflictos=[];
+    // Misma cédula, otro nombre: casi siempre es una cédula mal escrita en el archivo. No se pisa a la persona ya registrada.
+    const mismaPersona=(a,b)=>{const ta=new Set(RH.normNombre(a).split(' ').filter(w=>w.length>2));return RH.normNombre(b).split(' ').filter(w=>w.length>2&&ta.has(w)).length>=2};
     r.registros.forEach((x,i)=>{const id=ids[i],ex=mapa.get(id);
       if(!ex){nuevos.push({id,x});return}
+      if(ex.nombre&&!mismaPersona(ex.nombre,x.nombre)){conflictos.push({id,x,ex});return}
       const dif=['nombre','cargo','categoria','empresa','tienda','ingreso'].some(k=>(ex[k]||'')!==(x[k]||''));
       if(ex.alta&&ex.alta.origen==='tienda'&&ex.alta.confirmada===false)confirma.push({id,x,ex});
       else if(dif)cambian.push({id,x});else iguales.push(id)});
-    ALTASP={nuevos,cambian,confirma,iguales,r};
+    ALTASP={nuevos,cambian,confirma,iguales,conflictos,r};
     const E=r.errores,fl=a=>a.slice(0,8).join(', ')+(a.length>8?'…':'');
     $('rhSum').hidden=false;
-    $('rhSum').innerHTML=[[r.registros.length,'Personas válidas'],[nuevos.length,'Nuevas (se cargan)'],[confirma.length,'Confirman lo que ya registró la tienda'],[cambian.length,'Con datos distintos (se actualizan)'],[iguales.length,'Ya registradas, sin cambios'],[E.sinTienda.length,'Sin tienda en RITMO'],[E.repetidas.length,'Repetidas en el archivo'],[E.cedulaRevisar.length,'Cédula por revisar']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
-    const av=[E.sinTienda.length?`Sin tienda (filas ${fl(E.sinTienda)}).`:'',E.repetidas.length?`Cédula repetida, se omite la segunda (filas ${fl(E.repetidas)}).`:'',E.cedulaRevisar.length?`Cédula con formato raro (filas ${fl(E.cedulaRevisar)}).`:'',E.sinCedula.length?`Sin cédula (filas ${fl(E.sinCedula)}).`:''].filter(Boolean).join(' ');
+    $('rhSum').innerHTML=[[r.registros.length,'Personas válidas'],[nuevos.length,'Nuevas (se cargan)'],[confirma.length,'Confirman lo que ya registró la tienda'],[cambian.length,'Con datos distintos (se actualizan)'],[iguales.length,'Ya registradas, sin cambios'],[E.sinTienda.length,'Sin tienda en RITMO'],[E.repetidas.length,'Repetidas en el archivo'],[conflictos.length,'Cédula de otra persona'],[E.cedulaRevisar.length,'Cédula por revisar']].map(([v,l])=>`<div class="mini"><b>${v}</b><span>${l}</span></div>`).join('');
+    const av=[E.sinTienda.length?`Sin tienda (filas ${fl(E.sinTienda)}).`:'',E.repetidas.length?`⚠ Cédula repetida en el archivo: ${E.repetidasDet.slice(0,4).map(d=>`${d.nombre} (fila ${d.fila}) usa la misma que ${d.con} (fila ${d.filaCon})`).join('; ')}${E.repetidasDet.length>4?'…':''}. Se omite la segunda: corrige esa cédula en el archivo.`:'',conflictos.length?`⚠ Misma cédula que otra persona ya registrada, no se actualiza: ${conflictos.slice(0,4).map(c=>`${c.x.nombre} (fila ${c.x.fila}) tiene la cédula de ${c.ex.nombre}`).join('; ')}${conflictos.length>4?'…':''}. Revisa la cédula en el archivo.`:'',E.cedulaRevisar.length?`Cédula con formato raro (filas ${fl(E.cedulaRevisar)}).`:'',E.sinCedula.length?`Sin cédula (filas ${fl(E.sinCedula)}).`:''].filter(Boolean).join(' ');
     const hay=nuevos.length||cambian.length||confirma.length;
-    msg('rhMsg',hay?`Archivo leído. Las personas nuevas quedan “por confirmar” hasta que cada gerente las revise y las incorpore a su horario, sin duplicar a nadie. ${av}`:`No hay cambios que publicar. ${av}`,E.sinTienda.length||E.repetidas.length?'warn':'ok');
+    msg('rhMsg',hay?`Archivo leído. Las personas nuevas quedan “por confirmar” hasta que cada gerente las revise y las incorpore a su horario, sin duplicar a nadie. ${av}`:`No hay cambios que publicar. ${av}`,E.sinTienda.length||E.repetidas.length||conflictos.length?'warn':'ok');
     $('rhPub').disabled=!hay;
   }catch(err){ALTASP=null;$('rhPub').disabled=true;msg('rhMsg','No se pudo leer el archivo: '+err.message,'bad')}
 };
@@ -1623,7 +1640,8 @@ function cierreDe(e,cod,cal=CAL,ap=APER[cod]){
 const bloqueada=(e,c)=>!!cierreDe(e,c||e?.tienda);
 function insigniaHE(e,cod){
   const cz=cierreDe(e,cod);let h='';
-  if(cz==='bloqueada')h+=` <span class="st ok" title="Horas extra aprobadas${e.heAprobada?.porNombre?' por '+esc(e.heAprobada.porNombre):''}. La planilla está bloqueada.">🔒 HE aprobadas</span>`;
+  if(cz==='bloqueada'&&e.cierreManual)h+=' <span class="st late" title="Cerrada manualmente desde Periodos">🔒 Cerrada (Periodos)</span>';
+  else if(cz==='bloqueada')h+=` <span class="st ok" title="Horas extra aprobadas${e.heAprobada?.porNombre?' por '+esc(e.heAprobada.porNombre):''}. La planilla está bloqueada.">🔒 HE aprobadas</span>`;
   else if(cz==='cerrada')h+=' <span class="st late" title="Pasó la fecha de entrega de planilla. Solo el GZ puede reabrirla.">🔒 Cerrada por fecha</span>';
   if(e&&e.reapertura?.estado==='solicitada')h+=` <span class="st late" title="${esc(e.reapertura.motivo||'')}">↩ Reapertura solicitada</span>`;
   return h;
@@ -1667,6 +1685,113 @@ async function abrirQuincena(cod){
     pintar();
   }catch(err){alert('No se pudo abrir la quincena: '+(err.code||err.message))}
 }
+// ---------- Periodos (Superusuario): abrir y cerrar quincenas de todas las tiendas en una sola matriz
+// Casilla marcada = quincena abierta para esa tienda (el gerente puede importar, cambiar y publicar). Desmarcada = cerrada.
+// Abrir = apertura directa (colección aperturas) y, si la tienda ya entregó, quita el bloqueo. Cerrar = la planilla se bloquea (cierre manual);
+// si no hay entrega, solo se puede cerrar una quincena cuya fecha de planilla ya pasó (antes se cierra sola). El GZ sigue cerrando con «Aprobar HE».
+let PER=null;
+const perQs=()=>[...$('qSel').options].map(o=>o.value);
+const perId=(c,q)=>`${c}_${q}`;
+async function cargarPer(){
+  const qs=perQs(),cal={},ent={},ap={};
+  if(C){const {F,db}=C;
+    await Promise.all(qs.map(async q=>{const s=await F.getDoc(F.doc(db,'calendario',q)).catch(()=>null);if(s&&s.exists())cal[q]=s.data()}));
+    const [se,sa]=await Promise.all([F.getDocs(F.query(F.collection(db,'entregas'),F.where('quincena','in',qs))).catch(()=>null),F.getDocs(F.collection(db,'aperturas')).catch(()=>null)]);
+    if(se)se.docs.forEach(d=>{ent[d.id]=d.data()});if(sa)sa.docs.forEach(d=>{ap[d.id]=d.data()})}
+  else{qs.forEach(q=>{if(DEMO_CAL[q])cal[q]=DEMO_CAL[q]});
+    Object.entries(ENT).forEach(([c,e])=>{ent[perId(c,Q)]=e});DEMOAP.forEach((v,k)=>{ap[k]=v})}
+  PER={qs,cal,ent,ap};
+}
+const perEstado=(c,q)=>cierreDe(PER.ent[perId(c,q)]||null,c,PER.cal[q]||null,PER.ap[perId(c,q)]||null);
+const perVencida=q=>{const fp=finPagoQ(PER.cal[q]||null);return !!fp&&Date.now()>fp.getTime()};
+function perTiendas(){
+  const t=RH.normNombre($('perTxt').value||''),z=$('perZona').value;
+  return (ALLT.length?ALLT:TIENDAS).filter(x=>!x.prueba).filter(x=>(!z||x.zona===z)&&(!t||RH.normNombre((x.codigo||'')+' '+(x.nombre||'')+' '+(x.zona||'')+' '+(x.gzNombre||'')).includes(t)))
+    .sort((a,b)=>(a.numero||0)-(b.numero||0)||String(a.codigo).localeCompare(String(b.codigo)));
+}
+const MESES_P=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function perMesesAbiertos(){ // el mes anterior y el actual: lo que se abre de una vez para importar horarios atrasados
+  const h=new Date(),a=new Date(h.getFullYear(),h.getMonth()-1,1),ms=new Set([`${a.getFullYear()}-${String(a.getMonth()+1).padStart(2,'0')}`,`${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`]);
+  return {ms,txt:`${MESES_P[a.getMonth()]} y ${MESES_P[h.getMonth()]}`};
+}
+async function pintarPer(recargar){
+  if(!$('perB'))return;
+  const zs=[...new Set((ALLT.length?ALLT:TIENDAS).map(t=>t.zona).filter(Boolean))].sort(),zsel=$('perZona').value;
+  $('perZona').innerHTML='<option value="">Todas las zonas</option>'+zs.map(z=>`<option${z===zsel?' selected':''}>${esc(z)}</option>`).join('');
+  if(recargar||!PER){$('perB').innerHTML='<tr><td colspan="9" class="empty">Leyendo periodos…</td></tr>';await cargarPer()}
+  const T=perTiendas(),qs=PER.qs,mm=perMesesAbiertos();
+  $('perMes').textContent=`🔓 Abrir ${mm.txt} (todas las tiendas que ves)`;
+  $('perH').innerHTML=`<tr><th>Tienda</th><th>Zona</th><th>GZ</th>${qs.map(q=>{const fp=PER.cal[q]?.fechaPlanilla,todas=T.length&&T.every(t=>!perEstado(t.codigo,q));
+    return `<th class="perq"><b>${esc(quincenaTexto(q))}</b><span class="sub">${fp?'Planilla '+esc(fp.split('-').reverse().join('/')):'Sin calendario'}</span><label class="chk"><input type="checkbox" data-perall="${esc(q)}"${todas?' checked':''}> Todas</label></th>`}).join('')}</tr>`;
+  $('perB').innerHTML=T.map(t=>`<tr><td><b class="mono">${esc(t.codigo)}</b> ${esc(t.nombre||'')}</td><td>${esc(t.zona||'')}</td><td>${esc(t.gzNombre||'')}</td>${qs.map(q=>{const st=perEstado(t.codigo,q),e=PER.ent[perId(t.codigo,q)];
+    const txt=st==='cerrada'?'🔒 Cerrada':st==='bloqueada'?(e?.cierreManual?'🔒 Cerrada (manual)':'🔒 Cerrada (HE aprobadas)'):'✔ Abierta';
+    const tip=st===null?(perVencida(q)||e?.reapertura?'Abierta por una reapertura o apertura directa':'Abierta: aún no vence la fecha de planilla'):st==='bloqueada'?'El GZ aprobó las horas extra o se cerró manualmente':'Pasó la fecha de planilla';
+    return `<td class="percel ${st?'cer':'ab'}"><label title="${esc(tip)}"><input type="checkbox" data-per="${esc(t.codigo)}|${esc(q)}"${st?'':' checked'}> ${txt}</label></td>`}).join('')}</tr>`).join('')||'<tr><td colspan="9" class="empty">Sin tiendas con ese filtro.</td></tr>';
+  const ab=T.reduce((s,t)=>s+qs.filter(q=>!perEstado(t.codigo,q)).length,0),tot=T.length*qs.length;
+  $('perPie').textContent=`${T.length} tienda${T.length===1?'':'s'} · ${ab} de ${tot} periodos abiertos. Cerrar una quincena sin entrega solo es posible cuando ya pasó su fecha de planilla; antes se cierra sola.`;
+}
+// Aplica abrir o cerrar a una lista de [tienda, quincena]. Devuelve cuántas cambió y cuántas no se podían cerrar.
+async function aplicarPer(items,abrir,nota){
+  const quien={por:REAL.correo,porNombre:REAL.nombre||''},ts=C?C.F.serverTimestamp():new Date(),ops=[];let hecho=0,noPosible=0;
+  for(const [c,q] of items){
+    const id=perId(c,q),e=PER.ent[id]||null,st=perEstado(c,q);
+    if(abrir){
+      if(st===null)continue;
+      ops.push({k:'ap-set',id,d:{tienda:c,quincena:q,...quien,fecha:ts,motivo:nota||'Apertura desde Periodos'}});
+      if(e)ops.push({k:'ent-abrir',id,d:{bloqueada:false,heAprobada:C?C.F.deleteField():null,cierreManual:C?C.F.deleteField():null,reapertura:{...(e.reapertura||{}),estado:'aprobada',resueltaPor:quien.por,resueltaPorNombre:quien.porNombre,resueltaFecha:ts,nota:nota||'Apertura desde Periodos'}}});
+      hecho++;
+    }else{
+      if(st!==null)continue;
+      if(e){ops.push({k:'ent-cerrar',id,d:{bloqueada:true,cierreManual:{...quien,fecha:ts}}});if(PER.ap[id])ops.push({k:'ap-del',id});hecho++}
+      else if(perVencida(q)){if(PER.ap[id])ops.push({k:'ap-del',id});hecho++}
+      else noPosible++;
+    }
+  }
+  if(ops.length){
+    if(C){const {F,db}=C;let b=F.writeBatch(db),n=0;
+      for(const o of ops){
+        if(o.k==='ap-set')b.set(F.doc(db,'aperturas',o.id),o.d);
+        else if(o.k==='ap-del')b.delete(F.doc(db,'aperturas',o.id));
+        else b.set(F.doc(db,'entregas',o.id),o.d,{merge:true});
+        if(++n>=400){await b.commit();b=F.writeBatch(db);n=0}}
+      if(n)await b.commit()}
+    // estado local
+    for(const o of ops){
+      if(o.k==='ap-set'){PER.ap[o.id]={...o.d,fecha:new Date()};if(!C)DEMOAP.set(o.id,PER.ap[o.id])}
+      else if(o.k==='ap-del'){delete PER.ap[o.id];if(!C)DEMOAP.delete(o.id)}
+      else{const e=PER.ent[o.id];if(!e)continue;
+        if(o.k==='ent-abrir'){e.bloqueada=false;delete e.heAprobada;delete e.cierreManual;e.reapertura={...(e.reapertura||{}),estado:'aprobada',resueltaFecha:new Date(),nota:o.d.reapertura.nota}}
+        else{e.bloqueada=true;e.cierreManual={...o.d.cierreManual,fecha:new Date()}}}}
+    if(!C)Object.keys(ENT).forEach(c=>{if(PER.ent[perId(c,Q)])ENT[c]=PER.ent[perId(c,Q)]});
+  }
+  return {hecho,noPosible};
+}
+async function togglePer(c,q,abrir){
+  try{
+    const r=await aplicarPer([[c,q]],abrir);
+    if(r.hecho)audita(abrir?'apertura':'cierre',c,`${abrir?'Abrió':'Cerró'} la quincena ${quincenaTexto(q)} desde Periodos`);
+    if(r.noPosible)alert('Esta quincena todavía no vence (no hay entrega y no pasó la fecha de planilla): se cierra sola. Si la tienda ya entregó, se puede cerrar al instante.');
+    pintarPer();pintar();
+  }catch(err){alert('No se pudo cambiar el periodo: '+(err.code||err.message));pintarPer(true)}
+}
+async function lotePer(qsSel,abrir){
+  const T=perTiendas(),items=T.flatMap(t=>qsSel.map(q=>[t.codigo,q])),cambian=items.filter(([c,q])=>abrir?perEstado(c,q)!==null:perEstado(c,q)===null);
+  if(!cambian.length)return alert(abrir?'Esas quincenas ya están abiertas para las tiendas que ves.':'Esas quincenas ya están cerradas para las tiendas que ves.');
+  const r=await dialogo({titulo:abrir?'Abrir periodos':'Cerrar periodos',cuerpo:`<p>Vas a <b>${abrir?'abrir':'cerrar'}</b> ${cambian.length} periodo${cambian.length>1?'s':''}: ${qsSel.map(q=>esc(quincenaTexto(q))).join(', ')} para las <b>${T.length}</b> tienda${T.length>1?'s':''} que ves.</p>${abrir?'<p>Los gerentes podrán importar horarios, cambiar y publicar la planilla de esos periodos; lo que publiquen cuenta a tiempo. Después, cada GZ puede cerrarlos con «Aprobar HE».</p>':'<p>Las tiendas con entrega quedarán bloqueadas; las que no entregaron solo se cierran si ya pasó la fecha de planilla.</p>'}`,botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:abrir?'🔓 Abrir':'🔒 Cerrar',k:'ok',cls:abrir?'pri':'dng'}]});
+  if(r.k!=='ok')return;
+  $('perPie').textContent='Aplicando…';
+  try{
+    const x=await aplicarPer(cambian,abrir);
+    audita(abrir?'apertura':'cierre','',`${abrir?'Abrió':'Cerró'} ${x.hecho} periodo(s) (${qsSel.map(quincenaTexto).join(', ')}) en ${T.length} tienda(s) desde Periodos`);
+    pintarPer();pintar();
+    if(x.noPosible)alert(`${x.noPosible} periodo${x.noPosible>1?'s':''} no se ${x.noPosible>1?'pudieron':'pudo'} cerrar porque aún no vence${x.noPosible>1?'n':''} y la tienda no ha entregado: se cierra${x.noPosible>1?'n':''} solo${x.noPosible>1?'s':''}.`);
+  }catch(err){alert('No se pudo aplicar: '+(err.code||err.message));pintarPer(true)}
+}
+$('perB').onchange=e=>{const c=e.target.closest('[data-per]');if(!c)return;const [cod,q]=c.dataset.per.split('|');togglePer(cod,q,c.checked)};
+$('perH').onchange=e=>{const c=e.target.closest('[data-perall]');if(!c)return;lotePer([c.dataset.perall],c.checked);setTimeout(()=>pintarPer(),0)};
+$('perMes').onclick=()=>{const mm=perMesesAbiertos();lotePer((PER?PER.qs:perQs()).filter(q=>mm.ms.has(q.slice(0,7))),true)};
+$('perRef').onclick=()=>pintarPer(true);
+$('perTxt').oninput=()=>pintarPer();$('perZona').onchange=()=>pintarPer();
 // leer(d): opcional, devuelve los datos del formulario al aceptar. ancho: diálogo ancho para tablas.
 function dialogo({titulo,cuerpo,botones,leer,ancho,init}){ // init(d): se llama al abrir; botón con accion(d): corre sin cerrar el diálogo
   return new Promise(res=>{
@@ -1757,7 +1882,7 @@ async function audita(tipo,tienda,detalle){
   const d={tipo,tienda:tienda||'',detalle:String(detalle||'').slice(0,300),por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()};
   try{if(!C){DEMOAUD.unshift({...d,id:nuevoId('a'),fecha:new Date()});return}await C.F.addDoc(C.F.collection(C.db,'auditoria'),d)}catch(e){/* la auditoría nunca bloquea la acción */}
 }
-const AUD_TXT={he:'Horas extra aprobadas',mbk:'MBK',apertura:'Apertura de quincena',reapertura:'Reapertura',reinicio:'Reinicio de datos'};
+const AUD_TXT={he:'Horas extra aprobadas',mbk:'MBK',apertura:'Apertura de quincena',cierre:'Cierre de quincena',reapertura:'Reapertura',reinicio:'Reinicio de datos'};
 async function pintarAuditoria(){
   const B=$('audTb');if(!B)return;let L=[];
   try{if(!C)L=DEMOAUD.slice();else{const {F,db}=C,s=await F.getDocs(F.query(F.collection(db,'auditoria'),F.orderBy('fecha','desc'),F.limit(150)));L=s.docs.map(d=>({id:d.id,...d.data()}))}}catch(e){B.innerHTML=`<tr><td colspan="5" class="empty">No se pudo leer: ${esc(e.code||e.message)}</td></tr>`;return}

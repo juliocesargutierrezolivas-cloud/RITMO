@@ -479,6 +479,12 @@ export const AYUDA = [
     pasos: c => [
       { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "Las altas se cargan y se publican aquí." },
       { sel: "#rhPub", opcional: true, titulo: "Publicar altas", texto: "Las manda a las tiendas para que las confirmen." }] },
+  { cat: "rrhh", perm: "rrhh_cargar", accion: "Una alta no le aparece a la tienda (cédula repetida o de otra persona)", id: "alta-no-aparece",
+    kw: "alta no aparece tienda gerente no ve persona cedula repetida duplicada misma cedula otra persona conflicto sin tienda omitida cargar altas no llego",
+    texto: "Al cargar el Excel de altas, una persona no llega a la tienda si: (1) su cédula está repetida en el archivo (se omite la segunda), (2) su cédula ya está registrada a nombre de otra persona (no se actualiza para no sobrescribir), (3) la columna Tiendas no trae un número de tienda que exista en RITMO, o (4) falta la cédula. RITMO lo dice con nombres y número de fila: corrige esa cédula en el Excel y vuelve a cargar. Después, «Publicar altas».",
+    pasos: c => [
+      { antes: () => c.ir("rrh"), sel: '#tabs [data-k="rrh"]', titulo: "Recursos Humanos", texto: "El resumen de la carga aparece al leer el archivo." },
+      { sel: "#rhCarga", opcional: true, titulo: "Cargar altas", texto: "Mira el resumen: «Repetidas en el archivo», «Cédula de otra persona» y «Sin tienda en RITMO» son las que no se publicarán. El mensaje de abajo dice quiénes son." }] },
   { cat: "rrhh", perm: "rrhh_ver", accion: "Ver la rotación y los motivos de baja", id: "rotacion",
     kw: "rotacion bajas motivo renuncia despido salida personal analisis indicadores tienda",
     texto: "«Rotación y bajas» muestra cuántas personas salen y por qué motivo, por tienda, zona o región, para detectar dónde hay más rotación. Al registrar una baja puedes indicar el motivo (con un segundo motivo si aplica).",
@@ -505,6 +511,18 @@ export const AYUDA = [
       { sel: "#rcFoco", opcional: true, titulo: "Dónde enfocarte", texto: "Las tiendas con más plazas por cubrir." }] },
 
   /* ---------- Administración ---------- */
+  { cat: "admin", perm: "administracion", accion: "Abrir o cerrar periodos (quincenas) de todas las tiendas", id: "periodos",
+    kw: "periodos periodo abrir cerrar quincena quincenas septiembre octubre agosto tiendas checklist matriz cerrada abierta importar horarios atrasados abrir todas lote",
+    texto: "En la pestaña Periodos (junto a Administración) hay una matriz con todas las tiendas y las últimas 6 quincenas. Casilla marcada = abierta: el gerente puede importar horarios, cambiar y publicar. Desmarcada = cerrada. «Abrir septiembre y octubre» (o la casilla «Todas» de cada columna) abre en un solo paso las tiendas que ves; después cada GZ cierra con «Aprobar HE». Para cerrar una quincena sin entrega, ya debe haber pasado su fecha de planilla.",
+    pasos: c => [
+      { antes: () => c.ir("per"), sel: '#tabs [data-k="per"]', titulo: "Periodos", texto: "La matriz de tiendas y quincenas está en esta pestaña." },
+      { sel: "#perMes", opcional: true, titulo: "Abrir periodos atrasados", texto: "Abre de una vez el mes anterior y el actual para las tiendas que ves." },
+      { sel: "#perB", opcional: true, titulo: "Casillas por tienda", texto: "Marca o desmarca una casilla para abrir o cerrar esa quincena en esa tienda." }] },
+  { cat: "horarios", perm: "mi_horario", accion: "El importador omitió una semana porque está cerrada", id: "importar-semana-cerrada",
+    kw: "importar semana cerrada no se importo omitio periodo cerrado quincena cerrada abrir periodo reabrir gz administrador no cargo horario septiembre",
+    texto: "El importador no toca las semanas de una quincena cerrada (pasó la fecha de planilla o tu GZ aprobó las horas extra). El informe las lista como «Semanas cerradas». Pídele a tu GZ que abra la quincena (🔓 Abrir quincena) o al administrador de RITMO que la abra en Periodos, y vuelve a importar.",
+    pasos: c => [
+      { antes: () => c.ir("mia"), sel: '#tabs [data-k="mia"]', titulo: "Entregar", texto: "Aquí ves si tu quincena está cerrada y puedes solicitar la reapertura." }] },
   { cat: "admin", perm: "administracion", accion: "Consultar el registro de auditoría", id: "auditoria",
     kw: "auditoria registro quien aprobo horas extra mbk abrio reabrio quincena reinicio historial control",
     texto: "En Administración, «Registro de auditoría» muestra quién aprobó horas extra y MBK, y quién abrió o reabrió quincenas, con fecha y hora. Filtra por tipo (horas extra, MBK, aperturas, reaperturas, reinicios) o busca una tienda o persona.",

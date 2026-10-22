@@ -243,7 +243,7 @@ html.emb .trash{position:absolute;top:calc(var(--vt,0px) + 74px)}
 .sheet footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--line-2);flex-wrap:wrap}
 
 /* Forms (matriz/config) */
-.formtable{border-collapse:separate;border-spacing:0;width:100%;min-width:1340px}
+.formtable{border-collapse:separate;border-spacing:0;width:100%;min-width:0}
 .dayck{display:flex;gap:2px}
 .dayck label{position:relative;cursor:pointer}
 .dayck input{position:absolute;opacity:0;width:1px;height:1px}
@@ -256,7 +256,8 @@ html.emb .trash{position:absolute;top:calc(var(--vt,0px) + 74px)}
 .in:focus{border-color:var(--orange);outline:none}
 input[type=color].in{padding:2px;height:34px;width:46px}
 input[type=checkbox]{width:18px;height:18px;accent-color:var(--orange)}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr);gap:16px} /* las tablas de Configuración usan todo el ancho; a pantalla muy grande se ponen lado a lado */
+@media (min-width:1750px){.cols{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start}}
 .pad{padding:14px}
 .note{font-size:12px;color:var(--muted);margin:8px 0 0;max-width:70ch}
 .fer-list{list-style:none;margin:0;padding:0}
@@ -376,7 +377,7 @@ td.off{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,transp
   .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%}.tabs::-webkit-scrollbar{display:none}.tabs button{white-space:nowrap;flex:none}
   .save{font-size:11px}}
 /* Importar Excel en celular: cada fila es una tarjeta (nombre, ejemplo y selector uno debajo del otro) para no esconder el selector a la derecha */
-@media (max-width:640px){#modal .ih-t thead{display:none}#modal .ih-t,#modal .ih-t tbody,#modal .ih-t tr,#modal .ih-t td{display:block;width:100%}#modal .ih-t tr{padding:8px 0;border-bottom:1px solid var(--line-2)}#modal .ih-t td{padding:2px 0;border:0;min-width:0!important;max-width:none!important}#modal .ih-t select{width:100%;min-width:0!important}}
+@media (max-width:980px){#modal .ih-t thead{display:none}#modal .ih-t,#modal .ih-t tbody,#modal .ih-t tr,#modal .ih-t td{display:block;width:100%}#modal .ih-t tr{padding:10px 0;border-bottom:1px solid var(--line-2)}#modal .ih-t td{padding:3px 0;border:0;min-width:0!important;max-width:none!important;text-align:left!important}#modal .ih-t td[data-l]::before{content:attr(data-l) ": ";font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}#modal .ih-t td[data-l]>select{display:block;margin-top:3px}#modal .ih-t select{width:100%;min-width:0!important}}
 /* Modo visor (RITMO · solo lectura) */
 .ro label[for="restore"],.ro #restore,.ro [data-delpl],.ro [data-delfi],.ro [data-delag],.ro [data-act="auto"],.ro [data-act="dup"],.ro [data-act="undo"],.ro [data-act="limpiar"],
 .ro [data-addrow],.ro [data-delrow],.ro [data-askdel],.ro [data-act="addag"],.ro [data-act="addpl"],.ro [data-act="addfi"],.ro [data-act="basecero"],.ro [data-act="backup"]{display:none!important}
@@ -1249,7 +1250,7 @@ function renderMatriz(){
   const opt=(sel,list,blank)=>(blank?`<option value="">${blank}</option>`:"")+list.map(x=>`<option ${x===sel?"selected":""}>${esc(x)}</option>`).join("");
   let h=`<div class="panel tiendabox"><label for="tiendaNom"><b>Nombre de la tienda</b></label><input class="in" id="tiendaNom" value="${esc(S.cfg.tienda||"")}" placeholder="Ej. TIENDA AMPM-00 NOMBRE"><span class="note" style="margin:0">Aparece en el encabezado, la imagen del horario, el mensaje y la planilla.</span></div>
   <div class="weekbar"><div class="weeknav"><h2>Matriz base del personal</h2></div><div class="actions"><button class="btn danger" data-act="basecero">Base cero</button><button class="btn primary" data-act="addag">+ Dar de alta</button></div></div>
-  <div class="panel"><div class="panel-h"><h3>Cargos por prioridad</h3><p>Cargo 1 = puesto base · Cargos 2 y 3 = lo que también puede cubrir</p></div><div class="scroll"><table class="formtable"><thead><tr>
+  <div class="panel"><div class="panel-h"><h3>Cargos por prioridad</h3><p>Cargo 1 = puesto base · Cargos 2 y 3 = lo que también puede cubrir</p></div><div class="scroll"><table class="formtable" style="min-width:1120px"><thead><tr>
   <th>Color</th><th>Nombre</th><th>Cargo 1 (base)</th><th>Cargo 2</th><th>Cargo 3</th><th>Días de clase</th><th>Nuevo ingreso</th><th>Fecha de alta</th><th>Baja (último día)</th><th>Salario mensual C$</th><th></th></tr></thead><tbody>`;
   const hoyM=ymd(new Date());const orden=S.agentes.map((a,i)=>({a,i})).sort((x,y)=>((x.a.baja&&x.a.baja<hoyM)?1:0)-((y.a.baja&&y.a.baja<hoyM)?1:0));
   let sepPuesto=false;
