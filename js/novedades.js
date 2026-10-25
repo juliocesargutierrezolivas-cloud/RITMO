@@ -7,6 +7,11 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 56, fecha: "2026-10-22", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
+    titulo: "Información y solicitudes, + Turno y manual oculto",
+    detalle: "El aviso de la entrega ahora está en el botón «Información y solicitudes» para no ocupar la pantalla. Desde ahí puedes pedir abrir una quincena que no está pagada, por ejemplo para un cambio de última hora; tu GZ la aprueba o la rechaza. En Horario, «+ Turno» agrega un turno de día o de noche y crea el horario nuevo ahí mismo. «+ Inducción» solo aparece cuando la semana la usa, y el manual de uso empieza oculto: tócalo para verlo."
+  },
+  {
     id: 55, fecha: "2026-10-21", version: "3.5", tipo: "Nuevo", para: ["Superusuario"],
     titulo: "Periodos: abrir y cerrar quincenas de todas las tiendas",
     detalle: "Hay una pestaña nueva, Periodos, junto a Administración: una matriz con todas las tiendas y las últimas 6 quincenas. Casilla marcada = abierta (el gerente puede importar horarios, cambiar y publicar); desmarcada = cerrada. Con «Abrir septiembre y octubre» o la casilla de cada columna abres de una vez los periodos atrasados para que las tiendas importen sus horarios; luego cada GZ los cierra con «Aprobar HE». Cada apertura y cierre queda en la auditoría."

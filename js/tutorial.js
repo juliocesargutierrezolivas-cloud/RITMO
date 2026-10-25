@@ -276,6 +276,7 @@ const L_EDITOR_HORARIO = {
     { frame: F, antes: () => ctx.gen("matriz"), sel: '[data-act="addag"]', opcional: true, titulo: "1. Matriz base: tu personal", texto: "Empieza dando de alta a tus agentes con este botón. Cada persona lleva su cargo base, los cargos que también cubre, sus días de clase y su fecha de alta." },
     { frame: F, sel: "#view-matriz table", opcional: true, titulo: "Nombre, fechas y color", texto: "Escribe el nombre corto del agente. Toca el cuadro de color para elegir uno de la paleta; RITMO sugiere azules o rosados según el nombre y nunca repite colores." },
     { frame: F, antes: () => ctx.gen("horario"), sel: '[data-act="auto"]', opcional: true, titulo: "2. Horario: autollenar", texto: "Con la matriz lista, este botón arma la semana respetando la ley y las reglas de la tienda. Luego puedes arrastrar, intercambiar o quitar turnos a mano." },
+    { frame: F, antes: () => ctx.gen("horario"), sel: ".tnbtn", opcional: true, titulo: "Agregar un turno", texto: "En cada bloque (Compras, MBK y Turno Operativo Principal), «+ Turno» junto a Turno · Caja te pide el puesto si hay varios, luego si el turno es de día (AM) o de noche (PM), y el horario. Si no aparece, creas uno nuevo ahí mismo: queda guardado y lo usas en todas las semanas." },
     { frame: F, sel: ".toolbar .switch", opcional: true, titulo: "Horas extra", texto: "Activa las horas extra solo cuando la semana lo necesite. Si está apagado, nadie pasa del tope de horas." },
     { frame: F, sel: "table.nov", opcional: true, titulo: "Novedades del personal", texto: "Toca una celda para marcar vacaciones, subsidio, extraordinario o ausencia. Si alguien cumple años esa semana verás un 🎂." },
     { frame: F, sel: '[data-act="asis"]', opcional: true, titulo: "Hoja de asistencia", texto: "Imprime la semana en tamaño carta, con el turno de cada colaborador y espacio para su firma." },
@@ -446,6 +447,7 @@ const L_EDITOR_ENTREGA = {
   desc: "Los pasos para entregar a tiempo: horario y planilla, hoja de asistencia, validación y envío.",
   pasos: ctx => [
     { antes: () => ctx.ir("mia"), sel: "#miaSt", titulo: "Estado de tu entrega", texto: "Aquí ves si tu quincena ya fue entregada, cuándo, y si quedó a tiempo o tarde." },
+    { sel: "#infoBtn", opcional: true, titulo: "Información y solicitudes", texto: "Aquí está el aviso de la entrega: fecha límite, semanas de horas extra, lo que debes enviar y quién la publicó. Si necesitas abrir una quincena que no está pagada (por ejemplo, para un cambio de última hora), usa «Solicitar abrir un periodo»." },
     { sel: "#useGen", titulo: "Horario y planilla", texto: "Toca este botón para usar lo que ya tienes en Mi horario. Es la forma más simple: no subes ningún archivo." },
     { sel: "#drop", titulo: "Si trabajaste sin internet", texto: "Si usaste el Generador fuera de RITMO, sube aquí su respaldo en archivo." },
     { sel: "#wA", opcional: true, titulo: "Hoja de asistencia", texto: "Si planilla lo pide, sube aquí una foto clara de la hoja de asistencia firmada, o el PDF." },
