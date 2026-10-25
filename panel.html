@@ -236,10 +236,10 @@ button.drop{width:100%;background:#fff;font:inherit}
   <div class="vc" id="vc" hidden><b>👁 Ver como</b><select id="vcSel" aria-label="Ver RITMO como otro rol"></select><span id="vcTxt">Revisa la pantalla de cada rol antes de producción. Tus permisos reales no cambian.</span></div>
 
   <div class="alerta none" id="alerta"></div>
-  <div class="bar" id="infoBar" style="margin:0 0 12px"><button class="btn pri" id="infoBtn" hidden>ℹ️ Información y solicitudes<span class="dot" id="infoDot" hidden style="margin-left:6px"></span></button></div>
 
-  <div class="bar">
+  <div class="bar" style="margin-top:6px">
     <div style="flex:1;min-width:240px"><h2 id="title">Cumplimiento de la quincena</h2><p class="sub" id="qTxt"></p></div>
+    <button class="btn pri" id="infoBtn" hidden>ℹ️ Información y solicitudes<span class="dot" id="infoDot" hidden style="margin-left:6px"></span></button>
     <label>Quincena <select class="in" id="qSel"></select></label>
   </div>
 
@@ -836,7 +836,7 @@ function ofertaTour(){
 function ver(k){document.body.classList.toggle('wide',['seg','per'].includes(k));if(k==='seg')pintarSolGZ();if(k==='loc')pintarLoc();if(k==='adm'){pintarAuditoria();estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='per')pintarPer(true);if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','per','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
   $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',per:'Periodos',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];
   // La quincena y la alerta de planilla solo importan donde se trabaja con quincenas; RRHH y Reclutamiento no las necesitan
-  $('qSel').closest('label').style.display=['seg','mia','cal','gen'].includes(k)?'':'none';$('alerta').style.display=['rrh','rec'].includes(k)?'none':'';
+  $('qSel').closest('label').style.display=['seg','cal'].includes(k)?'':'none';$('alerta').style.display=(['rrh','rec'].includes(k)||esEditor())?'none':'';
   ajustarGen();}
 
 // Los filtros de Seguimiento (buscar, zona, estado de entrega) gobiernan las dos tablas: Detalle por tienda y Planilla MBK

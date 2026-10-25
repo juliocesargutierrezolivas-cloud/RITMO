@@ -7,6 +7,11 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 57, fecha: "2026-10-22", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
+    titulo: "Cabecera más limpia en Mi horario",
+    detalle: "Mi horario ya no muestra el selector de quincena: la planilla tiene el suyo, con las quincenas anteriores. «Información y solicitudes» quedó a la derecha del título, y la pantalla empieza más arriba. La página de inicio muestra solo el logo de RITMO."
+  },
+  {
     id: 56, fecha: "2026-10-22", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
     titulo: "Información y solicitudes, + Turno y manual oculto",
     detalle: "El aviso de la entrega ahora está en el botón «Información y solicitudes» para no ocupar la pantalla. Desde ahí puedes pedir abrir una quincena que no está pagada, por ejemplo para un cambio de última hora; tu GZ la aprueba o la rechaza. En Horario, «+ Turno» agrega un turno de día o de noche y crea el horario nuevo ahí mismo. «+ Inducción» solo aparece cuando la semana la usa, y el manual de uso empieza oculto: tócalo para verlo."

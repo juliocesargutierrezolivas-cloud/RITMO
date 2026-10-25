@@ -259,7 +259,7 @@ const L_PANEL = {
     { sel: "header .who", titulo: "Tu sesión", texto: "Aquí aparece tu nombre y tu rol. Tu rol define lo que puedes ver y hacer en RITMO." },
     { sel: "#pwB", titulo: "Tu contraseña", texto: "Desde aquí puedes cambiar tu contraseña cuando quieras. Por seguridad, RITMO te la pedirá cambiar cada 60 días." },
     { sel: "#alerta", opcional: true, titulo: "Alerta de entrega", texto: "Cuando hay una quincena por entregar, esta alerta te dice la fecha límite y cuánto falta. Desaparece cuando ya cumpliste." },
-    { sel: "#qSel", titulo: "La quincena", texto: "Elige qué quincena quieres ver. Por defecto aparece la actual." },
+    { sel: "#qSel", opcional: true, titulo: "La quincena", texto: "En Seguimiento y Calendario eliges la quincena que quieres ver. En Planilla, el selector de mes y quincena está dentro de la propia planilla." },
     { sel: "#tabs", titulo: "Tus módulos", texto: "Estas pestañas son tus módulos. Solo ves los que corresponden a tu rol. En Novedades encuentras las mejoras nuevas de RITMO." },
     { sel: "#out", titulo: "Cerrar sesión", texto: "Cuando termines, sal con este botón, sobre todo si usas una computadora compartida." },
     { sel: "#tutB", opcional: true, titulo: "Repite este recorrido cuando quieras", texto: "El botón de ayuda y la pestaña Tutoriales guardan todas las lecciones de tu rol." }
