@@ -7,6 +7,11 @@ export const VERSION = "3.5";
 // tipo: "Nuevo" | "Mejora" | "Corrección" · para: roles que lo ven ("Todos" o lista)
 export const NOVEDADES = [
   {
+    id: 58, fecha: "2026-10-22", version: "3.5", tipo: "Mejora", para: "Todos",
+    titulo: "Ya no se pide el respaldo para entregar",
+    detalle: "La entrega de la quincena ya no pide el respaldo del Generador: el horario y la planilla se guardan en RITMO. El calendario de planilla solo pide la hoja de asistencia (si la marcas) y la validación del gerente."
+  },
+  {
     id: 57, fecha: "2026-10-22", version: "3.5", tipo: "Mejora", para: ["Editor","Superusuario"],
     titulo: "Cabecera más limpia en Mi horario",
     detalle: "Mi horario ya no muestra el selector de quincena: la planilla tiene el suyo, con las quincenas anteriores. «Información y solicitudes» quedó a la derecha del título, y la pantalla empieza más arriba. La página de inicio muestra solo el logo de RITMO."
