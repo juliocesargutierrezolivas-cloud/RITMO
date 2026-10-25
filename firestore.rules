@@ -96,6 +96,18 @@ service cloud.firestore {
       allow delete: if isSuper();
     }
 
+    // Solicitudes del gerente para abrir un periodo (p. ej. la quincena actual por un cambio de última hora).
+    // La crea el gerente de la tienda; la aprueba o rechaza el GZ de esa tienda (la aprobación abre la quincena en aperturas).
+    match /solicitudes/{id} {
+      allow read: if sees(resource.data.tienda);
+      allow create: if owns(request.resource.data.tienda) && request.resource.data.por == email()
+        && request.resource.data.estado == 'pendiente';
+      allow update: if isSuper()
+        || (gzDe(resource.data.tienda)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'respondidaPor', 'respondidaFecha']));
+      allow delete: if isSuper();
+    }
+
     // Entregas por quincena (id = CODIGO_AAAA-MM-Q1/Q2): estado visible para todo el alcance (GZ, distrito, operaciones, planilla).
     //
     // Ciclo de la planilla:

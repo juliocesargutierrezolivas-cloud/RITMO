@@ -289,6 +289,17 @@ export const AYUDA = [
     texto: "🔒 HE aprobadas: tu GZ aprobó las horas extra y la planilla quedó bloqueada. 🔒 Cerrada por fecha: pasó la fecha de entrega de planilla. En ambos casos solo el GZ puede reabrir; pídele la reapertura en Entregar." },
 
   /* ---------- Más ayudas del Editor: horario ---------- */
+  { cat: "horarios", perm: "mi_horario", accion: "Agregar un turno de día o de noche (+ Turno)", id: "turno-nuevo",
+    kw: "agregar turno nuevo horario dia noche am pm crear horario plantilla mas turno boton",
+    texto: "En Horario, cada bloque (Compras, Horario de MBK y Turno Operativo Principal) tiene su botón «+ Turno», junto a Turno · Caja. Si el bloque tiene varios puestos, primero eliges el puesto; después eliges si es de día (AM) o de noche (PM) y el horario de la lista. Si no aparece, lo creas ahí mismo con su entrada y salida: queda guardado en Configuración y lo usas en todas las semanas.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#tabs [data-k="gen"]', titulo: "Mi horario", texto: "El botón está en el encabezado de cada bloque." },
+      { frame: F, antes: () => c.gen("horario"), sel: ".tnbtn", opcional: true, titulo: "+ Turno", texto: "Elige AM o PM, el horario y agrégalo." }] },
+  { cat: "planilla", perm: "mi_horario", accion: "Pedir abrir una quincena que no está pagada", id: "solicitar-periodo",
+    kw: "solicitar abrir periodo quincena no pagada cerrada cambio ultima hora pedir apertura gz aprobar pagada",
+    texto: "En el botón «Información y solicitudes» tocas «Solicitar abrir un periodo», eliges la quincena y escribes el motivo. Tu GZ lo aprueba o lo rechaza; si lo aprueba, la quincena queda abierta para importar, cambiar y publicar.",
+    pasos: c => [
+      { antes: () => c.ir("gen"), sel: '#infoBtn', opcional: true, titulo: "Información y solicitudes", texto: "Desde aquí pides la solicitud y ves el estado de las que hiciste." }] },
   { cat: "horarios", perm: "mi_horario", accion: "Duplicar la semana anterior", id: "duplicar-semana",
     kw: "duplicar copiar semana anterior repetir mismo horario partir de",
     texto: "En Horario toca «Duplicar semana anterior»: copia los turnos de la semana pasada a la que estás viendo, y desde ahí ajustas lo que cambió. Respeta las novedades y las altas y bajas de esta semana.",

@@ -236,6 +236,7 @@ button.drop{width:100%;background:#fff;font:inherit}
   <div class="vc" id="vc" hidden><b>👁 Ver como</b><select id="vcSel" aria-label="Ver RITMO como otro rol"></select><span id="vcTxt">Revisa la pantalla de cada rol antes de producción. Tus permisos reales no cambian.</span></div>
 
   <div class="alerta none" id="alerta"></div>
+  <div class="bar" id="infoBar" style="margin:0 0 12px"><button class="btn pri" id="infoBtn" hidden>ℹ️ Información y solicitudes<span class="dot" id="infoDot" hidden style="margin-left:6px"></span></button></div>
 
   <div class="bar">
     <div style="flex:1;min-width:240px"><h2 id="title">Cumplimiento de la quincena</h2><p class="sub" id="qTxt"></p></div>
@@ -246,6 +247,7 @@ button.drop{width:100%;background:#fff;font:inherit}
 
   <!-- Seguimiento (Visualizar, Descargar, Superusuario) -->
   <section id="v-seg" hidden>
+    <div id="solGZ" style="margin-bottom:16px"></div>
     <div id="alJ" style="margin-bottom:16px"></div>
     <div class="kpis">
       <div class="kpi" title="Tiendas que están dentro de tu alcance"><b id="kT">0</b><span>Tiendas a cargo</span></div>
@@ -535,7 +537,7 @@ let REAL=null, ALLT=[], C=null, ME=null, TIENDAS=[], ENT={}, RES={}, Q=quincena(
 $('qSel').onchange=()=>{Q=$('qSel').value;cargarEntregas()};
 // Manual de entrega ocultable (el navegador recuerda la elección)
 {const KM='ritmo_manual_oculto',pon=o=>{$('manualB').hidden=o;$('manualT').textContent=o?'Mostrar manual':'Ocultar manual';$('manualT').setAttribute('aria-expanded',String(!o))};
-  let o=false;try{o=localStorage.getItem(KM)==='1'}catch(e){}pon(o);
+  let o=true;try{o=localStorage.getItem(KM)!=='0'}catch(e){}pon(o);
   $('manualT').onclick=()=>{o=!o;pon(o);try{localStorage.setItem(KM,o?'1':'0')}catch(e){}}}
 
 // ---------- Inicio
@@ -620,6 +622,67 @@ async function cargarEntregas(){
   if(esEditor())await cargarCierres();
   pintar();pintarCal();listo();if(genTienda&&$('genF').src){$('genF').contentWindow?.postMessage({tipo:'ritmo-quincena',q:Q,semanasHE:Array.isArray(CAL?.semanas)?CAL.semanas:undefined},location.origin);estadoPub()}
 }
+
+// ---------- Información y solicitudes (gerente) + aprobación del GZ
+// Solicitud: el gerente pide abrir un periodo (p. ej. la quincena actual para un cambio de última hora). El GZ de su tienda la aprueba
+// y la apertura queda registrada como una apertura directa (aperturas), igual que «Abrir quincena».
+const DEMOSOL=[];
+async function cargarSolicitudes(){
+  if(!C)return DEMOSOL.slice();
+  try{const {F,db}=C;
+    const q=esSuper()?F.collection(db,'solicitudes'):F.query(F.collection(db,'solicitudes'),F.where('tienda','in',TIENDAS.map(t=>t.codigo).slice(0,30)));
+    const s=await F.getDocs(q);return s.docs.map(d=>({id:d.id,...d.data()}))}
+  catch(e){return []}
+}
+async function abrirInfo(){
+  const A=$('alerta'),cod=TIENDAS[0]?.codigo;if(!cod)return;
+  const mias=(await cargarSolicitudes()).filter(s=>s.tienda===cod).sort((a,b)=>String(b.quincena).localeCompare(String(a.quincena)));
+  const cuerpo=`<div class="${A.className}" style="margin-bottom:12px">${A.innerHTML||'<b>Planilla aún no publica el calendario de esta quincena.</b>'}</div>
+    <h4 style="margin:6px 0">Mis solicitudes</h4>
+    ${mias.length?mias.map(s=>`<div style="padding:8px 0;border-bottom:1px solid var(--line-2)"><b>${esc(quincenaTexto(s.quincena))}</b> · ${esc(s.motivo||'')}
+      <span class="rh-tag ${s.estado==='aprobada'?'ok':s.estado==='rechazada'?'bad':'warn'}">${esc(s.estado||'pendiente')}</span></div>`).join(''):'<p class="sub">Aún no has hecho solicitudes.</p>'}`;
+  const r=await dialogo({titulo:'Información y solicitudes',ancho:true,cuerpo,botones:[{t:'Cerrar',k:'cancel',cancel:true},{t:'＋ Solicitar abrir un periodo',k:'sol',cls:'pri'}]});
+  if(r.k==='sol')solicitarPeriodo();
+}
+async function solicitarPeriodo(){
+  const cod=TIENDAS[0]?.codigo;if(!cod)return;
+  const opts=[...$('qSel').options].map(o=>`<option value="${esc(o.value)}"${o.value===Q?' selected':''}>${esc(o.textContent)}${CIERRES.some(c=>c.q===o.value)?' · cerrada':''}</option>`).join('');
+  const r=await dialogo({titulo:'Solicitar abrir un periodo',leer:d=>({q:d.querySelector('#solQ').value,m:d.querySelector('#solM').value.trim()}),
+    cuerpo:`<p>Úsalo para un cambio de última hora en una quincena que no está pagada. Tu GZ lo revisa; si lo aprueba, la quincena queda abierta para que importes, cambies y publiques.</p>
+      <label class="sub" for="solQ">Quincena</label><select class="in" id="solQ" style="display:block;margin:4px 0 10px">${opts}</select>
+      <label class="sub" for="solM">Motivo (obligatorio)</label><textarea id="solM" placeholder="Ej. Se movió un turno de última hora por incapacidad" style="width:100%;min-height:70px"></textarea>`,
+    botones:[{t:'Cancelar',k:'cancel',cancel:true},{t:'Enviar solicitud',k:'ok',cls:'pri'}]});
+  if(r.k!=='ok')return;
+  if(!r.datos||!r.datos.m){alert('Escribe el motivo de la solicitud.');return}
+  const d={tienda:cod,quincena:r.datos.q,tipo:'abrir_periodo',motivo:r.datos.m,estado:'pendiente',por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()};
+  try{if(C)await C.F.addDoc(C.F.collection(C.db,'solicitudes'),d);else DEMOSOL.unshift({...d,id:nuevoId('s'),fecha:new Date()});
+    audita('solicitud',cod,`Pidió abrir la quincena ${quincenaTexto(r.datos.q)}: ${r.datos.m}`);
+    alert('Solicitud enviada. Tu GZ la revisará; cuando la apruebe verás la quincena abierta.');
+  }catch(err){alert('No se pudo enviar: '+(err.code||err.message))}
+}
+async function pintarSolGZ(){
+  const B=$('solGZ');if(!B)return;
+  if(!(esSuper()||tiene('seguimiento'))){B.innerHTML='';return}
+  const L=(await cargarSolicitudes()).filter(s=>s.estado==='pendiente'&&(esSuper()||TIENDAS.some(t=>t.codigo===s.tienda&&puedeGZ(t))));
+  B.innerHTML=L.length?`<div class="panel"><div class="panel-h"><h3>Solicitudes de abrir periodo · ${L.length}</h3><p>Tu GZ las aprueba o las rechaza</p></div>
+    <div style="padding:6px 14px">${L.map(s=>`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line-2)"><b class="mono">${esc(s.tienda)}</b> <span>${esc(quincenaTexto(s.quincena))}</span> · <span class="sub">${esc(s.motivo||'')}</span> <span class="sub">(${esc(s.porNombre||s.por||'')})</span>
+      <span style="margin-left:auto;display:flex;gap:6px"><button class="btn pri" data-solok="${esc(s.id)}">✔ Aprobar</button><button class="btn" data-solno="${esc(s.id)}">✕ Rechazar</button></span></div>`).join('')}</div></div>`:'';
+}
+async function responderSol(id,aprobar){
+  const s=(await cargarSolicitudes()).find(x=>x.id===id);if(!s)return;
+  const quien={por:REAL.correo,porNombre:REAL.nombre||''};
+  try{
+    if(aprobar){const a={tienda:s.tienda,quincena:s.quincena,...quien,fecha:ahoraTS(),motivo:'Solicitud aprobada: '+(s.motivo||'')};
+      if(C)await C.F.setDoc(C.F.doc(C.db,'aperturas',`${s.tienda}_${s.quincena}`),a);else DEMOAP.set(`${s.tienda}_${s.quincena}`,a)}
+    const cambios={estado:aprobar?'aprobada':'rechazada',respondidaPor:quien.por,respondidaFecha:ahoraTS()};
+    if(C)await C.F.updateDoc(C.F.doc(C.db,'solicitudes',id),cambios);else Object.assign(DEMOSOL.find(x=>x.id===id)||{},cambios);
+    audita(aprobar?'apertura':'solicitud',s.tienda,`${aprobar?'Aprobó':'Rechazó'} la solicitud de abrir ${quincenaTexto(s.quincena)}`);
+    if(aprobar)await cargarEntregas();
+    pintarSolGZ();
+  }catch(err){alert('No se pudo responder: '+(err.code||err.message))}
+}
+$('infoBtn').onclick=abrirInfo;
+$('solGZ').onclick=e=>{const b=e.target.closest('[data-solok],[data-solno]');if(!b)return;if(b.dataset.solok)responderSol(b.dataset.solok,true);else responderSol(b.dataset.solno,false)};
 
 // ---------- Interfaz según rol
 function armar(){
@@ -770,7 +833,7 @@ function ofertaTour(){
   if(REAL&&REAL.rol!==ME.rol)return; // no se ofrece mientras el superusuario usa "Ver como"
   ofrecerRecorrido({correo:correoTour(),id:'panel',titulo:'¿Un recorrido de 1 minuto?',texto:'Te muestro lo esencial de RITMO, paso a paso, con voz si quieres.',onEmpezar:()=>lanzarLeccion('panel')});
 }
-function ver(k){document.body.classList.toggle('wide',['seg','per'].includes(k));if(k==='loc')pintarLoc();if(k==='adm'){pintarAuditoria();estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='per')pintarPer(true);if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','per','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
+function ver(k){document.body.classList.toggle('wide',['seg','per'].includes(k));if(k==='seg')pintarSolGZ();if(k==='loc')pintarLoc();if(k==='adm'){pintarAuditoria();estadoAdm();compartir();pintarRoles();pintarUsuarios()}if(k==='gen')abrirGen().then(pintarPersonalTienda);if(k==='tut')pintarTut();if(k==='per')pintarPer(true);if(k==='rrh')pintarRRH();if(k==='rec')pintarRec();['seg','mia','adm','per','cal','nov','loc','gen','tut','rrh','rec'].forEach(x=>$('v-'+x).hidden=x!==k);if(k==='nov')leerNov();
   $('title').textContent={seg:'Cumplimiento de la quincena',mia:TIENDAS[0]?`${TIENDAS[0].codigo} · ${TIENDAS[0].nombre||''}`:'Mi tienda',adm:'Administración',per:'Periodos',tut:'Tutoriales',rrh:'Recursos Humanos',rec:'Reclutamiento',cal:'Calendario de planilla',nov:'Novedades',loc:'Guardados en este navegador',gen:TIENDAS[0]?`Mi horario · ${TIENDAS[0].codigo}`:'Mi horario'}[k];
   // La quincena y la alerta de planilla solo importan donde se trabaja con quincenas; RRHH y Reclutamiento no las necesitan
   $('qSel').closest('label').style.display=['seg','mia','cal','gen'].includes(k)?'':'none';$('alerta').style.display=['rrh','rec'].includes(k)?'none':'';
@@ -1882,7 +1945,7 @@ async function audita(tipo,tienda,detalle){
   const d={tipo,tienda:tienda||'',detalle:String(detalle||'').slice(0,300),por:REAL.correo,porNombre:REAL.nombre||'',fecha:ahoraTS()};
   try{if(!C){DEMOAUD.unshift({...d,id:nuevoId('a'),fecha:new Date()});return}await C.F.addDoc(C.F.collection(C.db,'auditoria'),d)}catch(e){/* la auditoría nunca bloquea la acción */}
 }
-const AUD_TXT={he:'Horas extra aprobadas',mbk:'MBK',apertura:'Apertura de quincena',cierre:'Cierre de quincena',reapertura:'Reapertura',reinicio:'Reinicio de datos'};
+const AUD_TXT={he:'Horas extra aprobadas',mbk:'MBK',apertura:'Apertura de quincena',cierre:'Cierre de quincena',solicitud:'Solicitud de periodo',reapertura:'Reapertura',reinicio:'Reinicio de datos'};
 async function pintarAuditoria(){
   const B=$('audTb');if(!B)return;let L=[];
   try{if(!C)L=DEMOAUD.slice();else{const {F,db}=C,s=await F.getDocs(F.query(F.collection(db,'auditoria'),F.orderBy('fecha','desc'),F.limit(150)));L=s.docs.map(d=>({id:d.id,...d.data()}))}}catch(e){B.innerHTML=`<tr><td colspan="5" class="empty">No se pudo leer: ${esc(e.code||e.message)}</td></tr>`;return}
@@ -2353,6 +2416,8 @@ function pintarCal(){
   const fpl=CAL?.fechaPlanilla?new Date(CAL.fechaPlanilla+'T23:59:59'):null;
   const cerrada=!!CAL&&((fpl&&Date.now()>fpl)||(TIENDAS.length&&!pend));
   A.style.display=cerrada?'none':'';
+  // Gerente: la información de la entrega vive en el botón «Información y solicitudes» (no ocupa la pantalla)
+  if(esEditor()){A.style.display='none';$('infoBtn').hidden=false;$('infoDot').hidden=!(!cerrada&&L&&L-Date.now()<864e5)}else $('infoBtn').hidden=true;
   if(!CAL){A.className='alerta none';A.innerHTML=`<span class="ic">🗓</span><div><b>Planilla aún no publica el calendario de esta quincena.</b>Cuando lo haga verás aquí las semanas de horas extra a pagar y la fecha límite.</div>`}
   else{const ms=L?L-Date.now():1e12;const k=ms<0?'venc':ms<864e5?'prox':'info';
     A.className='alerta '+k;
