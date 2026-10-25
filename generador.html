@@ -1782,6 +1782,7 @@ document.addEventListener("change",e=>{const el=e.target;if(S.tab!=="planilla"&&
   if(el.dataset.pf){const a=S.agentes[Number(el.dataset.pi)],f=el.dataset.pf;if(!a)return;
     if(f==="ingreso"&&!fechaValida(el.value))return;
     a[f]=f==="salario"||f==="viatico"?(el.value===""?null:Math.max(0,Number(el.value))):f==="ingreso"?(el.value||null):el.value.trim();if(f==="cedula")a.cedula=a.cedula.toUpperCase();
+    if(f==="viatico"){sincronizarSolicitudMBK();persist("base/config")}
     persist("base/agentes");renderConFoco();return}
   if(el.dataset.hesem){const key=S.pl.ini+"_"+S.pl.fin,cur=new Set(semanasHE(key,S.pl.fin));if(el.checked)cur.add(el.dataset.hesem);else cur.delete(el.dataset.hesem);
     S.cfg.plHE[key]=[...cur].sort();persist("base/config");render();toast(el.checked?"Semana agregada al pago de horas extra.":"Semana quitada del pago de horas extra.");return}
@@ -1826,14 +1827,14 @@ function avisoMBK(info){
   document.getElementById("mbkV").onclick=()=>{cerrarModal();S.vtSem=(ok[0]||pend[0]||info[0]).k;document.getElementById("tab-mbk").click()}}
 function solicitarMBKconPlanilla(q,fecha){
   try{const v=vtCfg(),marc=[];
-    semanasPagoMBK(q).forEach(k=>{const w=v.semanas[k]=v.semanas[k]||{},V=calcViatico(k);if(!(V.total>0))return;
+    semanasPagoMBK(q).forEach(k=>{const w=v.semanas[k]=v.semanas[k]||{},V=calcViatico(k);if(!(V.total>0)&&!w.solicitado)return;
       // ya solicitada: si el monto cambió (p. ej. se corrigieron viáticos), se actualiza con esta publicación para que el GZ vea el monto vigente
       if(w.solicitado){if(w.montoSol!=null&&r2(w.montoSol)===V.total)return;marc.push({k,prev:{solicitado:w.solicitado,montoSol:w.montoSol,auto:w.auto}});w.solicitado=fecha;w.montoSol=V.total;return}
       marc.push({k,prev:null});w.solicitado=fecha;w.montoSol=V.total;w.auto=true});
     if(marc.length)persist("base/config");return marc}catch(e){return []}}
 // La solicitud de viático MBK sigue siempre a lo real: si cambian los horarios o los viáticos, el monto solicitado se actualiza solo en cada guardado.
 // Si el GZ ya había aprobado otro monto, su vista lo marca para volver a aprobar (así el cambio nunca pasa desapercibido).
-function sincronizarSolicitudMBK(){let n=0;try{const v=vtCfg();Object.entries(v.semanas).forEach(([k,w])=>{if(!w.solicitado||!S.semanas[k]||S.semanas[k]._draft)return;const V=calcViatico(k);if(V.total>0&&(w.montoSol==null||r2(w.montoSol)!==V.total)){w.montoSol=V.total;n++}})}catch(e){}return n}
+function sincronizarSolicitudMBK(){let n=0;try{const v=vtCfg();Object.entries(v.semanas).forEach(([k,w])=>{if(!w.solicitado||!S.semanas[k]||S.semanas[k]._draft)return;const V=calcViatico(k);if(w.montoSol==null||r2(w.montoSol)!==V.total){w.montoSol=V.total;n++}})}catch(e){}return n}
 // Si la planilla no se pudo publicar (p. ej. falta la hoja de asistencia), el viático que se marcó con ese intento se deshace
 function deshacerSolicitudMBK(marc){try{const v=vtCfg();(marc||[]).forEach(m=>{const w=v.semanas[m.k];if(!w)return;if(m.prev){w.solicitado=m.prev.solicitado;w.montoSol=m.prev.montoSol;if(m.prev.auto===undefined)delete w.auto;else w.auto=m.prev.auto}else{delete w.solicitado;delete w.montoSol;delete w.auto}});if((marc||[]).length)persist("base/config")}catch(e){}}
 function horaCorta(t){const [h]=t.split(":").map(Number);return (h%12||12)+" "+(h<12?"AM":"PM")}
