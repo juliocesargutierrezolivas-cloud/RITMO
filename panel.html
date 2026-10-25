@@ -338,7 +338,6 @@ button.drop{width:100%;background:#fff;font:inherit}
         </div>
         <div class="fl">Requisitos de la entrega
           <div class="form">
-            <label class="chk"><input type="checkbox" checked disabled>Respaldo del Generador (horario y planilla) · siempre</label>
             <label class="chk"><input type="checkbox" id="rqA" checked>Hoja de asistencia (foto o PDF)</label>
             <label class="chk"><input type="checkbox" id="rqV" checked>El gerente confirma que validó que todo esté reportado</label>
             <label class="chk"><input type="checkbox" id="rqH" checked>Si se entrega después del límite, no se toma en cuenta el pago de horas extra</label>
@@ -2422,11 +2421,11 @@ function pintarCal(){
   else{const ms=L?L-Date.now():1e12;const k=ms<0?'venc':ms<864e5?'prox':'info';
     A.className='alerta '+k;
     const fp=CAL.fechaPlanilla?new Date(CAL.fechaPlanilla+'T00:00'):null;
-    const rq=['Respaldo del Generador (horario y planilla)'].concat(CAL.reqAsistencia!==false?['Hoja de asistencia']:[]);
+    const rq=CAL.reqAsistencia!==false?['Hoja de asistencia']:[];
     A.innerHTML=`<span class="ic">${k==='venc'?'⛔':k==='prox'?'⏰':'🗓'}</span><div><b>Entrega de planilla ${quincenaTexto(Q)}</b>
       Envía a más tardar el <b style="display:inline">${L?fLarga(L):'—'}</b>${fp?` · la planilla se entrega el ${fp.toLocaleDateString('es-NI',{weekday:'long',day:'numeric',month:'long'})}`:''}.
       <div style="margin-top:6px">${(CAL.semanas||[]).length?'Horas extra que se pagan: <span class="w" style="display:inline-flex">'+CAL.semanas.map(w=>`<span class="wk">Semana ${semTxt(w)}</span>`).join('')+'</span>':'Esta quincena no se pagan horas extra.'}</div>
-      <div style="margin-top:6px">Debes enviar: ${rq.join(' + ')}.${CAL.reqValidar!==false?' Valida que todo esté reportado antes de enviar.':''}</div>
+      <div style="margin-top:6px">Debes enviar: ${rq.length?rq.join(' + '):'solo tu planilla y horario, que ya se guardan en RITMO'}.${CAL.reqValidar!==false?' Valida que todo esté reportado antes de enviar.':''}</div>
       ${CAL.sinHETarde!==false?'<div class="regla">⚠ Si envías después de la fecha límite, no se tomará en cuenta el pago de horas extra.</div>':''}
       ${CAL.nota?`<div style="margin-top:6px">${esc(CAL.nota)}</div>`:''}
       ${CAL.porNombre?`<div class="sub" style="margin-top:6px">Publicado por ${esc(CAL.porNombre)}${CAL.cargo?' · '+esc(CAL.cargo):''}</div>`:''}</div>${L?`<div class="cd">${falta(L)}</div>`:''}`}
